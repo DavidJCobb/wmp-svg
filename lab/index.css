@@ -1,0 +1,97 @@
+
+svg[hidden] {
+   display: none;
+   
+   &:has(defs filter) {
+      display: initial;
+      width:    0px;
+      height:   0px;
+      position: absolute;
+   }
+}
+
+.view {
+   display: grid;
+   grid-template: "header" "area" / auto;
+   
+   border:  1px solid #000;
+   padding: 8px;
+   --checkerboard-color-a: #888;
+   --checkerboard-color-b: #444;
+
+   background-image: conic-gradient(
+      var(--checkerboard-color-a) 0deg,
+      var(--checkerboard-color-a) 90deg,
+      var(--checkerboard-color-b) 90deg,
+      var(--checkerboard-color-b) 180deg,
+      var(--checkerboard-color-a) 180deg,
+      var(--checkerboard-color-a) 270deg,
+      var(--checkerboard-color-b) 270deg
+   ) !important;
+   background-size: 16px 16px;
+   
+   >header {
+      grid-area: header;
+      background: #FFF;
+      font-weight: bold;
+      padding: .25em .5em;
+   }
+   
+   >.layer {
+      grid-area: area;
+      position:  relative;
+   
+      width:  364px;
+      height: 102px;
+      
+      &.raster img {
+         image-rendering: pixelated;
+      }
+   }
+   
+   /* specific views */
+   
+   & {
+      .layer.raster {
+         clip-path: xywh(0 0 var(--raster-x, 0px) 100%);
+      }
+      .layer.vector {
+         clip-path: xywh(var(--raster-x, 0px) 0 100% 100%);
+         /*background: inherit;*/
+      }
+   }
+   
+   &.active {
+      button.play-pause {
+         appearance: none;
+         color: transparent;
+         border: 0;
+         padding: 0;
+         margin: 0;
+         background-color: transparent;
+         
+         position: absolute;
+         left:   166px;
+         top:      1px;
+         width:  100px;
+         height: 100px;
+         background-image: url(play-pause.svg);
+         background-repeat: no-repeat;
+         background-size: 100px 100px;
+         
+         &:hover {
+            background-image: url(play-pause.svg#play-hover) !important;
+         }
+         &:active {
+            background-image: url(play-pause.svg#play-active) !important;
+         }
+         &[disabled] {
+            background-image: url(play-pause.svg#play-disabled) !important;
+         }
+      }
+   }
+}
+
+.disable-alpha {
+   filter: url(#filter-disable-alpha);
+}

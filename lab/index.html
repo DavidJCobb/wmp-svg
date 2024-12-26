@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+   <head>
+      <title>WMP SVG lab</title>
+      <link rel="stylesheet" href="index.css" />
+      <style>
+body {
+   display: grid;
+   gap:     8px;
+   
+   grid-template:
+      "full      raster    padding  "
+      "utilities utilities utilities"
+      /
+      auto auto 1fr
+   ;
+}
+
+.pane {
+   grid-row: 1;
+}
+.utilities {
+   grid-area: utilities;
+}
+      </style>
+   </head>
+   <body>
+      
+      <!--
+         Helper filters for our various tests and viewing options.
+         These have to be inside of this file because referencing 
+         SVG filters in separate files is broken (probably because 
+         I'm running all of this locally and browsers cripple the 
+         file:/// origin on purpose).
+      -->
+      <svg hidden>
+         <defs>
+            <filter id="filter-disable-alpha">
+               <feColorMatrix
+                  in="SourceGraphic"
+                  type="matrix"
+                  values="1 0 0 0 0
+                          0 1 0 0 0
+                          0 0 1 0 0
+                          0 0 0 0 1"
+               />
+            </filter>
+         </defs>
+      </svg>
+      
+      <!--
+         Preview areas. While drafting SVGs, I can work directly 
+         in here in order to be able to use the DOM inspector on 
+         SVG content directly. Once I have a design 90% done, I 
+         should move it to its own file.
+      -->
+      <section class="view play-pause" id="preview">
+         <header>
+            Controllable preview
+         </header>
+         <div class="layer raster">
+            <img id="raster-preview" width="364" height="102" />
+         </div>
+         <div class="layer vector">
+            <img id="play-pause-button" src="play-pause.svg" style="position:absolute; left: 166px; top: 1px" />
+         </div>
+         <div class="layer vector">
+            <svg name="next" width="104" height="102" viewBox="260 0" style="position: absolute; left: 260px">
+               <path
+                  transform="translate(-260 51)"
+                  d="M 264 -23 L 343 -23 Q 358 -23 358 0 Q 358 23 343 23 L 265 23 Q 262 23 262 20 C 262 11 266 14 266 0 C 266 -14 262 -11 262 -20 Q 262 -23 265 -23 Z"
+               />
+            </svg>
+         </div>
+      </section>
+      
+      <!-- preview that dynamically responds to hover, active, etc. -->
+      <section class="view active">
+         <header>
+            Interactive preview
+         </header>
+         <div class="layer vector">
+            <button class="play-pause">Play</button>
+         </div>
+      </section>
+      
+      <!--
+         Viewing options and controls, to aid in testing and 
+         comparisons.
+      -->
+      <section class="utilities">
+         <!-- Control the play/pause icon, and the button states. -->
+         <div id="button-state-select">
+            <label><input type="radio" name="button-state" value="normal" checked /> Normal</label>
+            <label><input type="radio" name="button-state" value="active" /> Active</label>
+            <label><input type="radio" name="button-state" value="hover" />  Hover</label>
+            <label><input type="radio" name="button-state" value="disabled" />  Disabled</label>
+         </div>
+         <label>
+            Play/Pause Icon:
+            <select id="play-pause-icon-select">
+               <option value="play">Play</option>
+               <option value="pause">Pause</option>
+            </select>
+         </label>
+         <br/>
+         
+         <!-- The view is half-raster/half-vector. Cotnrol at what 
+         X-coordinate we switch from the one to the other. -->
+         <label>Raster:</label> <input type="range" id="raster-threshold" min="0" max="364" value="0" />
+         <br/>
+         
+         <!-- Disable alpha masks. It's easiest to try and match the 
+         color of the raster first, and then try to match the alpha. -->
+         <label><input type="checkbox" id="toggle-disable-alpha" /> Disable alpha</label>
+      </section>
+      <script src="index.js"></script>
+   </body>
+</html>

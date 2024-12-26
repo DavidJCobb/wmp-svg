@@ -1,0 +1,292 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="166 1 100 100" width="100">
+   <!-- sentinel nodes -->
+   <defs id="play-normal" />
+   <defs id="play-hover" />
+   <defs id="play-active" />
+   <defs id="play-disabled" />
+   <defs id="pause-normal" />
+   <defs id="pause-hover" />
+   <defs id="pause-active" />
+   <defs id="pause-disabled" />
+   
+   <defs>
+      <style><![CDATA[
+:root {
+   --body-base-color: #04258B;
+
+   --glass-highlight-opacity:   0.72;
+   --glass-highlight-color-min: #A0A0B0;
+   --glass-highlight-color-mid: #C0C0D0;
+   --glass-highlight-color-far: #D0D0D8;
+   --glass-highlight-color-max: #E0E0FF;
+   
+   --outline-color: #043287;
+   --shadow-color:  #0157a8;
+}
+
+/* play/pause state */
+#play-pause-icon-pause {
+   display: none;
+}
+#pause-normal:target, #pause-hover:target, #pause-active:target, #pause-disabled:target {
+   & ~ #play-pause-icon-play {
+      display: none;
+   }
+   & ~ #play-pause-icon-pause {
+      display: initial !important;
+   }
+}
+
+/* button states */
+:root:hover:not(:active),
+:root:has(#play-hover:target):not(:active),
+:root:has(#pause-hover:target):not(:active) {
+   --body-base-color: #0358A2;
+
+   --glass-highlight-color-min: #98A8B0;
+   --glass-highlight-color-mid: #B0B8C0;
+   --glass-highlight-color-far: #C0C8D0;
+   --glass-highlight-color-max: #E0F0FF;
+   
+   --shadow-color: #26a7f2;
+   
+   #grad-body-highlight-color {
+      &>stop:nth-child(1) { stop-color: #74e9fb; }
+      &>stop:nth-child(2) { stop-color: #35abe6; }
+      &>stop:nth-child(3) { stop-color: #1285d1; }
+      &>stop:nth-child(4) { stop-color: #0069be; }
+      &>stop:nth-child(5) { stop-color: #0060b2; }
+   }
+   #body-highlight-alpha-mask>ellipse:nth-of-type(1) {
+      rx: 40px;
+   }
+   #grad-body-highlight-alpha>stop:nth-child(3) {
+      stop-color: #666;
+   }
+   
+   #grad-edge {
+      &>stop:nth-child(1) { stop-color: #f5ffff; }
+      &>stop:nth-child(2) { stop-color: #aaf7fe; }
+      &>stop:nth-child(3) { stop-color: #57b2f2; }
+      &>stop:nth-child(4) { stop-color: #224c9d; }
+      &>stop:nth-child(4) { stop-color: #306cb6; }
+   }
+}
+
+:root:active,
+:root:has(#play-active:target),
+:root:has(#pause-active:target) {
+   --body-base-color: #041540;
+   
+   --glass-highlight-opacity:   1;
+   --glass-highlight-color-min: #646C70;
+   --glass-highlight-color-mid: #788084;
+   --glass-highlight-color-far: #808484;
+   --glass-highlight-color-max: #848484;
+   
+   --shadow-color: #26a7f2;
+   
+   #grad-edge>stop { stop-color: #454d6e; }
+   #grad-edge>stop:nth-child(1) { stop-color: #314d75; }
+   #grad-edge>stop:nth-child(2) { stop-color: #336394; }
+   
+   #button-alpha-mask-gradient {
+      &>stop:first-child { stop-color: #606060; }
+      &>stop:nth-child(2) { stop-color: #A0A0A0; }
+   }
+   
+   [name="fill-light"] {
+      fill: url(#grad-body-highlight-color-active);
+   }
+   #body-highlight-alpha-mask>ellipse:nth-of-type(1) {
+      rx: 43px;
+   }
+   
+   #body-shading {
+      transform: translate(0, 1px);
+   }
+}
+
+/* Windows Media Player doesn't actually have a "disabled" graphic for the 
+   play/pause button, because there's no (typical) situation where you can't 
+   play media: if you hit Play and there's no obvious function to perform, 
+   WMP will basically "guess" what media it should play. The styles used here 
+   are extrapolated from the disable states for the Previous and Next buttons. */
+.if-disabled {
+   display: none;
+}
+:root[disabled],
+:root:has(#play-disabled:target),
+:root:has(#pause-disabled:target) {
+   .if-disabled {
+      display: initial;
+   }
+   .if-enabled {
+      display: none;
+   }
+   
+   #grad-icon {
+      &>stop:nth-child(1) { stop-color: #A8A8A8; }
+      &>stop:nth-child(2) { stop-color: #989898; }
+      &>stop:nth-child(3) { stop-color: #909090; }
+      &>stop:nth-child(4) { stop-color: #808080; }
+   }
+   .icon-element {
+      stroke: #808080;
+   }
+}
+      ]]></style>
+      <linearGradient id="grad-edge" x1="0" x2="0" y1="1" y2="0">
+         <stop offset="0.000" stop-color="#cfffff" />
+         <stop offset="0.125" stop-color="#81d7fa" />
+         <stop offset="0.250" stop-color="#5290e4" />
+         <stop offset="0.500" stop-color="#3f3d92" />
+         <stop offset="0.750" stop-color="#607890" />
+         <stop offset="1.000" stop-color="#A0A0B0" />
+      </linearGradient>
+      <radialGradient id="grad-body-inner">
+         <stop offset="0.000" stop-color="#0d4091FF" />
+         <stop offset="0.900" stop-color="#0c3f90FF" />
+         <stop offset="1.000" stop-color="#0c3f9000" />
+      </radialGradient>
+      <radialGradient id="grad-glass-highlight">
+         <stop stop-color="var(--glass-highlight-color-min)" offset="20%" stop-opacity="var(--glass-highlight-opacity)" />
+         <stop stop-color="var(--glass-highlight-color-mid)" offset="60%" stop-opacity="var(--glass-highlight-opacity)" />
+         <stop stop-color="var(--glass-highlight-color-far)" offset="75%" stop-opacity="var(--glass-highlight-opacity)" />
+         <stop stop-color="var(--glass-highlight-color-max)" offset="90%" stop-opacity="var(--glass-highlight-opacity)" />
+      </radialGradient>
+      
+      <linearGradient id="grad-body-highlight-color" x1="0" x2="0" y1="1" y2="0.5">
+         <stop stop-color="#40c3f8" offset=".2" />
+         <stop stop-color="#0c83d6" offset=".445" />
+         <stop stop-color="#0c5eae" offset=".675" />
+         <stop stop-color="#0c4c99" offset=".82" />
+         <stop stop-color="#043988" offset="1" />
+      </linearGradient>
+      <linearGradient id="grad-body-highlight-color-active" x1="0" x2="0" y1="1" y2="0.5">
+         <stop stop-color="#62E2FE" offset=".1" />
+         <stop stop-color="#1695CF" offset=".35" />
+         <stop stop-color="#064A7A" offset=".585" />
+         <stop stop-color="#001130" offset=".87" />
+         <stop stop-color="#000418" offset="1" />
+      </linearGradient>
+      <radialGradient id="grad-body-highlight-alpha">
+         <stop offset="0.00" stop-color="#FFF" />
+         <stop offset="0.75" stop-color="#FFF" />
+         <stop offset="0.95" stop-color="#000" />
+      </radialGradient>
+      <mask id="glass-highlight-shape-mask">
+         <rect x="0" y="0" width="100%" height="100%" fill="#000" />
+         <path fill="#FFF" d="M 0.5 -40.5 l -0.5 0 c -18 0 -37 10 -40 32 c 0 3 0 6 2 7 c 2 1 4 1 12 -2 c 6 -2 13 -3 26 -3 Z" transform="translate(216 50)" />
+         <path fill="#FFF" d="M 0 -40.5 c -18 0 -37 10 -40 32 c 0 3 0 6 2 7 c 2 1 4 1 12 -2 c 6 -2 13 -3 26.5 -3 Z" transform="translate(216 50) scale(-1 1)" />
+      </mask>
+      <mask id="body-highlight-alpha-mask">
+         <rect x="0" y="0" width="100%" height="100%" fill="#000" />
+         <ellipse cx="216" fill="url(#grad-body-highlight-alpha)" ry="44" rx="40" cy="54" />
+         <ellipse rx="42" ry="40.5" cx="216" cy="50.75" fill="none" stroke="#000" stroke-width="4" />
+         <ellipse rx="48" ry="46.5" cx="216" cy="50.75" fill="none" stroke="#000" stroke-width="10" />
+      </mask>
+      
+      <radialGradient id="grad-button-shadow">
+         <stop offset="0.92" stop-color="var(--shadow-color)" stop-opacity="0.44" />
+         <stop offset="0.96" stop-color="var(--shadow-color)" stop-opacity="0.22" />
+         <stop offset="1.00" stop-color="var(--shadow-color)" stop-opacity="0" />
+      </radialGradient>
+      
+      <mask id="button-alpha-mask">
+         <radialGradient id="button-alpha-mask-gradient">
+            <stop offset="0.000" stop-color="#808080" />
+            <stop offset="0.500" stop-color="#C0C0C0" />
+            <stop offset="0.8" stop-color="#F0F0F0" />
+         </radialGradient>
+         <ellipse cx="216" cy="49" rx="60" ry="42" fill="url(#button-alpha-mask-gradient)" />
+         <ellipse cx="216" cy="51" rx="43" ry="43" fill="none" stroke="#FFF" stroke-width="6" />
+         <circle  cx="216" cy="51" r="57" stroke-width="14" stroke="#000" fill="none" />
+      </mask>
+      
+      <!--
+         used to soften the edge highlight. the edge highlight is a simple circle, 
+         with the inner portion of the button covering it; ergo lowering the alpha 
+         on the inner portion's edges is functionally the same as softening and 
+         slightly thickening the edge highlight.
+      -->
+      <mask id="button-non-edge-alpha-mask">
+         <rect x="0" y="0" width="100%" height="100%" fill="#000" />
+         <radialGradient id="button-non-edge-alpha-mask-grad">
+            <stop offset="0" stop-color="#FFF" />
+            <stop offset="0.96" stop-color="#FFF" />
+            <stop offset="1" stop-color="#000" />
+         </radialGradient>
+         <ellipse fill="url(#button-non-edge-alpha-mask-grad)" rx="42" ry="40" cx="216" cy="49.5" />
+      </mask>
+      
+      <!-- gradient fill for the play/pause icons -->
+      <linearGradient id="grad-icon" x1="0" x2="0" y1="0" y2="1">
+         <stop offset="0.00" stop-color="#FEFEFE" />
+         <stop offset="0.45" stop-color="#F5F5F5" />
+         <stop offset="0.55" stop-color="#EAEAEA" />
+         <stop offset="1.00" stop-color="#D3D3D3" />
+      </linearGradient>
+   </defs>
+   
+   <g class="if-disabled">
+      <defs>
+         <radialGradient id="disable-gradient">
+            <stop offset="0.700" stop-color="#FFFFFF00" />
+            <stop offset="0.850" stop-color="#FFFFFF4D" />
+            <stop offset="0.87" stop-color="#0000004D" />
+            <stop offset="1.000" stop-color="#00000000" />
+         </radialGradient>
+      </defs>
+      <ellipse name="edge" fill="url(#disable-gradient)" cx="216" cy="51" rx="48" ry="48" />
+   </g>
+   <g class="if-enabled">
+      <ellipse name="shadow" fill="url(#grad-button-shadow)" cx="216" cy="52" rx="45" ry="46" />
+      <g mask="url(#button-alpha-mask)">
+         <ellipse name="outline"    fill="var(--outline-color)"   rx="43" ry="43"   cx="216" cy="51" />
+         <ellipse name="edge"       fill="url(#grad-edge)"        rx="42" ry="40.5" cx="216" cy="50.75" />
+         <g id="body-shading" mask="url(#button-non-edge-alpha-mask)">
+            <ellipse name="fill-base"  fill="var(--body-base-color)" rx="40" ry="38.5" cx="216" cy="50.5" />
+            <ellipse name="fill-inner" fill="url(#grad-body-inner)"  rx="36" ry="38"   cx="216" cy="50.5" />
+            <ellipse name="fill-light" fill="url(#grad-body-highlight-color)" rx="43" ry="43" cx="216" cy="51" mask="url(#body-highlight-alpha-mask)" />
+         </g>
+         <circle name="glass-light" fill="url(#grad-glass-highlight)" mask="url(#glass-highlight-shape-mask)" r="41.5" cx="216" cy="51" style="mix-blend-mode: screen" />
+      </g>
+   </g>
+   
+   <style><![CDATA[
+.icon-element {
+   stroke: #FEFEFE;
+   stroke-width: 1.5px;
+   filter: drop-shadow(-1px 1px 2px #00000080);
+   fill:   url(#grad-icon);
+   
+   &.pause-bar {
+      --height: 38px;
+   
+      rx:     3px;
+      ry:     3px;
+      y:      calc(var(--height) / -2);
+      width:  7px;
+      height: var(--height);
+      fill:   url(#grad-icon);
+      
+      --shadow-x: 1px;
+      &:first-child {
+         --shadow-x: -1px;
+      }
+      filter: drop-shadow(var(--shadow-x, 0px) 1px 2px #00000080);
+   }
+}
+   ]]></style>
+   <g id="play-pause-icon-play">
+      <path class="icon-element"
+         transform="translate(205, 51)"
+         d="M 29.909 -1.732 a 2 2 90 0 1 0 3.4641 l -26.909 15.5359 a 2 2 90 0 1 -3 -1.7321 l 0 -31.0718 a 2 2 90 0 1 3 -1.7321 Z"
+      />
+   </g>
+   <g id="play-pause-icon-pause" transform="translate(175 51)">
+      <rect class="icon-element pause-bar" x="30" />
+      <rect class="icon-element pause-bar" x="46" />
+   </g>
+</svg>
