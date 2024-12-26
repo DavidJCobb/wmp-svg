@@ -1,9 +1,7 @@
 
 # Ripped files
 
-To avoid any kind of IP infringement, I will not be including ripped WMP assets here.
-
-I will, however, explain *how* to rip them, if I can remember.
+The original WMP assets aren't mine to distribute, so I won't be committing them to Github; but for the lab, they'd go in here.
 
 ## Extracting WMP assets
 
