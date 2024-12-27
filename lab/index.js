@@ -31,15 +31,18 @@
    input.addEventListener("input", update);
 })();
 
-// Control "Disable alpha" option
+// Filters
 (function() {
-   let input = document.getElementById("toggle-disable-alpha");
+   let input = document.getElementById("filter-picker");
    let view  = document.getElementById("preview");
    function update() {
-      let checked = input.checked;
-      let nodes   = view.querySelectorAll(".layer :is(img, svg)");
+      let value = input.value;
+      let nodes = view.querySelectorAll(".layer :is(img, svg)");
       nodes.forEach(function(node) {
-         node.classList[checked ? "add" : "remove"]("disable-alpha");
+         if (value)
+            node.style.filter = `url(#filter-${value})`;
+         else
+            node.style.filter = "";
       });
    }
    update();
