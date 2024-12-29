@@ -2,11 +2,7 @@
    <!--
       TODO:
       
-       - Only visible for hover or active
-       
        - Active: bottom highlight has trapezoidal shape
-       
-       - Hover: bottom highlight has rounded rectangle shape
    -->
    <defs id="normal" />
    <defs id="hover" />
