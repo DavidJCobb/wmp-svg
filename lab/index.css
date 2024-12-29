@@ -62,31 +62,103 @@ svg[hidden] {
    }
    
    &.active {
-      button.play-pause {
+      button {
          appearance: none;
-         color: transparent;
-         border: 0;
+         color:   transparent;
+         border:  0;
          padding: 0;
-         margin: 0;
+         margin:  0;
          background-color: transparent;
          
          position: absolute;
-         left:   166px;
-         top:      1px;
-         width:  100px;
-         height: 100px;
-         background-image: url(play-pause.svg);
-         background-repeat: no-repeat;
-         background-size: 100px 100px;
          
-         &:hover {
+         /*
+            use a pseudo-element for the actual visuals so that we can control 
+            the clickable hitbox via pointer-events and friends.
+            
+            in some cases, we'll want to use `pointer-events: none` on the 
+            visuals, and rely on the shape of the ancestor element. in other 
+            cases, we may want to use `pointer-events: none` on the ancestor 
+            element and use a second pseudo-element to define the hit area.
+         */
+         &::before {
+            pointer-events: none;
+            content: " ";
+            display: block;
+            
+            position: absolute;
+            
+            background-repeat: no-repeat;
+         }
+      }
+      button.play-pause {
+         left:   166px;
+         top:    1px;
+         width:  0px;
+         height: 0px;
+         font-size: 0px !important;
+         
+         &::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            left:   0;
+            top:    0;
+            width:  100px;
+            height: 100px;
+            clip-path: ellipse(43px 43px at center center);
+         }
+         
+         &::before {
+            width:  100px;
+            height: 100px;
+            
+            left: 0px;
+            top:  0px;
+            
+            background-image: url(play-pause.svg);
+            background-size: 100px 100px;
+         }
+         
+         &:hover::before {
             background-image: url(play-pause.svg#play-hover) !important;
          }
-         &:active {
+         &:active::before {
             background-image: url(play-pause.svg#play-active) !important;
          }
-         &[disabled] {
+         &:is([disabled], :disabled)::before {
             background-image: url(play-pause.svg#play-disabled) !important;
+         }
+      }
+      button.stop {
+         left:   5px;
+         top:    26px;
+         width:  48px;
+         height: 48px;
+         
+         /*
+            use a pseudo-element for the actual visuals so that we can control 
+            the clickable hitbox via pointer-events and friends
+         */
+         &::before {
+            pointer-events: none;
+            width:   58px;
+            height:  58px;
+            
+            left: -5px;
+            top:   0px;
+            
+            background-image: url(stop.svg);
+            background-size:  58px 58px;
+         }
+         &:hover::before {
+            background-image: url(stop.svg#hover) !important;
+         }
+         &:active::before {
+            background-image: url(stop.svg#active) !important;
+         }
+         &:is([disabled], :disabled)::before {
+            background-image: url(stop.svg#disabled) !important;
          }
       }
    }
