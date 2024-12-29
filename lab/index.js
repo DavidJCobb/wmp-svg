@@ -14,6 +14,8 @@
       }
       raster.src = `rips/main-${state}.png`;
       vector.src = `play-pause.svg#${icon}-${state}`;
+      
+      document.getElementById("stop-button").src = `stop.svg#${state}`;
    }
    update();
    icon_pick.addEventListener("change", update);
