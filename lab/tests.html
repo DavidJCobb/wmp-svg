@@ -1,0 +1,182 @@
+<!doctype html>
+<html>
+   <head>
+      <title>Tests</title>
+   </head>
+   <body>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200">
+         <defs>
+            <symbol id="fuzzy-rounded-rect" shape-rendering="crispedges">
+               <defs>
+                  <style><![CDATA[
+/*
+   Ensure that the stylesheet (defs > symbol > style) doesn't affect 
+   content in the rest of the SVG or embedding document. The styles 
+   will still be receptive to CSS variables set on the shadow host, 
+   when this <symbol/> is <use/>d.
+*/
+#fuzzy-rounded-rect{
+
+   /* account for sub-pixel rounding errors in browsers */
+   --fudge-factor: 0.01px;
+
+   --inner-size:    calc(100% - var(--blur-radius) * 2 + var(--fudge-factor, 0));
+   --near-position: calc(var(--blur-radius) - var(--fudge-factor, 0) / 2);
+   --far-position:  calc(100% - var(--blur-radius));
+   
+   /* don't bother. color-interpolation only applies to RGB, not A. */
+   /*linearGradient, radialGradient {
+      color-interpolation: linearrgb;
+   }*/
+   
+   linearGradient, radialGradient {
+   
+      &:has(:nth-child(2):last-child) { --child-count: 2; }
+      &:has(:nth-child(3):last-child) { --child-count: 3; }
+      &:has(:nth-child(4):last-child) { --child-count: 4; }
+      &:has(:nth-child(5):last-child) { --child-count: 5; }
+      &:has(:nth-child(6):last-child) { --child-count: 6; }
+      &:has(:nth-child(7):last-child) { --child-count: 7; }
+      &:has(:nth-child(8):last-child) { --child-count: 8; }
+      &:has(:nth-child(9):last-child) { --child-count: 9; }
+      
+      --srgb-to-linear: 2.2;
+      
+      stop {
+         
+         --i: (var(--child-index) - 1);
+         --d: (var(--child-count) - 1);
+         --alpha: pow(1 - calc(var(--i) / var(--d)), var(--srgb-to-linear));
+      
+         stop-color: rgba(0, 0, 0, var(--alpha));
+         
+         &:first-child { --child-index: 1; }
+         &:nth-child(2) { --child-index: 2; }
+         &:nth-child(3) { --child-index: 3; }
+         &:nth-child(4) { --child-index: 4; }
+         &:nth-child(5) { --child-index: 5; }
+         &:nth-child(6) { --child-index: 6; }
+         &:nth-child(7) { --child-index: 7; }
+         &:nth-child(8) { --child-index: 8; }
+         &:nth-child(9) { --child-index: 9; }
+      }
+   }
+
+   .corner {
+      width:  var(--blur-radius, 0px);
+      height: var(--blur-radius, 0px);
+      
+      fill: url(#fuzzy-rounded-rect--corner);
+      
+      &.left {
+         x: 0;
+      }
+      &.right {
+         x: var(--far-position);
+      }
+      &.top {
+         y: 0;
+      }
+      &.bottom {
+         y: var(--far-position);
+      }
+      
+      /* gradient transforms */
+      transform-box:    fill-box;
+      transform-origin: center;
+      &.top.right    { transform: rotate( 90deg); }
+      &.bottom.right { transform: rotate(180deg); }
+      &.bottom.left  { transform: rotate(270deg); }
+   }
+   .center {
+      x:      var(--near-position);
+      y:      var(--near-position);
+      width:  var(--inner-size);
+      height: var(--inner-size);
+   }
+   .edge {
+      fill: url(#fuzzy-rounded-rect--edge-r);
+      
+      &.top,
+      &.bottom {
+         width:  var(--inner-size);
+         height: var(--blur-radius);
+         x:      var(--near-position);
+      }
+      &.left,
+      &.right {
+         width:  var(--blur-radius);
+         height: var(--inner-size);
+         y:      var(--near-position);
+      }
+      
+      &.top    { fill: url(#fuzzy-rounded-rect--edge-t); y: 0; }
+      &.bottom { fill: url(#fuzzy-rounded-rect--edge-b); y: var(--far-position); }
+      &.left   { fill: url(#fuzzy-rounded-rect--edge-l); x: 0; }
+      &.right  { fill: url(#fuzzy-rounded-rect--edge-r); x: var(--far-position); }
+   }
+}
+                  ]]></style>
+                  <linearGradient id="fuzzy-rounded-rect--edge-r" x1="0" x2="1" y1="0" y2="0">
+                     <stop offset="0.00" stop-color="#000000FF" />
+                     <stop offset="0.125" />
+                     <stop offset="0.25" />
+                     <stop offset="0.375" />
+                     <stop offset="0.5" />
+                     <stop offset="0.625" />
+                     <stop offset="0.75" />
+                     <stop offset="0.875" />
+                     <stop offset="1.00" stop-color="#00000000" />
+                  </linearGradient>
+                  <linearGradient href="#fuzzy-rounded-rect--edge-r" id="fuzzy-rounded-rect--edge-l" x1="1" x2="0" />
+                  <linearGradient href="#fuzzy-rounded-rect--edge-r" id="fuzzy-rounded-rect--edge-t" x1="0" x2="0" y1="1" y2="0" />
+                  <linearGradient href="#fuzzy-rounded-rect--edge-t" id="fuzzy-rounded-rect--edge-b" y1="0" y2="1" />
+                  <radialGradient id="fuzzy-rounded-rect--corner" cx="1" cy="1" r="1">
+                     <stop offset="0.00" stop-color="#000000FF" />
+                     <stop offset="0.125" />
+                     <stop offset="0.25" />
+                     <stop offset="0.375" />
+                     <stop offset="0.5" />
+                     <stop offset="0.625" />
+                     <stop offset="0.75" />
+                     <stop offset="0.875" />
+                     <stop offset="1.00" stop-color="#00000000" />
+                  </radialGradient>
+               </defs>
+               
+               <rect class="corner top left" />
+               <rect class="corner top right" />
+               <rect class="corner bottom left" />
+               <rect class="corner bottom right" />
+               <rect class="edge left" />
+               <rect class="edge right" />
+               <rect class="edge top" />
+               <rect class="edge bottom" />
+               <rect class="center" />
+            </symbol>
+         </defs>
+         
+         <use href="#fuzzy-rounded-rect"
+            x="25"
+            y="25"
+            width="50"
+            height="50"
+            style="--blur-radius: 4px"
+         />
+         <use href="#fuzzy-rounded-rect"
+            x="25"
+            y="75"
+            width="50"
+            height="50"
+            style="--blur-radius: 16px"
+         />
+         <use href="#fuzzy-rounded-rect"
+            x="75"
+            y="25"
+            width="50"
+            height="50"
+            style="--blur-radius: 20px"
+         />
+      </svg>
+   </body>
+</html>
