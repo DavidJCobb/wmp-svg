@@ -6,6 +6,7 @@
    <body>
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400">
          <defs>
+            <defs id="make-sure-these-symbols-are-not-only-children-in-the-original-dom" />
             <symbol id="fuzzy-rounded-rect" shape-rendering="crispedges">
                <defs>
                   <style><![CDATA[
@@ -61,7 +62,7 @@
       that support SVG2 will apply selectors to the cloned elements 
       based on their position within the shadow DOM, but browsers that 
       are non-compliant will instead apply selectors to the cloned 
-      elements based on the original elements' positions in the DOM.
+      elements based on the original elements' positions in the DOM. 
       
     - Browsers that are non-compliant may also choose not to clone any 
       "non-graphical" elements, such as <mask/>, into the shadow DOM. 
@@ -74,9 +75,15 @@
    to a non-mask-based approach (and simply accept the rendering bugs 
    that that has) when dealing with non-SVG2-compliant browsers. This 
    is harder than it sounds: there's no @supports rule you can use to 
-   check for "does not completely flub the SVG2 DOM." In practice, we 
-   have to take the two above defects and use the former to deal with 
-   the latter.
+   check for "does not completely flub the SVG2 DOM," and you can't 
+   just use `#my-element:has(mask)` because (per the first bug) that 
+   selector would be matched against the original element and the 
+   rules would then incorrectly affect the cloned element. If the 
+   original element :has a given child or descendant, then the cloned 
+   element tests as having it too -- even if it no longer does.
+   
+   In practice, we have to take the two above defects and use the former 
+   to deal with the latter.
    
    If our to-be-used element isn't the :only-child within the normal 
    DOM, then we can use :only-child to match it within the shadow DOM 
@@ -86,6 +93,14 @@
    to apply selectors as SVG2 requires. As long as Chrome and WebKit 
    fix BOTH of the above bugs at the same time, or at least fix the 
    second listed bug BEFORE the first bug, we'll be fine.
+   
+   Let's look at the bright side. Chrome is deeply, deeply frustrating 
+   to write SVGs for because it gets so many things wrong. It's highly 
+   unlikely that they'll fix these bugs in "the wrong order" because 
+   it's highly unlikely that they'll ever bother to fix them at all. 
+   They've had nearly a decade to actually handle CSS-in-SVG2 properly 
+   and they still don't. We can probably rely on it continuing to be 
+   piss-poor at handling SVGs well into the future.
 */
 #fuzzy-rounded-rect {
 
@@ -96,10 +111,6 @@
    --near-position: calc(var(--blur-radius) - var(--fudge-factor, 0) / 2);
    --far-position:  calc(100% - var(--blur-radius));
    
-   linearGradient, radialGradient {
-      color-interpolation: linearrgb;
-   }
-
    .corner {
       width:  var(--blur-radius, 0px);
       height: var(--blur-radius, 0px);
@@ -199,102 +210,20 @@
                   <rect class="center" />
                </g>
             </symbol>
-            <symbol id="fuzzy-rounded-rect-alt" shape-rendering="crispedges">
-               <defs>
-                  <style><![CDATA[
-/*
-   Ensure that the stylesheet (defs > symbol > style) doesn't affect 
-   content in the rest of the SVG or embedding document. The styles 
-   will still be receptive to CSS variables set on the shadow host, 
-   when this <symbol/> is <use/>d.
-*/
-#fuzzy-rounded-rect-alt {
-
-   /* account for sub-pixel rounding errors in browsers */
-   --fudge-factor: 0.01px;
-
-   --inner-size:    calc(100% - var(--blur-radius) * 2 + var(--fudge-factor, 0));
-   --near-position: calc(var(--blur-radius) - var(--fudge-factor, 0) / 2);
-   --far-position:  calc(100% - var(--blur-radius));
-   
-   linearGradient, radialGradient {
-      color-interpolation: linearrgb;
-   }
-   linearGradient, radialGradient {
-      --child-count: 2;
-      
-      stop {
-         --i:     (var(--child-index) - 1);
-         --d:     (var(--child-count) - 1);
-         --alpha: calc((1 - calc(var(--i) / var(--d))) * 100%);
-         stop-color: hsl(none none var(--alpha));
-         stop-color: color(srgb-linear var(--alpha) var(--alpha) var(--alpha));
-         
-         &:first-child { --child-index: 1; }
-         &:nth-child(2) { --child-index: 2; }
-         &:nth-child(3) { --child-index: 3; }
-         &:nth-child(4) { --child-index: 4; }
-         &:nth-child(5) { --child-index: 5; }
-         &:nth-child(6) { --child-index: 6; }
-         &:nth-child(7) { --child-index: 7; }
-         &:nth-child(8) { --child-index: 8; }
-         &:nth-child(9) { --child-index: 9; }
-      }
-   }
-
-   .corner {
-      width:  var(--blur-radius, 0px);
-      height: var(--blur-radius, 0px);
-      
-      fill: url(#fuzzy-rounded-rect-alt--corner);
-      
-      /* gradient transforms */
-      transform-box:    view-box;
-      transform-origin: center;
-      &.top.right    { transform: rotate( 90deg); }
-      &.bottom.right { transform: rotate(180deg); }
-      &.bottom.left  { transform: rotate(270deg); }
-   }
-   .center {
-      x:      var(--near-position);
-      y:      var(--near-position);
-      width:  var(--inner-size);
-      height: var(--inner-size);
-   }
-   .edge {
-      fill: url(#fuzzy-rounded-rect-alt--edge);
-      
-      width:  var(--blur-radius);
-      height: var(--inner-size);
-      x:      0;
-      y:      var(--near-position);
-      
-      transform-box:    view-box;
-      transform-origin: center;
-      &.top    { transform: rotate(90deg); }
-      &.right  { transform: rotate(180deg); }
-      &.bottom { transform: rotate(270deg); }
-   }
-}
-                  ]]></style>
-                  <linearGradient id="fuzzy-rounded-rect-alt--edge" x1="1" x2="0">
-                     <stop offset="0.00" />
-                     <stop offset="1.00" />
-                  </linearGradient>
-                  <radialGradient id="fuzzy-rounded-rect-alt--corner" href="#fuzzy-rounded-rect-alt--edge" cx="1" cy="1" r="1" />
-               </defs>
-               <mask id="fuzzy-rounded-rect-alt--mask">
-                  <rect class="corner top left" />
-                  <rect class="corner top right" />
-                  <rect class="corner bottom left" />
-                  <rect class="corner bottom right" />
-                  <rect class="edge left" />
-                  <rect class="edge right" />
-                  <rect class="edge top" />
-                  <rect class="edge bottom" />
-                  <rect class="center" fill="#FFF" />
-               </mask>
-               <rect x="0" y="0" width="100%" height="100%" mask="url(#fuzzy-rounded-rect-alt--mask)" />
+            
+            <!--
+               there's no good way to make this configurable, literally none, because 
+               SVG gradient stop offsets can't be configured via CSS. why? because SVG 
+               is a bad standard
+            -->
+            <symbol id="fuzzy-ring">
+               <style><![CDATA[
+               ]]></style>
+               <radialGradient id="fuzzy-ring--inner-grad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0" stop-color="#000000FF" />
+                  <stop offset="1" stop-color="#00000000" />
+               </radialGradient>
+               <circle cx="50%" cy="50%" r="50%" fill="url(#fuzzy-ring--inner-grad)" />
             </symbol>
          </defs>
          
@@ -319,60 +248,13 @@
             height="50"
             style="--blur-radius: 20px"
          />
-         
-         <use href="#fuzzy-rounded-rect-alt"
-            x="225"
-            y="25"
-            width="50"
-            height="50"
-            style="--blur-radius: 4px"
-         />
-         <use href="#fuzzy-rounded-rect-alt"
-            x="225"
+         <use href="#fuzzy-ring"
+            x="75"
             y="75"
-            width="50"
-            height="50"
-            style="--blur-radius: 16px"
-         />
-         <use href="#fuzzy-rounded-rect-alt"
-            x="275"
-            y="25"
             width="50"
             height="50"
             style="--blur-radius: 20px"
          />
       </svg>
-      
-      
-      
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
-   <defs>
-      <style>
-linearGradient, mask {
-   color-interpolation: linearrgb;
-}
-      </style>
-      
-      <linearGradient id="alpha-gradient">
-         <stop offset="0" stop-color="#000000FF" />
-         <stop offset="1" stop-color="#00000000" />
-      </linearGradient>
-      
-      <mask id="mask">
-         <linearGradient id="white-to-black-gradient">
-            <stop offset="0" stop-color="#FFF" />
-            <stop offset="1" stop-color="#000" />
-         </linearGradient>
-         <rect x="50" y="100" width="300" height="100%" fill="url(#white-to-black-gradient)" />
-      </mask>
-   </defs>
-   
-   <rect x="0" y="0" width="100%" height="100%" fill="#808080" />
-   
-   <rect x="50" y="0" width="300" height="100" fill="url(#alpha-gradient)" />
-   <rect x="50" y="100" width="300" height="100" fill="#000" mask="url(#mask)" />
-</svg>
-      
-      
    </body>
 </html>
