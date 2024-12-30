@@ -28,24 +28,13 @@
       color-interpolation: linearrgb;
    }
    linearGradient, radialGradient {
-      &:has(:nth-child(2):last-child) { --child-count: 2; }
-      &:has(:nth-child(3):last-child) { --child-count: 3; }
-      &:has(:nth-child(4):last-child) { --child-count: 4; }
-      &:has(:nth-child(5):last-child) { --child-count: 5; }
-      &:has(:nth-child(6):last-child) { --child-count: 6; }
-      &:has(:nth-child(7):last-child) { --child-count: 7; }
-      &:has(:nth-child(8):last-child) { --child-count: 8; }
-      &:has(:nth-child(9):last-child) { --child-count: 9; }
+      --child-count: 9;
       
       stop {
-         --i: (var(--child-index) - 1);
-         --d: (var(--child-count) - 1);
-         --alpha: pow(1 - calc(var(--i) / var(--d)), var(--srgb-to-linear));
-      
-         stop-color: rgba(0, 0, 0, var(--alpha));
-         
-         --alpha: calc(255 * (1 - calc(var(--i) / var(--d))));
-         stop-color: rgba(var(--alpha), var(--alpha), var(--alpha), 1);
+         --i:     (var(--child-index) - 1);
+         --d:     (var(--child-count) - 1);
+         --alpha: calc((1 - calc(var(--i) / var(--d))) * 100%);
+         stop-color: hsl(none none var(--alpha));
          
          &:first-child { --child-index: 1; }
          &:nth-child(2) { --child-index: 2; }
@@ -95,7 +84,7 @@
 }
                   ]]></style>
                   <linearGradient id="fuzzy-rounded-rect--edge" x1="1" x2="0">
-                     <stop offset="0.00" stop-color="#000000FF" />
+                     <stop offset="0.00" />
                      <stop offset="0.125" />
                      <stop offset="0.25" />
                      <stop offset="0.375" />
@@ -103,19 +92,9 @@
                      <stop offset="0.625" />
                      <stop offset="0.75" />
                      <stop offset="0.875" />
-                     <stop offset="1.00" stop-color="#00000000" />
+                     <stop offset="1.00" />
                   </linearGradient>
-                  <radialGradient id="fuzzy-rounded-rect--corner" cx="1" cy="1" r="1">
-                     <stop offset="0.00" stop-color="#000000FF" />
-                     <stop offset="0.125" />
-                     <stop offset="0.25" />
-                     <stop offset="0.375" />
-                     <stop offset="0.5" />
-                     <stop offset="0.625" />
-                     <stop offset="0.75" />
-                     <stop offset="0.875" />
-                     <stop offset="1.00" stop-color="#00000000" />
-                  </radialGradient>
+                  <radialGradient id="fuzzy-rounded-rect--corner" href="#fuzzy-rounded-rect--edge" cx="1" cy="1" r="1" />
                   
                   <mask id="fuzzy-rounded-rect--mask">
                      <rect class="corner top left" />
