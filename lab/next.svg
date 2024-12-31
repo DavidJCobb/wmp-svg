@@ -27,6 +27,21 @@ linearGradient, radialGradient, mask {
    .hover {
       display: inline;
    }
+   #primary-layer {
+      mask: url(#alpha-mask-hover);
+   }
+   #shadow {
+      fill: #3ba3ff;
+   }
+   #outline {
+      stroke: url(#outline-color-hover);
+   }
+   #fill {
+      fill: url(#base-color-hover);
+   }
+   #edge {
+      stroke: url(#edge-color-hover);
+   }
 }
 :root:active,
 :root:has(#active:target) {
@@ -39,30 +54,14 @@ linearGradient, radialGradient, mask {
 }
       
 path.button {
-   d: path("M 4 0 l 79 0 q 15 0 15 23 q 0 23 -15 23 l -78 0 q -3 0 -3 -3 c 0 -9 4 -6 4 -20 c 0 -14 -4 -11 -4 -20 q 0 -3 3 -3 z");
-   d: path("M 4 0 l 79 0 q 15 0 15 23 q 0 23 -15 23 l -78 0 q -3 0 -3 -3 c 0 -3 4 -6 4 -20 c 0 -14 -4 -17 -4 -20 q 0 -3 3 -3 z");
    d: path("M 4 0 l 79 0 q 15 0 15 23 q 0 23 -15 23 l -78 0 q -3 0 -3 -2 C 2 42 6 37 6 23 c 0 -14 -4 -19 -4 -21 Q 2 0 5 0 z");
 }
       ]]></style>
-      <linearGradient id="base-color" x1="0" x2="0" y1="0" y2="1">
+      <linearGradient id="base-color-normal" x1="0" x2="0" y1="0" y2="1">
          <stop offset="0.00" stop-color="#FFFFFF" />
          <stop offset="0.25" stop-color="#def0ff" />
          <stop offset="0.45" stop-color="#bddbfc" />
          <stop offset="0.50" stop-color="#1c4784" />
-         <stop offset="0.675" stop-color="#225b97" />
-         <stop offset="0.75" stop-color="#2b74ac" />
-         <stop offset="0.8" stop-color="#3e97ce" />
-         <stop offset="0.875" stop-color="#5fc1e5" />
-         <stop offset="1.00" stop-color="#6ad8ee" />
-      </linearGradient>
-      <linearGradient id="base-alpha" x1="0" x2="0" y1="0" y2="1">
-         <stop offset="0.00" stop-color="#CDCDCD" />
-         <stop offset="0.20" stop-color="#C3C3C3" />
-         <stop offset="0.45" stop-color="#AEAEAE" />
-         <stop offset="0.52" stop-color="#878787" />
-         <stop offset="0.60" stop-color="#7C7C7C" />
-         <stop offset="0.75" stop-color="#757575" />
-         <stop offset="1.00" stop-color="#808080" />
       </linearGradient>
       <linearGradient id="edge-color-normal" x1="0" x2="0" y1="0" y2="1">
          <stop offset="0.00" stop-color="#FFFFFF" />
@@ -71,15 +70,33 @@ path.button {
          <stop offset="0.90" stop-color="#6d90b9" />
          <stop offset="1.00" stop-color="#FFFFFF" />
       </linearGradient>
-      <linearGradient id="edge-and-shadow-mask-gradient" x1="0" x2="0" y1="0" y2="1">
-         <stop offset="0.00" stop-color="#dfdfdf" />
-         <stop offset="1.00" stop-color="#c7c7c7" />
-      </linearGradient>
+      
+      <!--
+         Used in various places where we need an inner stroke only, 
+         as well as places where we need to prevent effects from 
+         bleeding out of the button shape.
+      -->
       <clipPath id="shape-clip">
          <path class="button" fill="#FFF" />
       </clipPath>
-      <mask id="alpha-mask">
-         <path class="button" fill="url(#base-alpha)" />
+      
+      <mask id="alpha-mask-normal">
+         <defs>
+            <linearGradient id="base-alpha-normal" x1="0" x2="0" y1="0" y2="1">
+               <stop offset="0.00" stop-color="#CDCDCD" />
+               <stop offset="0.20" stop-color="#C3C3C3" />
+               <stop offset="0.45" stop-color="#AEAEAE" />
+               <stop offset="0.52" stop-color="#878787" />
+               <stop offset="0.60" stop-color="#7C7C7C" />
+               <stop offset="0.75" stop-color="#757575" />
+               <stop offset="1.00" stop-color="#808080" />
+            </linearGradient>
+            <linearGradient id="edge-and-shadow-mask-gradient" x1="0" x2="0" y1="0" y2="1">
+               <stop offset="0.00" stop-color="#dfdfdf" />
+               <stop offset="1.00" stop-color="#c7c7c7" />
+            </linearGradient>
+         </defs>
+         <path class="button" fill="url(#base-alpha-normal)" />
          <g
             fill="none"
             filter="blur(1px)"
@@ -100,10 +117,85 @@ path.button {
             </g>
          </g>
       </mask>
+      
+      <linearGradient id="base-color-hover" x1="0" x2="0" y1="0" y2="1">
+         <stop offset="0.00" stop-color="#FFFFFF" />
+         <stop offset="0.25" stop-color="#d0e9f3" />
+         <stop offset="0.45" stop-color="#abd9e8" />
+         <stop offset="0.49" stop-color="#407db5" />
+         <stop offset="0.50" stop-color="#3b6ea7" />
+         <stop offset="0.625" stop-color="#4291bd" />
+         <stop offset="0.75" stop-color="#45c8e6" />
+         <stop offset="0.85" stop-color="#4fe5f7" />
+         <stop offset="0.88" stop-color="#7af6ff" />
+         <stop offset="0.9" stop-color="#6df0fb" />
+         <stop offset="0.91" stop-color="#6df0fb" />
+         <stop offset="0.93" stop-color="#68e8f5" />
+         <stop offset="0.96" stop-color="#a2fbff" />
+      </linearGradient>
+      <linearGradient id="edge-color-hover" x1="0" x2="0" y1="0" y2="1">
+         <stop offset="0.00" stop-color="#FFFFFF" />
+         <stop offset="0.45" stop-color="#FFFFFF" />
+         <stop offset="0.50" stop-color="#808cb7" />
+         <stop offset="0.85" stop-color="#abcadf" />
+         <stop offset="1.00" stop-color="#FFFFFF" />
+      </linearGradient>
+      <linearGradient id="outline-color-hover" x1="0" x2="0" y1="0" y2="1">
+         <stop offset="0.00" stop-color="#0d62c1" />
+         <stop offset="1.00" stop-color="#002273" />
+      </linearGradient>
+      
+      <mask id="alpha-mask-hover" x="-30%" width="140%">
+         <defs>
+            <linearGradient id="base-alpha-hover" x1="0" x2="0" y1="0" y2="1">
+               <stop offset="0.00" stop-color="#CDCDCD" />
+               <stop offset="0.20" stop-color="#cdcdcd" />
+               <stop offset="0.45" stop-color="#bdbdbd" />
+               <stop offset="0.52" stop-color="#999999" />
+               <stop offset="0.60" stop-color="#939393" />
+               <stop offset="0.75" stop-color="#A2A2A2" />
+               <stop offset="0.90" stop-color="#D8D8D8" />
+            </linearGradient>
+            <linearGradient id="edge-mask-gradient-hover" x1="0" x2="0" y1="0" y2="1">
+               <stop offset="0.00" stop-color="#E9E9E9" />
+               <stop offset="0.50" stop-color="#C5C5C5" />
+               <stop offset="1.00" stop-color="#FAFAFA" />
+            </linearGradient>
+         </defs>
+         
+         <g fill="#888" filter="drop-shadow(0 4px 2px #AAA)">
+            <path class="button" />
+            <path class="button" transform="translate(1 0)" />
+            <path class="button" transform="translate(-1 0)" />
+         </g>
+         
+         <path class="button" fill="url(#base-alpha-hover)" />
+         
+         <!-- edge mask -->
+         <g filter="blur(1px)">
+            <path class="button"
+               fill="none"
+               stroke="url(#edge-mask-gradient-hover)"
+               stroke-width="6"
+               clip-path="url(#shape-clip)"
+            />
+         </g>
+      </mask>
    </defs>
-   <g mask="url(#alpha-mask)" transform="translate(0 28)">
-      <rect id="shadow" x="-10%" y="-10%" width="120%" height="120%" />
-      <path id="fill" class="button" fill="url(#base-color)" />
+   <g id="primary-layer" mask="url(#alpha-mask-normal)" transform="translate(0 28)">
+   
+      <!--
+         Create an area of to-be-masked opaque black, so that our 
+         mask can turn it into a drop shadow.
+      -->
+      <rect id="shadow" x="-10%" y="-10%" width="120%" height="120%" fill="#000" />
+      <g id="outline" fill="none" stroke="#000" stroke-width="3">
+         <path class="button" />
+         <path class="button" transform="translate(0 1)" clip-path="fill-box xywh(0, 0, 100%, 50%)" />
+      </g>
+      
+      <path id="fill" class="button" fill="url(#base-color-normal)" />
+      
       <g id="highlight" clip-path="url(#shape-clip)">
          <g class="normal">
             <defs>
@@ -170,9 +262,29 @@ path.button {
          </g>
          <g class="active">
          </g>
-         <g class="hover">
+         <g class="hover" mask="url(#highlight-mask-hover)">
+            <defs>
+               <radialGradient id="highlight-grad-hover-a">
+                  <stop offset="0.7" stop-color="#0006" />
+                  <stop offset="1" stop-color="#0000" />
+               </radialGradient>
+               <radialGradient id="highlight-grad-hover-b" cx="0" cy=".8" r="1">
+                  <stop offset="0.5" stop-color="#0000" />
+                  <stop offset="1" stop-color="#0006" />
+               </radialGradient>
+               <mask id="highlight-mask-hover">
+                  <rect x="0" y="0" width="100%" height="23" fill="#666" />
+                  <rect x="0" y="23" width="100%" height="23" fill="#FFF" />
+               </mask>
+            </defs>
+            <ellipse cx="-2" cy="23" rx="15" ry="27" fill="url(#highlight-grad-hover-a)" />
+            <g style="transform: translate(calc(100% - 26px), 0); clip-path: view-box xywh(0 23px 100% 23px)">
+               <rect x="0" y="15" width="26" height="31" fill="url(#highlight-grad-hover-b)" />
+            </g>
+            <rect x="0" y="3" width="100%" height="1" fill="#0006" />
          </g>
       </g>
+      
       <path id="edge" class="button"
          fill="none"
          stroke="url(#edge-color-normal)"
