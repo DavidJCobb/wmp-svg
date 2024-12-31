@@ -161,6 +161,37 @@ svg[hidden] {
             background-image: url(stop.svg#disabled) !important;
          }
       }
+      button.next {
+         left:   260px;
+         top:    0px;
+         width:  104px;
+         height: 102px;
+         
+         /*
+            use a pseudo-element for the actual visuals so that we can control 
+            the clickable hitbox via pointer-events and friends
+         */
+         &::before {
+            pointer-events: none;
+            width:   104px;
+            height:  102px;
+            
+            left: 0px;
+            top:  0px;
+            
+            background-image: url(next.svg);
+            background-size:  104px 102px;
+         }
+         &:hover::before {
+            background-image: url(next.svg#hover) !important;
+         }
+         &:active::before {
+            background-image: url(next.svg#active) !important;
+         }
+         &:is([disabled], :disabled)::before {
+            background-image: url(next.svg#disabled) !important;
+         }
+      }
    }
 }
 
