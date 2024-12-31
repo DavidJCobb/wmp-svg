@@ -88,10 +88,15 @@
          <stop offset="0.475" stop-color="#7792b0" />
          <stop offset="0.485" stop-color="#0d315a" />
       </linearGradient>
-      <linearGradient id="stop-button-edge-color-active" x1="0" x2="0" y1="0" y2="1">
+      <linearGradient id="stop-button-edge-color-active" x1="0" x2="0" y1="0" y2="1" color-interpolation="linearrgb">
          <stop offset="0.000" stop-color="#E0E4EC" />
          <stop offset="0.480" stop-color="#8ea2b7" />
-         <stop offset="0.483" stop-color="#8ea2b700" />
+         <stop offset="0.483" stop-color="#667e99" />
+         <stop offset="0.5" stop-color="#1c2e53" />
+         <stop offset="0.7" stop-color="#0d2878" />
+         <stop offset="0.92" stop-color="#0d639e" />
+         <stop offset="0.96" stop-color="#40cbff" />
+         <stop offset="0.98" stop-color="#40cbff" />
       </linearGradient>
       
       <linearGradient id="stop-button-outline-color-hover" x1="0" x2="0" y1="0" y2="1">
@@ -178,7 +183,7 @@
          <g class="active highlight">
             <defs>
                <style><![CDATA[
-.active.highlight {
+#stop-button-overall-mask .active.highlight {
    --width:  40px;
    --height: 16px;
    
@@ -254,6 +259,7 @@
          <stop offset="1.000" stop-color="#0d315a" />
       </radialGradient>
    </defs>
+   
    <g id="glass" transform="translate(6 0)" mask="url(#stop-button-overall-mask)">
       <rect id="shadow"
          x="-4" y="0" width="54" height="53" rx="4"
@@ -277,7 +283,7 @@
          cy="56"
          rx="43" ry="43"
          fill="url(#active-highlight-grad)"
-         clip-path="view-box xywh(0 23px 46px 23px round 4px)"
+         clip-path="view-box xywh(var(--glass-edge-thickness) calc(var(--button-size) / 2) calc(var(--button-size) - var(--glass-edge-thickness) * 2) calc(var(--button-size) / 2 - var(--glass-edge-thickness)) round var(--glass-edge-thickness))"
       />
       
       <rect name=""
@@ -385,6 +391,7 @@
       </g>
    </g>
    
+   <!-- icons -->
    <defs>
       <linearGradient id="icon-fill-normal" x1="0" x2="0" y1="0" y2="1">
          <stop offset="0" stop-color="#3eabff" />
