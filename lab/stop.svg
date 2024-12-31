@@ -9,6 +9,7 @@
    --glass-display: none;
    --shadow-color:  #47b5ff;
    
+   --glass-edge-thickness: 2px;
    --button-size: 46px;
 }
 :root:hover,
@@ -178,16 +179,14 @@
             <defs>
                <style><![CDATA[
 .active.highlight {
-   --icon-size: 46px;
-   
    --width:  40px;
    --height: 16px;
    
    --corner-width: 14px;
    
    transform: translate(
-      calc((var(--icon-size) - var(--width)) / 2),
-      calc(var(--icon-size) - var(--height))
+      calc((var(--button-size) - var(--width)) / 2),
+      calc(var(--button-size) - var(--height))
    );
    
    mask, linearGradient, radialGradient {
@@ -270,7 +269,7 @@
          x="0" y="0" width="46" height="46" rx="4"
          fill="url(#stop-button-color-hover)"
          stroke="url(#stop-button-edge-color-hover)"
-         stroke-width="4"
+         stroke-width="calc(var(--glass-edge-thickness) * 2)"
          clip-path="fill-box xywh(0 0 100% 100% round 4px)"
       />
       <ellipse class="active"
@@ -293,9 +292,11 @@
          <defs>
                <style><![CDATA[
 #dim-near-edge {
-   --icon-size: 46px;
+   --corner-size: 2.5px;
    
-   --corner-size: 4px;
+   --inset-x: var(--glass-edge-thickness);
+   --inset-y: var(--glass-edge-thickness);
+   --width:   calc(var(--button-size) - var(--inset-x) * 2);
    
    mask, linearGradient, radialGradient {
       color-interpolation: linearrgb;
@@ -304,72 +305,93 @@
    .corner {
       width:  var(--corner-size);
       height: var(--corner-size);
-      y: 0;
+      y: var(--inset-y);
    
       &.left {
-         x:    0;
-         fill: url(#dim-near-edge-b);
+         x: var(--inset-x);
       }
       &.right {
-         x:    calc(var(--icon-size) - var(--corner-size));
-         fill: url(#dim-near-edge-c);
+         x: calc(var(--inset-x) + var(--width) - var(--corner-size));
       }
    }
    .edge {
-      width:  calc(var(--icon-size) - var(--corner-size) * 2);
+      width:  calc(var(--width) - var(--corner-size) * 2);
       height: var(--corner-size);
-      x:      var(--corner-size);
-      y:      0;
-      fill:   url(#dim-near-edge-t);
       
+      &.top {
+         x:    calc(var(--inset-x) + var(--corner-size));
+         y:    var(--inset-y);
+         fill: url(#dim-near-edge-t);
+      }
       &.left,
       &.right {
          width:  var(--corner-size);
-         height: var(--icon-size);
-         x:      0;
-         y:      var(--corner-size);
+         height: calc(var(--width) - var(--corner-size));
+         x:      var(--inset-x);
+         y:      calc(var(--inset-y) + var(--corner-size));
          fill:   url(#dim-near-edge-l);
       }
       &.right {
-         x:    calc(var(--icon-size) - var(--corner-size));
+         x:    calc(var(--inset-x) + var(--width) - var(--corner-size));
          fill: url(#dim-near-edge-r);
       }
    }
+   
+   .bottom-fade,
+   .bottom-clip {
+      x:     var(--inset-x);
+      width: var(--width);
+   }
+   .bottom-fade {
+      y:      calc(var(--width) + var(--inset-y) - var(--corner-size));
+      height: 2px;
+      fill:   url(#dim-near-edge-clip-grad);
+   }
+   .bottom-clip {
+      y:      calc(var(--width) + var(--inset-y) - var(--corner-size) + 2px);
+      height: 13px;
+      fill:   #000;
+   }
 }
                ]]></style>
-            <linearGradient id="dim-near-edge-l"
-               x1="1" x2="0" y1="0" y2="0"
+            <linearGradient id="dim-near-edge-r"
+               x1="0" x2="1" y1="0" y2="0"
             >
-               <stop offset="0" stop-color="#000" />
-               <stop offset="1" stop-color="#FFF" />
+               <stop offset="0.00" stop-color="#000F" />
+               <stop offset="0.95" stop-color="#FFFF" />
+               <stop offset="1.00" stop-color="#FFF0" />
             </linearGradient>
             <linearGradient id="dim-near-edge-t"
                href="#dim-near-edge-l"
-               x1="0" x2="0" y1="0" y2="1"
+               x1="0" x2="0" y1="1" y2="0"
             />
-            <linearGradient id="dim-near-edge-r"
-               href="#dim-near-edge-l"
-               x1="0" x2="1" y1="0" y2="0"
+            <linearGradient id="dim-near-edge-l"
+               href="#dim-near-edge-r"
+               x1="1" x2="0" y1="0" y2="0"
             />
             <radialGradient id="dim-near-edge-b"
                href="#dim-near-edge-l"
-               cx="0"
-               cy="0"
+               cx="1"
+               cy="1"
                r="1"
             />
-            <radialGradient id="dim-near-edge-c"
-               href="#dim-near-edge-b"
-               cx="1"
-            />
+            <radialGradient id="dim-near-edge-tl" href="#dim-near-edge-b"  cx="1" cy="1" r="1" />
+            <radialGradient id="dim-near-edge-tr" href="#dim-near-edge-tl" cx="0" cy="1" />
+            <linearGradient id="dim-near-edge-clip-grad" x1="0" x2="0" y1="0" y2="1">
+               <stop offset="0" stop-color="#0000" />
+               <stop offset="1" stop-color="#000F" />
+            </linearGradient>
             <mask id="dim-near-edge-mask">
-               <rect class="corner left" />
-               <rect class="corner right" />
+               <rect class="corner left"  fill="url(#dim-near-edge-tl)" />
+               <rect class="corner right" fill="url(#dim-near-edge-tr)" />
                <rect class="edge left" />
                <rect class="edge right" />
                <rect class="edge top" />
+               <rect class="bottom-fade" />
+               <rect class="bottom-clip" />
             </mask>
          </defs>
-         <!--<rect x="0" y="0" width="46" height="46" fill="#000" mask="url(#dim-near-edge-mask)" />-->
+         <rect x="0" y="0" width="46" height="46" fill="#0000000C" mask="url(#dim-near-edge-mask)" />
       </g>
    </g>
    
