@@ -296,12 +296,9 @@ path.button {
    <g id="icon" transform="translate(0 28)">
       <defs>
          <style><![CDATA[
-#icon {
-   filter: drop-shadow(-1px 1px 2px #00000080);
-}
 .icon-element {
    stroke: #FEFEFE;
-   stroke-width: 1.2px;
+   stroke-width: 1.1px;
    stroke-linejoin: round;
    fill: url(#icon-fill-normal);
 }

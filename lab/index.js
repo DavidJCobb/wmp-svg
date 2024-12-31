@@ -16,7 +16,7 @@
       vector.src = `play-pause.svg#${icon}-${state}`;
       
       document.getElementById("stop-button").src = `stop.svg#${state}`;
-      document.getElementById("next-button").src = `next.svg#${state}`
+      document.getElementById("next-button").src = `spritesheet-next.svg#${state}-next`
    }
    update();
    icon_pick.addEventListener("change", update);
