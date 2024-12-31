@@ -274,7 +274,7 @@ use[href="#icon-fast-forward"] {
       </defs>
       
       <g mask="url(#alpha-mask-hover)">
-         <rect x="-10%" y="-10%" width="120%" height="120%" fill="#000" />
+         <rect x="-10%" y="-10%" width="120%" height="120%" fill="#39a1ff" />
          
          <!-- outline -->
          <g fill="none" stroke="#000" stroke-width="3">
