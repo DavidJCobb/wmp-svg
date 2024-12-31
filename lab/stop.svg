@@ -266,7 +266,7 @@
          from under cover.
       -->
       <rect name="base"
-         x="0" y="0" width="46" height="46" rx="4"
+         x="0" y="0" width="46" height="46" rx="calc(var(--glass-edge-thickness) * 2)"
          fill="url(#stop-button-color-hover)"
          stroke="url(#stop-button-edge-color-hover)"
          stroke-width="calc(var(--glass-edge-thickness) * 2)"
@@ -288,110 +288,100 @@
          stroke-width="4"
       />
       
-      <g id="dim-near-edge">
+      <g id="inner-shadows">
          <defs>
-               <style><![CDATA[
-#dim-near-edge {
-   --corner-size: 2.5px;
-   
-   --inset-x: var(--glass-edge-thickness);
-   --inset-y: var(--glass-edge-thickness);
-   --width:   calc(var(--button-size) - var(--inset-x) * 2);
-   
-   mask, linearGradient, radialGradient {
+            <style><![CDATA[
+#inner-shadows {
+   linearGradient, radialGradient, mask {
       color-interpolation: linearrgb;
    }
-
-   .corner {
-      width:  var(--corner-size);
-      height: var(--corner-size);
-      y: var(--inset-y);
    
-      &.left {
-         x: var(--inset-x);
-      }
-      &.right {
-         x: calc(var(--inset-x) + var(--width) - var(--corner-size));
-      }
-   }
+   --total-distance:      3px;
+   --full-alpha-distance: calc(var(--total-distance) * 0.4);
+   
+   --y-shift: 1px;
+   
+   --inset:  var(--glass-edge-thickness);
+   --length: calc(var(--button-size) - var(--inset) * 2);
+   
+   .left  { x: var(--inset); }
+   .right { x: calc(var(--inset) + var(--length) - var(--total-distance)); }
+   .top   { y: var(--inset); }
+   
    .edge {
-      width:  calc(var(--width) - var(--corner-size) * 2);
-      height: var(--corner-size);
-      
-      &.top {
-         x:    calc(var(--inset-x) + var(--corner-size));
-         y:    var(--inset-y);
-         fill: url(#dim-near-edge-t);
-      }
       &.left,
       &.right {
-         width:  var(--corner-size);
-         height: calc(var(--width) - var(--corner-size));
-         x:      var(--inset-x);
-         y:      calc(var(--inset-y) + var(--corner-size));
-         fill:   url(#dim-near-edge-l);
+         y:      var(--inset);
+         width:  var(--total-distance);
+         height: var(--length);
       }
-      &.right {
-         x:    calc(var(--inset-x) + var(--width) - var(--corner-size));
-         fill: url(#dim-near-edge-r);
+      &.top {
+         x:      var(--inset);
+         width:  var(--length);
+         height: var(--total-distance);
       }
+   }
+   .corner {
+      width:  var(--total-distance);
+      height: var(--total-distance);
    }
    
-   .bottom-fade,
-   .bottom-clip {
-      x:     var(--inset-x);
-      width: var(--width);
-   }
-   .bottom-fade {
-      y:      calc(var(--width) + var(--inset-y) - var(--corner-size));
-      height: 2px;
-      fill:   url(#dim-near-edge-clip-grad);
-   }
-   .bottom-clip {
-      y:      calc(var(--width) + var(--inset-y) - var(--corner-size) + 2px);
-      height: 13px;
-      fill:   #000;
+   /*
+      Skew opacity for the top half of the inner shadow (the half that would 
+      cover the glassy highlight) versus the bottom half.
+   */
+   --top-opacity:    0.2;
+   --bottom-opacity: 1.0;
+   .skew-opacity {
+      x:     0;
+      width: var(--button-size);
+      fill:  #000;
+      
+      &.top {
+         opacity: calc(1 - var(--top-opacity));
+         y:       var(--glass-edge-thickness);
+         height:  23px;
+      }
+      &.bottom {
+         opacity: calc(1 - var(--bottom-opacity));
+         y:       calc(var(--glass-edge-thickness) + 23px);
+         height:  40px;
+      }
    }
 }
-               ]]></style>
-            <linearGradient id="dim-near-edge-r"
-               x1="0" x2="1" y1="0" y2="0"
-            >
+:root:is(:active, :has(#active:target)) #inner-shadows {
+   --top-opacity: 0.3;
+   --bottom-opacity: 0.2;
+}
+            ]]></style>
+            <linearGradient id="inner-shadows-r" x1="1" x2="0">
+               <stop offset="0.40" stop-color="#FFFF" />
+               <stop offset="1.00" stop-color="#000F" />
+            </linearGradient>
+            <linearGradient id="inner-shadows-l" href="#inner-shadows-r" x1="0" x2="1" />
+            <linearGradient id="inner-shadows-t" href="#inner-shadows-l" x1="0" x2="0" y1="0" y2="1" />
+            <radialGradient id="inner-shadows-tl" href="#inner-shadows-l" cx="1" cy="1" r=".6">
                <stop offset="0.00" stop-color="#000F" />
-               <stop offset="0.95" stop-color="#FFFF" />
-               <stop offset="1.00" stop-color="#FFF0" />
-            </linearGradient>
-            <linearGradient id="dim-near-edge-t"
-               href="#dim-near-edge-l"
-               x1="0" x2="0" y1="1" y2="0"
-            />
-            <linearGradient id="dim-near-edge-l"
-               href="#dim-near-edge-r"
-               x1="1" x2="0" y1="0" y2="0"
-            />
-            <radialGradient id="dim-near-edge-b"
-               href="#dim-near-edge-l"
-               cx="1"
-               cy="1"
-               r="1"
-            />
-            <radialGradient id="dim-near-edge-tl" href="#dim-near-edge-b"  cx="1" cy="1" r="1" />
-            <radialGradient id="dim-near-edge-tr" href="#dim-near-edge-tl" cx="0" cy="1" />
-            <linearGradient id="dim-near-edge-clip-grad" x1="0" x2="0" y1="0" y2="1">
-               <stop offset="0" stop-color="#0000" />
-               <stop offset="1" stop-color="#000F" />
-            </linearGradient>
-            <mask id="dim-near-edge-mask">
-               <rect class="corner left"  fill="url(#dim-near-edge-tl)" />
-               <rect class="corner right" fill="url(#dim-near-edge-tr)" />
-               <rect class="edge left" />
-               <rect class="edge right" />
-               <rect class="edge top" />
-               <rect class="bottom-fade" />
-               <rect class="bottom-clip" />
-            </mask>
+               <stop offset="1" stop-color="#FFFF" />
+            </radialGradient>
+            <radialGradient id="inner-shadows-tr" href="#inner-shadows-tl" cx="0" cy="1" />
          </defs>
-         <rect x="0" y="0" width="46" height="46" fill="#0000000C" mask="url(#dim-near-edge-mask)" />
+         <mask id="inner-shadows-mask">
+            <rect class="edge left"  fill="url(#inner-shadows-l)" />
+            <rect class="edge top"   fill="url(#inner-shadows-t)" />
+            <rect class="edge right" fill="url(#inner-shadows-r)" />
+            <rect class="corner top left" fill="url(#inner-shadows-tl)" />
+            <rect class="corner top right" fill="url(#inner-shadows-tr)" />
+            
+            <!-- tweak shadowing on versus off of the glassy highlight -->
+            <rect class="skew-opacity top" />
+            <rect class="skew-opacity bottom" />
+            
+            <!-- mask out anything that'd cover the edge highlight -->
+            <rect x="0" y="0" width="var(--button-size)" height="var(--button-size)" rx="calc(var(--glass-edge-thickness) * 2)" fill="none" stroke="#000" stroke-width="calc(var(--glass-edge-thickness) * 2)"
+            />
+         </mask>
+         <rect x="0" y="0" width="var(--button-size)" height="var(--button-size)" fill="#0004" mask="url(#inner-shadows-mask)" />
       </g>
    </g>
    
