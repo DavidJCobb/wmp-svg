@@ -12,7 +12,10 @@ svg[hidden] {
 
 .view {
    display: grid;
-   grid-template: "header" "area" / auto;
+   grid-template:
+      "header"
+      "area" 1fr / auto
+   ;
    
    border:  1px solid #000;
    padding: 8px;
@@ -131,10 +134,10 @@ svg[hidden] {
          }
       }
       button.stop {
-         left:   5px;
-         top:    26px;
-         width:  48px;
-         height: 48px;
+         left:   6px;
+         top:    28px;
+         width:  46px;
+         height: 46px;
          
          /*
             use a pseudo-element for the actual visuals so that we can control 
@@ -143,22 +146,22 @@ svg[hidden] {
          &::before {
             pointer-events: none;
             width:   58px;
-            height:  58px;
+            height:  60px;
             
-            left: -5px;
-            top:   0px;
+            left: -8px;
+            top:  -4px;
             
-            background-image: url(stop.svg);
-            background-size:  58px 58px;
+            background-image: url(spritesheet-generic.svg#normal);
+            background-size:  58px 60px;
          }
          &:hover::before {
-            background-image: url(stop.svg#hover) !important;
+            background-image: url(spritesheet-generic.svg#hover) !important;
          }
          &:active::before {
-            background-image: url(stop.svg#active) !important;
+            background-image: url(spritesheet-generic.svg#active) !important;
          }
          &:is([disabled], :disabled)::before {
-            background-image: url(stop.svg#disabled) !important;
+            background-image: url(spritesheet-generic.svg#disabled) !important;
          }
       }
       button.next,

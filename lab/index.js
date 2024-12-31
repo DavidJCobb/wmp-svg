@@ -15,7 +15,8 @@
       raster.src = `rips/main-${state}.png`;
       vector.src = `play-pause.svg#${icon}-${state}`;
       
-      document.getElementById("stop-button").src = `stop.svg#${state}`;
+      //document.getElementById("stop-button").src = `stop.svg#${state}`;
+      document.getElementById("stop-button").src = `spritesheet-generic.svg#${state}`;
       document.getElementById("next-button").src = `spritesheet-next.svg#${state}-next`
    }
    update();
