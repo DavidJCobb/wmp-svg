@@ -1,9 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="58" height="58" viewBox="0 -2 58 58">
-   <!--
-      TODO:
-      
-       - Alpha mask for "active" state
-   -->
    <defs id="normal" />
    <defs id="hover" />
    <defs id="active" />
@@ -13,6 +8,8 @@
 :root {
    --glass-display: none;
    --shadow-color:  #47b5ff;
+   
+   --button-size: 46px;
 }
 :root:hover,
 :root:active,
@@ -21,7 +18,7 @@
    --glass-display: inline;
 }
 
-#active-highlight {
+.active {
    display: none;
 }
 #glass {
@@ -47,7 +44,7 @@
       fill: url(#stop-button-color-active);
       stroke: url(#stop-button-edge-color-active);
    }
-   #active-highlight {
+   .active {
       display: inline;
    }
    #shadow-alpha-mask-rect {
@@ -58,6 +55,7 @@
    }
 }
       ]]></style>
+      
       <linearGradient id="stop-button-color-hover" x1="0" x2="0" y1="0" y2="1">
          <stop offset="0.090" stop-color="#e5f4f9" />
          <stop offset="0.098" stop-color="#ecf6fb" />
@@ -115,7 +113,7 @@
       
       <mask id="stop-button-overall-mask" color-interpolation="linearrgb">
          <defs>
-            <linearGradient id="stop-button-alpha-mask-base" x1="0" x2="0" y1="0" y2="1">
+            <linearGradient id="stop-button-alpha-mask-base-hover" x1="0" x2="0" y1="0" y2="1">
                <stop offset="0.00" stop-color="#d9d9d9" />
                <stop offset="0.01" stop-color="#d0d0d0" />
                <stop offset="0.10" stop-color="#d5d5d5" />
@@ -141,6 +139,20 @@
                <stop offset="0.90" stop-color="#d0d0d0" />
                <stop offset="0.98" stop-color="#f9f9f9" />
             </linearGradient>
+            
+            <linearGradient id="stop-button-alpha-mask-base-active"
+               x1="0" x2="0" y1="0" y2="1"
+               color-interpolation="linearrgb"
+            >
+               <stop offset="0.00" stop-color="#d9d9d9" />
+               <stop offset="0.01" stop-color="#d0d0d0" />
+               <stop offset="0.10" stop-color="#d5d5d5" />
+               <stop offset="0.25" stop-color="#c8c8c8" />
+               <stop offset="0.34" stop-color="#bebebe" />
+               <stop offset="0.41" stop-color="#bababa" />
+               <stop offset="0.45" stop-color="#bdbdbd" />
+               <stop offset="0.51" stop-color="#b2b2b2" />
+            </linearGradient>
          </defs>
          <rect id="shadow-alpha-mask-rect"
             x="0" y="2" width="46" height="46" rx="4"
@@ -150,13 +162,80 @@
          
          <rect
             x="0" y="0" width="46" height="46" rx="4"
-            fill="url(#stop-button-alpha-mask-base)"
+            fill="url(#stop-button-alpha-mask-base-hover)"
+         />
+         <rect class="active"
+            x="0" y="0" width="46" height="46" rx="4"
+            fill="url(#stop-button-alpha-mask-base-active)"
          />
          <ellipse
             cx="23" cy="46" rx="30" ry="15"
             fill="url(#stop-button-alpha-mask-highlight)"
             clip-path="view-box xywh(0 0 46px 46px round 4px)"
          />
+      
+         <g class="active highlight">
+            <defs>
+               <style><![CDATA[
+.active.highlight {
+   --icon-size: 46px;
+   
+   --width:  40px;
+   --height: 16px;
+   
+   --corner-width: 14px;
+   
+   transform: translate(
+      calc((var(--icon-size) - var(--width)) / 2),
+      calc(var(--icon-size) - var(--height))
+   );
+   
+   mask, linearGradient, radialGradient {
+      color-interpolation: linearrgb;
+   }
+
+   .corner {
+      width:  var(--corner-width);
+      height: var(--height);
+      y: 0;
+   
+      &.left {
+         x:    0;
+         fill: url(#active-highlight-grad-b);
+      }
+      &.right {
+         x:    calc(var(--width) - var(--corner-width));
+         fill: url(#active-highlight-grad-c);
+      }
+   }
+   .middle {
+      width:  calc(var(--width) - var(--corner-width) * 2);
+      height: var(--height);
+      x:      var(--corner-width);
+      fill:   url(#active-highlight-grad-a);
+   }
+}
+               ]]></style>
+               <linearGradient id="active-highlight-grad-a" x1="0" x2="0" y1="1" y2="0">
+                  <stop offset="0.0" stop-color="color(srgb-linear 1 1 1 / 95%)" />
+                  <stop offset="0.5" stop-color="color(srgb-linear 1 1 1 / 50%)" />
+                  <stop offset="1.0" stop-color="color(srgb-linear 1 1 1 / 0%)" />
+               </linearGradient>
+               <radialGradient id="active-highlight-grad-b"
+                  href="#active-highlight-grad-a"
+                  cx="1"
+                  cy="1"
+                  r="1"
+               />
+               <radialGradient id="active-highlight-grad-c"
+                  href="#active-highlight-grad-b"
+                  cx="0"
+               />
+            </defs>
+            <rect class="corner left" />
+            <rect class="middle" />
+            <rect class="corner right" />
+         </g>
          
          <rect
             x="0" y="2" width="46" height="42" rx="3"
@@ -194,7 +273,7 @@
          stroke-width="4"
          clip-path="fill-box xywh(0 0 100% 100% round 4px)"
       />
-      <ellipse id="active-highlight"
+      <ellipse class="active"
          cx="23"
          cy="56"
          rx="43" ry="43"
@@ -209,6 +288,89 @@
          stroke="url(#stop-button-outline-color-hover)"
          stroke-width="4"
       />
+      
+      <g id="dim-near-edge">
+         <defs>
+               <style><![CDATA[
+#dim-near-edge {
+   --icon-size: 46px;
+   
+   --corner-size: 4px;
+   
+   mask, linearGradient, radialGradient {
+      color-interpolation: linearrgb;
+   }
+
+   .corner {
+      width:  var(--corner-size);
+      height: var(--corner-size);
+      y: 0;
+   
+      &.left {
+         x:    0;
+         fill: url(#dim-near-edge-b);
+      }
+      &.right {
+         x:    calc(var(--icon-size) - var(--corner-size));
+         fill: url(#dim-near-edge-c);
+      }
+   }
+   .edge {
+      width:  calc(var(--icon-size) - var(--corner-size) * 2);
+      height: var(--corner-size);
+      x:      var(--corner-size);
+      y:      0;
+      fill:   url(#dim-near-edge-t);
+      
+      &.left,
+      &.right {
+         width:  var(--corner-size);
+         height: var(--icon-size);
+         x:      0;
+         y:      var(--corner-size);
+         fill:   url(#dim-near-edge-l);
+      }
+      &.right {
+         x:    calc(var(--icon-size) - var(--corner-size));
+         fill: url(#dim-near-edge-r);
+      }
+   }
+}
+               ]]></style>
+            <linearGradient id="dim-near-edge-l"
+               x1="1" x2="0" y1="0" y2="0"
+            >
+               <stop offset="0" stop-color="#000" />
+               <stop offset="1" stop-color="#FFF" />
+            </linearGradient>
+            <linearGradient id="dim-near-edge-t"
+               href="#dim-near-edge-l"
+               x1="0" x2="0" y1="0" y2="1"
+            />
+            <linearGradient id="dim-near-edge-r"
+               href="#dim-near-edge-l"
+               x1="0" x2="1" y1="0" y2="0"
+            />
+            <radialGradient id="dim-near-edge-b"
+               href="#dim-near-edge-l"
+               cx="0"
+               cy="0"
+               r="1"
+            />
+            <radialGradient id="dim-near-edge-c"
+               href="#dim-near-edge-b"
+               cx="1"
+            />
+            <mask id="dim-near-edge-mask">
+               <rect class="corner left" />
+               <rect class="corner right" />
+               <rect class="edge left" />
+               <rect class="edge right" />
+               <rect class="edge top" />
+            </mask>
+         </defs>
+         <!--<rect x="0" y="0" width="46" height="46" fill="#000" mask="url(#dim-near-edge-mask)" />-->
+      </g>
    </g>
    
    <defs>
