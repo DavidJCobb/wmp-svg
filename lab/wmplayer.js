@@ -258,11 +258,11 @@ class WMPlayerElement extends HTMLElement {
    --><button class="basic-button loop">Loop</button><!--
    --><hr /><!--
    --><button class="basic-button stop" disabled>Stop</button><!--
-   --><button class="prev-rw">Previous</button><!--
+   --><button class="prev-rw" disabled>Previous</button><!--
 --></div><!--
 --><button class="play-pause">Play</button><!--
 --><div class="right"><!--
-   --><button class="next-ff">Next</button><!--
+   --><button class="next-ff" disabled>Next</button><!--
    --><button class="basic-button mute">Mute</button><!--
    --><wm-slider class="volume constant-thumb circular-thumb" min="0" max="100" value="100"></wm-slider><!--
 --></div><!--

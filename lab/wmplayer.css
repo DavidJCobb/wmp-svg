@@ -7,7 +7,7 @@
       "controls"
    ;
    
-   --scale: 2;
+   --scale: 1;
 }
 
 video {
@@ -17,7 +17,7 @@ video {
 
 .seek {
    grid-area: seek;
-   margin: calc(2px * var(--scale,1)) 0 calc(6px * var(--scale,1)) 0;
+   margin: calc(2px * var(--scale,1)) 0;
 }
 :host(:state(buffering)) .seek {
    --fill-gradient: linear-gradient(to bottom, #a7c2d3, #3c587f, #90a7c5);
