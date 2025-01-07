@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" color-interpolation="linearrgb" width="16" height="12">
+   <defs>
+      <linearGradient id="track-edge" x1="0" x2="0" y1="0" y2="1">
+         <stop offset="0.0" stop-color="#a8a8a9" />
+         <stop offset="0.45" stop-color="#a8a8a9" />
+         <stop offset="1.55" stop-color="#cecdcf" />
+         <stop offset="1.0" stop-color="#cecdcf" />
+      </linearGradient>
+      <mask id="track-edge-mask">
+         <rect id="track-edge-rect" x="0" y="0" width="16" height="4" rx="2" fill="#FFF" />
+      </mask>
+   </defs>
+
+   <use href="#track-edge-rect" mask="url(#track-edge-mask)" fill="none" stroke="url(#track-edge)" stroke-width="2" />
+</svg>

@@ -13,6 +13,7 @@ Opening `wmploc.DLL.mun` in Resource Hacker, you'll find some basic assets in th
 
 | `wmploc.DLL.mun` path | Description |
 | :- | :- |
+| 256/BCB.JS | WMP JScript file related to the breadcrumb navbar |
 | 256/CAPTIONS.JS | WMP JScript file related to captions and lyrics |
 | 256/MAINAPPSKIN2.JS | WMP JScript file |
 | 256/TASKBAR.JS | WMP theme JScript file for the taskbar player |
@@ -26,12 +27,36 @@ Opening `wmploc.DLL.mun` in Resource Hacker, you'll find some basic assets in th
 #### Findings
 
 * Play-state icons with IDs >= 30000 were meant for "Vista Plus"
+* Breadcrumb assets
+  * 5228 = overflow image
+  * 5235 = overflow arrow
+  * 5236 = overflow arrow, bidi
+  * 5237 = overflow arrow, down
+  * 5650 = button, hover, some sort of override?
+  * 5651 = button, down
+  * 5652 = button, hover
+  * 5655 = button, initial
+  * 5660 = split menu button, up
+  * 5661 = split menu button, down
+  * 5662 = split menu button, hover
+  * 5663 = split menu button, bidi, up
+  * 5664 = split menu button, bidi, down
+  * 5665 = split menu button, bidi, hover
+* Player assets
+  * 3882 = seek slider thumb (per `PLAYER.JS`)
+* Volume icons
+  * 5244 = volume muted
+  * 5245 = volume in range (0, 33%)
+  * 5246 = volume in range [33%, 66%)
+  * 5247 = volume >= 66%
+  * 5248 = volume not muted but at 0
 
 
 ### High-value image assets
 
 | `wmploc.DLL.mun` path | Path in this folder | Description |
 | :- | :- | :- |
+| Bitmap/5100 |  | Play/Burn/Sync tab (dark theme) |
 | 257/2033 |  | Taskbar mini-player, all buttons, vertical, normal |
 | 257/2035 |  | Taskbar mini-player, all buttons, vertical, disabled |
 | 257/2036 |  | Taskbar mini-player, all buttons, vertical, active |
@@ -48,6 +73,13 @@ Opening `wmploc.DLL.mun` in Resource Hacker, you'll find some basic assets in th
 | 257/2174 |  | Taskbar mini-player, background, horizontal, grey |
 | 257/2175 |  | Taskbar mini-player, background, vertical, grey |
 | 257/3164 |  | Highest-resolution groove for stop/prev/play/pause/next/etc. buttons to sit in |
+| 257/3881 |  | Seek slider track (filled) |
+| 257/3882 |  | Seek slider thumb (non-mouseover) |
+| 257/4059 |  | Seek slider thumb (non-mouseover, when time is at 0) |
+| 257/4174 |  | Shuffle glyph, on |
+| 257/4175 |  | Shuffle glyph, off |
+| 257/4176 |  | Repeat glyph, on |
+| 257/4177 |  | Repeat glyph, off |
 | 257/4253 | main-normal.png | Highest-resolution stop/prev/play/pause/next buttons, normal state |
 | 257/4254 | main-active.png | Highest-resolution stop/prev/play/pause/next buttons, pressed state |
 | 257/4255 | main-hover.png | Highest-resolution stop/prev/play/pause/next buttons, hover state |

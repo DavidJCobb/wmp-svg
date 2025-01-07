@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" color-interpolation="linearrgb" width="16" height="12">
+   <!--
+      The "lead" is used to draw the thumb if it doesn't have mouseover 
+      state and playback has advanced past the zero-second mark.
+   -->
+   <view id="edge" viewBox="0 0 16 4" />
+   <view id="fill" viewBox="0 4 16 4" />
+   <view id="lead" viewBox="0 8 16 4" />
+
+   <defs>
+      <linearGradient id="track-edge" x1="0" x2="0" y1="0" y2="1">
+         <stop offset="0.0" stop-color="#a8a8a9" />
+         <stop offset="0.45" stop-color="#a8a8a9" />
+         <stop offset="1.55" stop-color="#cecdcf" />
+         <stop offset="1.0" stop-color="#cecdcf" />
+      </linearGradient>
+      <mask id="track-edge-mask">
+         <rect id="track-edge-rect" x="0" y="0" width="16" height="4" rx="2" fill="#FFF" />
+      </mask>
+      
+      <linearGradient id="track-fill" x1="0" x2="0" y1="0" y2="1">
+         <stop offset="0.0" stop-color="#7fc9fa" />
+         <stop offset="0.5" stop-color="#014cb6" />
+         <stop offset="1.0" stop-color="#619ff2" />
+      </linearGradient>
+      
+      <mask id="track-fill-mask">
+         <rect x="0" y="1" width="16" height="3" rx="2" fill="#FFF" />
+      </mask>
+      
+      <mask id="track-leading-end-mask">
+         <rect x="0" y="1" width="4" height="3" fill="#FFF" />
+         <rect x="0" y="1" width="16" height="3" rx="2" fill="#FFF" />
+      </mask>
+      <linearGradient id="track-leading-end-highlight" x1="1" x2="0.2" y1="0" y2="-0.2">
+         <stop offset="0.0" stop-color="#c5fcffc0" />
+         <stop offset="0.5" stop-color="#c5fcff50" />
+         <stop offset="1.0" stop-color="#c5fcff00" />
+      </linearGradient>
+   </defs>
+
+   <!-- track, empty -->
+   <g>
+      <use href="#track-edge-rect" mask="url(#track-edge-mask)" fill="none" stroke="url(#track-edge)" stroke-width="2" />
+   </g>
+   
+   <!-- track, full -->
+   <g transform="translate(0 4)" mask="url(#track-fill-mask)">
+      <rect x="0" y="1" width="16" height="3" fill="url(#track-fill)" />
+   </g>
+   
+   <!-- track, thumb, non-mouseover -->
+   <g transform="translate(0 8)" mask="url(#track-leading-end-mask)">
+      <rect x="0" y="1" width="16" height="3" fill="url(#track-fill)" />
+      <rect x="1" y="1" width="15" height="3" fill="url(#track-leading-end-highlight" />
+   </g>
+</svg>

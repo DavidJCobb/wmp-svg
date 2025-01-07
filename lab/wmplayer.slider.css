@@ -1,0 +1,107 @@
+:host {
+   --scale: 1;
+   
+   position: relative;
+   height:   calc(4px * var(--scale, 1));
+   max-width: 100%;
+   
+   user-select: none;
+   
+   --minimum: 0;
+   --maximum: 100;
+   --value:   0;
+   
+   --fill-gradient: linear-gradient(to bottom, #7fc9fa, #014cb6, #619ff2);
+}
+
+.track-full,
+.track-bare {
+   position:  absolute;
+   height:    4px;
+   top:       50%;
+}
+
+.track-bare {
+   inset: 0;
+   
+   box-sizing: border-box;
+   width:  100%;
+   height: calc(4px * var(--scale, 1));
+   
+   border: calc(1px * var(--scale, 1)) solid #A8A8A9;
+   border-top-color: #A8A8A9;
+   border-bottom-color: #CECDCF;
+   border-radius: calc(2px * var(--scale, 1));
+}
+.track-full {
+   left:   0;
+   top:    0;
+   width:  calc(100% * (var(--value) / var(--maximum)));
+   height: calc(4px * var(--scale, 1));
+   
+   border-radius: calc(2px * var(--scale, 1));
+   background: var(--fill-gradient) left 1px/1px calc(3px * var(--scale, 1)) repeat-x;
+}
+
+.thumb {
+   --width: calc(15px * var(--scale, 1));
+   
+   position: absolute;
+   left:     calc((100% - var(--width)) * (var(--value) / var(--maximum)));
+   width:    var(--width);
+   
+   --visible-width:  var(--width);
+   --visible-height: calc(8px * var(--scale, 1));
+}
+
+:host(:not(.constant-thumb)) .thumb {
+   /*
+      Windows Media Player hides the seek slider thumb when we're at exactly zero.
+   */
+   --show-thumb: min(var(--value) * var(--value) * 9999999, 1);
+   
+   top:    0;
+   width:  calc(var(--width) * var(--show-thumb, 0));
+   height: calc(4px * var(--scale, 1));
+   
+   background:
+      linear-gradient(315deg, #c5fcffc0, #c5fcff50, #c5fcff00) right 1px/var(--width) calc(3px * var(--scale, 1)) no-repeat,
+      var(--fill-gradient) left 1px/1px calc(3px * var(--scale, 1)) repeat-x
+   ;
+}
+:host(.circular-thumb) .thumb {
+   --visible-width:  calc(24px * var(--scale, 1));
+   --visible-height: calc(24px * var(--scale, 1));
+}
+
+:host(.constant-thumb) .thumb,
+:host(:hover) .thumb {
+   --sprite: url(spritesheet-jewel-no-shadow.svg#normal);
+}
+:host(:hover):not(:active):not(:state(active)) .thumb:hover {
+   --sprite: url(spritesheet-jewel-no-shadow.svg#hover);
+}
+:host(:active) .thumb,
+:host(:is(:state(active), :--active)) .thumb {
+   --sprite: url(spritesheet-jewel-no-shadow.svg#active);
+}
+:host(:disabled) .thumb {
+   display: none;
+}
+
+
+:host(.constant-thumb) .thumb,
+:host(:hover) .thumb,
+:host(:active) .thumb,
+:host(:state(active)) .thumb {
+   --corner-size: calc(var(--visible-height) / 2);
+   
+   width:  var(--visible-width);
+   height: var(--visible-height);
+   
+   top: 50%;
+   transform: translate(0, -50%);
+   
+   background: transparent none;
+   border-image: var(--sprite) 50% 49.9% / var(--corner-size) var(--corner-size);
+}

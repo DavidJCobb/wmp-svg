@@ -13,9 +13,9 @@
             state = radio.value || state;
       }
       raster.src = `rips/main-${state}.png`;
-      vector.src = `play-pause.svg#${icon}-${state}`;
+      vector.src = `spritesheet-jewel.svg#${state}`;
+      document.getElementById("play-pause-icon").src = `spritesheet-play-pause-labels.svg#${icon}`;
       
-      //document.getElementById("stop-button").src = `stop.svg#${state}`;
       document.getElementById("stop-button").src = `spritesheet-generic.svg#${state}`;
       document.getElementById("next-button").src = `spritesheet-next.svg#${state}-next`
    }

@@ -1,0 +1,306 @@
+
+:host {
+   display: grid;
+   grid-template:
+      "content" 1fr
+      "seek"
+      "controls"
+   ;
+}
+
+video {
+   grid-area: content;
+   max-width: 100%;
+}
+
+.seek {
+   grid-area: seek;
+   margin: 4px 0 6px 0;
+   
+   --scale: 2;
+}
+:host(:state(buffering)) .seek {
+   --fill-gradient: linear-gradient(to bottom, #a7c2d3, #3c587f, #90a7c5);
+}
+:host(:state(stalled)) .seek {
+   --fill-gradient: linear-gradient(to bottom, #e2adad, #933434, #d28080);
+}
+
+.controls {
+   --padding: 10px;
+   
+   grid-area: controls;
+   
+   display: grid;
+   grid-template: "left play right" 46px / min-content calc(100px - var(--padding, 0) * 2) min-content;
+   justify-content: center;
+   align-items: center;
+   
+   height: 60px;
+   margin: calc(20px + var(--padding, 0)) 0 20px 0;
+   
+   /*
+      We want an outline wrapping the player controls, hugging them tightly: 
+      think of a horizontal capsule where, at the center, it bulges in a 
+      circular shape around the play/pause button.
+      
+      The easiest way to do this is:
+      
+       - Split the controls around the play/pause button into "left" and 
+         "right" halves.
+         
+       - Put borders on those halves.
+       
+       - Overlay the play/pause button with a circular element that has a 
+         border, and use clip paths to slice off the middle portions.
+   */
+   & .left,
+   & .right {
+      display:   flex;
+      flex-flow: row nowrap;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      
+      padding: var(--padding) 0;
+      height: 46px;
+      
+      border: 2px solid #A8A8A9;
+      border-top-color: #A8A8A9;
+      border-bottom-color: #CECDCF;
+      border-radius: 800px;
+   }
+   & .left {
+      grid-area: left;
+      padding-left: 44px;
+      border-radius: 800px 0 0 800px;
+      border-right-width: 0;
+   }
+   & .right {
+      grid-area: right;
+      padding-right: 36px;
+      border-radius: 0 800px 800px 0;
+      border-left-width: 0;
+   }
+   &::before {
+      --button-radius: 0px;
+      
+      content: " ";
+      grid-area: play;
+      justify-self: center;
+      pointer-events: none;
+      
+      width:   86px;
+      height:  86px;
+      padding: calc(var(--padding) - var(--button-radius));
+      
+      border: 2px solid #A8A8A9;
+      border-top-color: #A8A8A9;
+      border-bottom-color: #CECDCF;
+      border-radius: 50%;
+      
+      clip-path: path("M0,0 L100,0 L100,22 L0,22 z M0,88 L100,88 L100,120 L0,120 z");
+   }
+}
+
+.controls hr {
+   width:  0;
+   height: 100%;
+   margin: 0 .25em;
+   border: 0 solid #CECDCF;
+   border-left-width: 1px;
+   border-right-width: 1px;
+}
+
+/*
+   Square-shaped buttons, whose glyphs are always visible but whose glassy 
+   buttons only appear on hover.
+   
+   In general, most of our buttons have graphics that are larger than their 
+   hitboxes (due to shadows, glows, and so on). For these square buttons, 
+   we give the button a size that matches the hitbox, and attach the actual 
+   graphics to a pseudo-element. Buttons with unusual shapes are harder.
+*/
+.basic-button {
+   all: unset;
+   appearance: none;
+   user-select: none;
+   color:  transparent;
+   width:  46px;
+   height: 46px;
+   
+   --sprite: url(spritesheet-generic.svg#normal);
+   --glyph:  linear-gradient(to bottom, transparent, transparent); /* dummy "no glyph" value */
+   
+   &:hover {
+      --sprite: url(spritesheet-generic.svg#hover);
+   }
+   &:active {
+      --sprite: url(spritesheet-generic.svg#active);
+   }
+   &:disabled {
+      --sprite: url(spritesheet-generic.svg#disabled);
+   }
+   
+   position: relative;
+   
+   &::before {
+      content: " ";
+      display: block;
+      pointer-events: none;
+      width:  58px;
+      height: 60px;
+      position: absolute;
+      left: -8px;
+      top:  -4px;
+      
+      background:
+         var(--glyph)  left top/58px 60px no-repeat,
+         var(--sprite) left top/58px 60px no-repeat
+      ;
+   }
+}
+
+/*
+   The "previous" and "next" buttons. The former is just the latter rotated 
+   by 180 degrees.
+   
+   These buttons have an unusual hitbox shape -- something that's only really 
+   possible using a clip-path. However, a clip-path would also clip the sprite 
+   we display via a pseudo-element. Therefore, the button needs to have a zero 
+   size in one dimension or the other, with the hitbox attached to a second 
+   pseudo-element. (Theoretically in the future, we could set pointer-events 
+   to `none` on the button, and then set it to `all` on the pseudo-element; 
+   but today, the latter doesn't work outside of SVG in all browsers.)
+   
+   In practice, we set the width to the button's physical size, and set the 
+   height to zero. Of course, this button exists inside of a flex container 
+   that wants to center its contents on the cross axis, so we use a margin to 
+   add cross-axis size without actually inflating the hitbox.
+*/
+.prev-rw,
+.next-ff {
+   all: unset;
+   appearance: none;
+   user-select: none;
+   color: transparent;
+   
+   width:    112px;
+   height:   0;
+   margin:   0 0 70px;
+   position: relative;
+   
+   &::before,
+   &::after {
+      content:  " ";
+      display:  block;
+      position: absolute;
+      left:     0;
+      top:      0;
+   }
+   
+   --sprite: url(spritesheet-next.svg#normal-next);
+   &:hover {
+      --sprite: url(spritesheet-next.svg#hover-next);
+   }
+   &:active {
+      --sprite: url(spritesheet-next.svg#active-next);
+   }
+   &:disabled {
+      --sprite: url(spritesheet-next.svg#disabled-next);
+   }
+   
+   &::before { /* visuals */
+      pointer-events: none;
+      width:   112px;
+      height:  70px;
+      
+      left: 0px;
+      top:  0px;
+      
+      background: var(--sprite) left top/112px 70px no-repeat;
+   }
+   &::after { /* hitbox */
+      left:   4px;
+      top:    12px;
+      width:  112px;
+      height: 70px;
+      clip-path: path("M 4 0 l 79 0 q 15 0 15 23 q 0 23 -15 23 l -78 0 q -3 0 -3 -2 C 2 42 6 37 6 23 c 0 -14 -4 -19 -4 -21 Q 2 0 5 0 z");
+   }
+}
+.next-ff {
+   margin-right: 6px;
+}
+.prev-rw {
+   margin-left: 6px;
+}
+.prev-rw {
+   transform-box:    content-box;
+   transform-origin: center center;
+   transform:        scale(-100%, 100%);
+}
+
+/*
+   The play/pause button separates its hitbox from its visuals using the same 
+   tricks as the "previous" and "next" buttons.
+*/
+.play-pause {
+   all: unset;
+   appearance: none;
+   user-select: none;
+   color: transparent;
+   
+   --pull-adjacent-buttons-inward: 10px;
+   
+   grid-area: play;
+   justify-self: center;
+   
+   width:     100px;
+   height:    0;
+   margin:    0 calc(-1 * var(--pull-adjacent-buttons-inward, 0px)) 102px calc(-1 * var(--pull-adjacent-buttons-inward, 0px));
+   font-size: 0;
+   position:  relative;
+   
+   &::before,
+   &::after {
+      content:  " ";
+      display:  block;
+      position: absolute;
+      left:     0;
+      top:      0;
+   }
+   
+   --sprite: url(spritesheet-jewel.svg#normal);
+   --glyph:  url(spritesheet-play-pause-labels.svg#play);
+   
+   &:hover {
+      --sprite: url(spritesheet-jewel.svg#hover);
+   }
+   &:active {
+      --sprite: url(spritesheet-jewel.svg#active);
+   }
+   &:disabled {
+      --sprite: url(spritesheet-jewel.svg#disabled);
+   }
+   
+   &::before { /* visuals */
+      pointer-events: none;
+      width:  100px;
+      height: 100px;
+      
+      background: var(--glyph) left top/100px 100px no-repeat, var(--sprite) left top/100px 100px no-repeat;
+   }
+   &::after { /* hitbox */
+      width:     100px;
+      height:    100px;
+      clip-path: ellipse(43px 43px at center center);
+   }
+}
+:host(:state(playing)) .play-pause {
+   --glyph: url(spritesheet-play-pause-labels.svg#pause) !important;
+}
+
+.volume {
+   width: 134px;
+   margin-left: 8px;
+}
