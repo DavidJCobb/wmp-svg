@@ -6,6 +6,8 @@
       "seek"
       "controls"
    ;
+   
+   --scale: 2;
 }
 
 video {
@@ -15,9 +17,7 @@ video {
 
 .seek {
    grid-area: seek;
-   margin: 4px 0 6px 0;
-   
-   --scale: 2;
+   margin: calc(2px * var(--scale,1)) 0 calc(6px * var(--scale,1)) 0;
 }
 :host(:state(buffering)) .seek {
    --fill-gradient: linear-gradient(to bottom, #a7c2d3, #3c587f, #90a7c5);
@@ -27,17 +27,34 @@ video {
 }
 
 .controls {
-   --padding: 10px;
+   --padding: calc(5px * var(--scale,1));
+   --height:  calc(23px * var(--scale,1));
+   
+   --base-widget-gap: calc(6px * var(--scale,1));
+   --endcap-padding:  calc(18px * var(--scale,1));
+   
+   --border-thickness: calc(1px * var(--scale,1));
+   
+   --play-pause-button-region: calc(50px * var(--scale,1));
+   --play-pause-button-hitbox: calc(43px * var(--scale,1));
+   
+   --extra-height: calc(var(--play-pause-button-hitbox) + (var(--padding) + var(--border-thickness)) * 2);
+   --extra-diff:   calc((var(--extra-height) - var(--height)) / 2);
+   
+   /*
+      Setting border-radius to 50% creates an ellipse, whereas what we want 
+      is a capsule. Setting an arbitrary huge value gives us a capsule.
+   */
+   --really-huge-value: 800px;
    
    grid-area: controls;
    
    display: grid;
-   grid-template: "left play right" 46px / min-content calc(100px - var(--padding, 0) * 2) min-content;
+   grid-template: "left play right" var(--height) / min-content var(--play-pause-button-hitbox) min-content;
    justify-content: center;
    align-items: center;
    
-   height: 60px;
-   margin: calc(20px + var(--padding, 0)) 0 20px 0;
+   margin: var(--extra-diff) 0;
    
    /*
       We want an outline wrapping the player controls, hugging them tightly: 
@@ -60,46 +77,60 @@ video {
       flex-flow: row nowrap;
       justify-content: center;
       align-items: center;
-      gap: 12px;
+      gap: var(--base-widget-gap);
       
       padding: var(--padding) 0;
-      height: 46px;
+      height:  var(--height);
       
-      border: 2px solid #A8A8A9;
+      border: var(--border-thickness) solid #A8A8A9;
       border-top-color: #A8A8A9;
       border-bottom-color: #CECDCF;
-      border-radius: 800px;
+      border-radius: var(--really-huge-value);
    }
    & .left {
       grid-area: left;
-      padding-left: 44px;
-      border-radius: 800px 0 0 800px;
+      padding-left: calc(var(--endcap-padding) + 4px*var(--scale,1));
+      border-radius: var(--really-huge-value) 0 0 var(--really-huge-value);
       border-right-width: 0;
    }
    & .right {
       grid-area: right;
-      padding-right: 36px;
-      border-radius: 0 800px 800px 0;
+      padding-right: var(--endcap-padding);
+      border-radius: 0 var(--really-huge-value) var(--really-huge-value) 0;
       border-left-width: 0;
    }
    &::before {
-      --button-radius: 0px;
-      
       content: " ";
       grid-area: play;
       justify-self: center;
       pointer-events: none;
       
-      width:   86px;
-      height:  86px;
-      padding: calc(var(--padding) - var(--button-radius));
+      --extent:       calc(var(--play-pause-button-hitbox) + (var(--padding) + var(--border-thickness))*2);
+      --area-to-show: calc(11px*var(--scale,1));
       
-      border: 2px solid #A8A8A9;
+      width:   var(--play-pause-button-hitbox);
+      height:  var(--play-pause-button-hitbox);
+      padding: var(--padding);
+      
+      border: var(--border-thickness) solid #A8A8A9;
       border-top-color: #A8A8A9;
       border-bottom-color: #CECDCF;
       border-radius: 50%;
       
       clip-path: path("M0,0 L100,0 L100,22 L0,22 z M0,88 L100,88 L100,120 L0,120 z");
+      
+      clip-path: none;
+      mask-image: linear-gradient(
+         to bottom,
+         #FFF 0px,
+         #FFF var(--area-to-show),
+         #000 var(--area-to-show),
+         #000 calc(var(--extent) - var(--area-to-show)),
+         #FFF calc(var(--extent) - var(--area-to-show)),
+         #FFF var(--extent)
+      );
+      mask-mode: luminance;
+      mask-size: 100px 100px;
    }
 }
 
@@ -126,8 +157,13 @@ video {
    appearance: none;
    user-select: none;
    color:  transparent;
-   width:  46px;
-   height: 46px;
+   width:  var(--height);
+   height: var(--height);
+   
+   --sprite-w: calc(29px * var(--scale,1));
+   --sprite-h: calc(30px * var(--scale,1));
+   --sprite-x: calc(-4px * var(--scale,1));
+   --sprite-y: calc(-2px * var(--scale,1));
    
    --sprite: url(spritesheet-generic.svg#normal);
    --glyph:  linear-gradient(to bottom, transparent, transparent); /* dummy "no glyph" value */
@@ -145,18 +181,18 @@ video {
    position: relative;
    
    &::before {
-      content: " ";
-      display: block;
       pointer-events: none;
-      width:  58px;
-      height: 60px;
+      content:  " ";
+      display:  block;
+      width:    var(--sprite-w);
+      height:   var(--sprite-h);
       position: absolute;
-      left: -8px;
-      top:  -4px;
+      left:     var(--sprite-x);
+      top:      var(--sprite-y);
       
       background:
-         var(--glyph)  left top/58px 60px no-repeat,
-         var(--sprite) left top/58px 60px no-repeat
+         var(--glyph)  left top/var(--sprite-w) var(--sprite-h) no-repeat,
+         var(--sprite) left top/var(--sprite-w) var(--sprite-h) no-repeat
       ;
    }
 }
@@ -185,9 +221,17 @@ video {
    user-select: none;
    color: transparent;
    
-   width:    112px;
+   --sprite-w: calc(56px * var(--scale,1));
+   --sprite-h: calc(35px * var(--scale,1));
+   
+   --hitbox-w: calc(50px * var(--scale,1));
+   --hitbox-h: calc(23px * var(--scale,1));
+   --hitbox-x: calc(2px * var(--scale,1));
+   --hitbox-y: calc(6px * var(--scale,1));
+   
+   width:    var(--hitbox-w);
    height:   0;
-   margin:   0 0 70px;
+   margin:   0 0 var(--hitbox-h);
    position: relative;
    
    &::before,
@@ -212,27 +256,30 @@ video {
    
    &::before { /* visuals */
       pointer-events: none;
-      width:   112px;
-      height:  70px;
+      width:   var(--sprite-w);
+      height:  var(--sprite-h);
       
-      left: 0px;
-      top:  0px;
+      top: calc(-6px * var(--scale,1));
       
-      background: var(--sprite) left top/112px 70px no-repeat;
+      background: var(--sprite) left top/var(--sprite-w) var(--sprite-h) no-repeat;
    }
    &::after { /* hitbox */
-      left:   4px;
-      top:    12px;
-      width:  112px;
-      height: 70px;
-      clip-path: path("M 4 0 l 79 0 q 15 0 15 23 q 0 23 -15 23 l -78 0 q -3 0 -3 -2 C 2 42 6 37 6 23 c 0 -14 -4 -19 -4 -21 Q 2 0 5 0 z");
+      /* can't use CSS variables in a path(), so scale the whole hitbox instead. */
+      
+      left:   var(--hitbox-x);
+      width:  49px;
+      height: 25px;
+      
+      clip-path: path("M 2 0 l 39.5 0 q 7.5 0 7.5 11.5 q 0 11.5 -7.5 11.5 l -39 0 q -1.5 0 -1.5 -1 C 1 21 3 18.5 3 11.5 c 0 -7 -2 -9.5 -2 -10.5 Q 1 0 2.5 0 z");
+      transform: scale(var(--scale, 1));
+      transform-origin: left top;
    }
 }
 .next-ff {
-   margin-right: 6px;
+   margin-right: calc(3px * var(--scale,1));
 }
 .prev-rw {
-   margin-left: 6px;
+   margin-left: calc(3px * var(--scale,1));
 }
 .prev-rw {
    transform-box:    content-box;
@@ -250,14 +297,14 @@ video {
    user-select: none;
    color: transparent;
    
-   --pull-adjacent-buttons-inward: 10px;
+   --pull-adjacent-buttons-inward: -10px;
    
    grid-area: play;
    justify-self: center;
    
-   width:     100px;
+   width:     var(--play-pause-button-region);
    height:    0;
-   margin:    0 calc(-1 * var(--pull-adjacent-buttons-inward, 0px)) 102px calc(-1 * var(--pull-adjacent-buttons-inward, 0px));
+   margin:    0 var(--pull-adjacent-buttons-inward, 0px) calc(51px * var(--scale,1)) var(--pull-adjacent-buttons-inward, 0px);
    font-size: 0;
    position:  relative;
    
@@ -285,15 +332,20 @@ video {
    
    &::before { /* visuals */
       pointer-events: none;
-      width:  100px;
-      height: 100px;
+      width:  var(--play-pause-button-region);
+      height: var(--play-pause-button-region);
       
-      background: var(--glyph) left top/100px 100px no-repeat, var(--sprite) left top/100px 100px no-repeat;
+      background:
+         var(--glyph)  left top/var(--play-pause-button-region) var(--play-pause-button-region) no-repeat,
+         var(--sprite) left top/var(--play-pause-button-region) var(--play-pause-button-region) no-repeat
+      ;
    }
    &::after { /* hitbox */
-      width:     100px;
-      height:    100px;
-      clip-path: ellipse(43px 43px at center center);
+      --radius: calc(var(--play-pause-button-hitbox) / 2);
+   
+      width:     var(--play-pause-button-region);
+      height:    var(--play-pause-button-region);
+      clip-path: ellipse(var(--radius) var(--radius) at center center);
    }
 }
 :host(:state(playing)) .play-pause {
@@ -301,6 +353,6 @@ video {
 }
 
 .volume {
-   width: 134px;
-   margin-left: 8px;
+   width: calc(67px * var(--scale,1));
+   margin-left: calc(4px * var(--scale,1));
 }

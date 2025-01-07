@@ -257,7 +257,7 @@ class WMPlayerElement extends HTMLElement {
    --><button class="basic-button shuffle">Shuffle</button><!--
    --><button class="basic-button loop">Loop</button><!--
    --><hr /><!--
-   --><button class="basic-button stop">Stop</button><!--
+   --><button class="basic-button stop" disabled>Stop</button><!--
    --><button class="prev-rw">Previous</button><!--
 --></div><!--
 --><button class="play-pause">Play</button><!--
@@ -396,9 +396,9 @@ class WMPlayerElement extends HTMLElement {
       this.#media.addEventListener("timeupdate", this.#on_current_time_change.bind(this));
       this.#media.addEventListener("durationchange", this.#on_duration_change.bind(this));
       this.#media.addEventListener("volumechange", this.#on_volume_change.bind(this));
-      this.#media.addEventListener("play", this.#update_play_pause_glyph.bind(this));
-      this.#media.addEventListener("pause", this.#update_play_pause_glyph.bind(this));
-      this.#media.addEventListener("ended", this.#update_play_pause_glyph.bind(this));
+      this.#media.addEventListener("play", this.#update_play_state.bind(this));
+      this.#media.addEventListener("pause", this.#update_play_state.bind(this));
+      this.#media.addEventListener("ended", this.#update_play_state.bind(this));
       {
          let bound = this.#update_buffering_state.bind(this);
          this.#media.addEventListener("buffering", bound);
@@ -455,14 +455,17 @@ class WMPlayerElement extends HTMLElement {
    }
    
    #on_play_pause_click(e) {
-      if (this.#media.paused)
+      if (this.#media.paused) {
          this.#media.play();
-      else
+         this.#stop_button.removeAttribute("disabled");
+      } else {
          this.#media.pause();
+      }
    }
    #on_stop_click(e) {
       this.#media.pause();
       this.#media.currentTime = 0;
+      this.#stop_button.setAttribute("disabled", "disabled");
    }
    
    #on_seek_slider_change(e) {
@@ -472,7 +475,7 @@ class WMPlayerElement extends HTMLElement {
       this.#media.volume = this.#seek_slider.value;
    }
    
-   #update_play_pause_glyph() {
+   #update_play_state() {
       if (this.#media.paused) {
          this.#internals.states.add("paused");
          this.#internals.states.delete("playing");
