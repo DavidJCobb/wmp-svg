@@ -1,31 +1,34 @@
 
 :host {
-   position: relative;
-   height:   calc(4px * var(--scale, 1));
-   max-width: 100%;
+   position:   relative;
+   min-height: var(--track-height);
+   max-width:  100%;
    
    user-select: none;
+   cursor: pointer;
    
    --minimum: 0;
    --maximum: 100;
    --value:   0;
    
    --fill-gradient: linear-gradient(to bottom, #7fc9fa, #014cb6, #619ff2);
+   
+   /* private */
+   --track-height: calc(4px * var(--scale, 1));
 }
 
 .track-full,
 .track-bare {
-   position:  absolute;
-   height:    4px;
-   top:       50%;
+   position: absolute;
+   height:   var(--track-height);
+   
+   top: 50%;
+   transform: translate(0, -50%);
 }
 
 .track-bare {
-   inset: 0;
-   
    box-sizing: border-box;
-   width:  100%;
-   height: calc(4px * var(--scale, 1));
+   width: 100%;
    
    border: calc(1px * var(--scale, 1)) solid #A8A8A9;
    border-top-color: #A8A8A9;
@@ -35,10 +38,8 @@
 .track-full {
    --radius: calc(2px * var(--scale, 1));
    
-   left:   0;
-   top:    0;
-   width:  calc(100% * (var(--value) / var(--maximum)));
-   height: calc(4px * var(--scale, 1));
+   left:  0;
+   width: calc(100% * (var(--value) / var(--maximum)));
    
    border-radius: var(--radius) 0 0 var(--radius);
    background: var(--fill-gradient) left calc(1px * var(--scale, 1))/1px calc(3px * var(--scale, 1)) repeat-x;

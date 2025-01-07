@@ -250,21 +250,24 @@ class WMPlayerElement extends HTMLElement {
    
    static #HTML = `
 <link rel="stylesheet" href="wmplayer.css" />
-<video></video>
+<video>
+   <slot> <!-- for <track/> elements -->
+   </slot>
+</video>
 <wm-slider class="seek"></wm-slider>
 <div class="controls"><!--
 --><div class="left"><!--
    --><button class="basic-button shuffle">Shuffle</button><!--
    --><button class="basic-button loop">Loop</button><!--
    --><hr /><!--
-   --><button class="basic-button stop" disabled>Stop</button><!--
+   --><button class="basic-button stop" disabled title="Stop">Stop</button><!--
    --><button class="prev-rw" disabled>Previous</button><!--
 --></div><!--
 --><button class="play-pause">Play</button><!--
 --><div class="right"><!--
    --><button class="next-ff" disabled>Next</button><!--
-   --><button class="basic-button mute">Mute</button><!--
-   --><wm-slider class="volume constant-thumb circular-thumb" min="0" max="100" value="100"></wm-slider><!--
+   --><button class="basic-button mute" title="Mute">Mute</button><!--
+   --><wm-slider class="volume constant-thumb circular-thumb" min="0" max="1" value="1" step="0.01" title="Volume"></wm-slider><!--
 --></div><!--
 --></div>
    `.trim();
@@ -438,6 +441,7 @@ class WMPlayerElement extends HTMLElement {
             continue;
          this.#media.setAttribute(name, attr);
       }
+      this.#update_play_state();
    }
    
    #on_current_time_change(e) {
@@ -479,9 +483,11 @@ class WMPlayerElement extends HTMLElement {
       if (this.#media.paused) {
          this.#internals.states.add("paused");
          this.#internals.states.delete("playing");
+         this.#play_pause_button.title = "Play";
       } else {
          this.#internals.states.add("playing");
          this.#internals.states.delete("paused");
+         this.#play_pause_button.title = "Pause";
       }
    }
    

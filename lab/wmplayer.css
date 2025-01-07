@@ -10,6 +10,22 @@
    --scale: 1;
 }
 
+:host(.theater) {
+   video {
+      grid-row: 1 / span 100;
+   }
+   .seek {
+      margin-left: calc(12px * var(--scale,1));
+      margin-right: calc(12px * var(--scale,1));
+   }
+   .controls {
+      border: 0 solid transparent;
+      border-width: calc(8px * var(--scale,1)) 0;
+      
+      --background: #FFFFFF60;
+   }
+}
+
 video {
    grid-area: content;
    max-width: 100%;
@@ -27,6 +43,8 @@ video {
 }
 
 .controls {
+   --background: transparent;
+   
    --padding: calc(5px * var(--scale,1));
    --height:  calc(23px * var(--scale,1));
    
@@ -86,6 +104,8 @@ video {
       border-top-color: #A8A8A9;
       border-bottom-color: #CECDCF;
       border-radius: var(--really-huge-value);
+      
+      background: var(--background);
    }
    & .left {
       grid-area: left;
@@ -117,20 +137,24 @@ video {
       border-bottom-color: #CECDCF;
       border-radius: 50%;
       
-      clip-path: path("M0,0 L100,0 L100,22 L0,22 z M0,88 L100,88 L100,120 L0,120 z");
+      background: var(--background);
       
-      clip-path: none;
-      mask-image: linear-gradient(
-         to bottom,
-         #FFF 0px,
-         #FFF var(--area-to-show),
-         #000 var(--area-to-show),
-         #000 calc(var(--extent) - var(--area-to-show)),
-         #FFF calc(var(--extent) - var(--area-to-show)),
-         #FFF var(--extent)
-      );
-      mask-mode: luminance;
-      mask-size: 100px 100px;
+      mask:
+         linear-gradient(
+            to bottom,
+            #FFF 0px,
+            #FFF var(--area-to-show),
+            #000 var(--area-to-show),
+            #000 calc(var(--extent) - var(--area-to-show)),
+            #FFF calc(var(--extent) - var(--area-to-show)),
+            #FFF var(--extent)
+         ) luminance 0 0/var(--extent) var(--extent) no-repeat,
+         linear-gradient(
+            to bottom,
+            #FFF 0%,
+            #FFF 100%
+         ) luminance 6px 5px/43px 39px no-repeat
+      ;
    }
 }
 
@@ -354,5 +378,6 @@ video {
 
 .volume {
    width: calc(67px * var(--scale,1));
+   height: calc(30px * var(--scale,1));
    margin-left: calc(4px * var(--scale,1));
 }
