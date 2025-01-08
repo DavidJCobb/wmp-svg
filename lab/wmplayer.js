@@ -104,21 +104,21 @@ class WMPlayerElement extends HTMLElement {
    <video></video>
 </div>
 <wm-slider class="seek"></wm-slider>
-<div class="controls"><!--
---><div class="left"><!--
-   --><input type="checkbox" class="basic-button shuffle" /><!--
-   --><input type="checkbox" class="basic-button loop" /><!--
-   --><hr /><!--
-   --><button class="basic-button stop" disabled title="Stop">Stop</button><!--
-   --><button class="prev-rw" disabled>Previous</button><!--
---></div><!--
---><button class="play-pause">Play</button><!--
---><div class="right"><!--
-   --><button class="next-ff" disabled>Next</button><!--
-   --><input type="checkbox" class="basic-button mute" /><!--
-   --><wm-slider class="volume constant-thumb circular-thumb" min="0" max="1" value="1" step="0.01" title="Volume"></wm-slider><!--
---></div><!--
---></div>
+<div class="controls">
+   <div class="left">
+      <input type="checkbox" class="basic-button shuffle" />
+      <input type="checkbox" class="basic-button loop" />
+      <hr />
+      <button class="basic-button stop" disabled title="Stop">Stop</button>
+      <button class="prev-rw" disabled>Previous</button>
+   </div>
+   <button class="play-pause">Play</button>
+   <div class="right">
+      <button class="next-ff" disabled>Next</button>
+      <input type="checkbox" class="basic-button mute" />
+      <wm-slider class="volume constant-thumb circular-thumb" min="0" max="1" value="1" step="0.01" title="Volume"></wm-slider>
+   </div>
+</div>
    `.trim();
    
    // Expose properties and methods of the wrapped media element.
@@ -150,6 +150,11 @@ class WMPlayerElement extends HTMLElement {
          });
       }
       
+      //
+      // We handle `muted` ourselves, since there's no event that gets 
+      // triggered when a media element is programmatically muted. We 
+      // have to intercept that in order to update our UI.
+      //
       for(const name of [
          // HTMLMediaElement:
          "audioTracks",
@@ -171,8 +176,32 @@ class WMPlayerElement extends HTMLElement {
          });
       }
       
+      //
+      // Attributes below.
+      //
+      
+      // Start by listing those attributes that we want to handle 
+      // entirely by ourselves. After this, we'll register the 
+      // attributes we want to automatically mirror to the wrapped 
+      // media element.
       this.observedAttributes = [ "autoplay", "src" ];
       
+      //
+      // We handle `autoplay` ourselves.
+      //
+      // We handle `src` ourselves, since we need somewhat different 
+      // logic (owing to us having built-in playlist functionality).
+      //
+      // We don't forward `controls` or `controlslist` because we're 
+      // supplying our own UI; we explicitly want the wrapped media 
+      // element to use its default of having no controls.
+      //
+      // We don't forward `width` or `height` since they're not fully 
+      // meaningful in this case. Our player may show its UI outside 
+      // the bounds of the video, consuming additional size; in that 
+      // case, one would expect `width` and `height` to refer to the 
+      // total size of the player, and not just the video dimensions.
+      //
       for(const name of [
          // HTMLMediaElement:
          //"autoplay",
@@ -196,6 +225,8 @@ class WMPlayerElement extends HTMLElement {
          });
       }
       
+      // There are some cases where an HTML attribute is reflected by 
+      // a JavaScript property with a different name. Handle them here.
       for(const [name, attr] of [
          // HTMLMediaElement:
          ["defaultMuted", "muted"],
@@ -410,6 +441,9 @@ class WMPlayerElement extends HTMLElement {
          return;
       this.#has_ever_been_connected = true;
       
+      //
+      // Copy all observed attributes from ourselves to the wrapped <media/> element.
+      //
       for(let name of this.constructor.observedAttributes) {
          let attr = this.getAttribute(name);
          if (attr === null)
@@ -420,11 +454,13 @@ class WMPlayerElement extends HTMLElement {
       this.#update_play_state();
       this.#update_shuffle_tooltip();
       this.#update_loop_tooltip(this.loop);
+      
+      this.#mute_button.checked = this.#media.muted; // account for `defaultMuted`
       this.#update_mute_tooltip();
       
       window.setTimeout((function() {
          this.#ready_to_autoplay = false;
-      }).bind(this), 200);
+      }).bind(this), 500);
    }
    
    //
@@ -489,7 +525,7 @@ class WMPlayerElement extends HTMLElement {
          this.#stop_button.disabled = false;
       }
       if (next) {
-         // TODO: preload
+         // TODO: (optionally?) preload
       }
       return true;
    }

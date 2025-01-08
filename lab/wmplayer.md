@@ -1,0 +1,106 @@
+
+# Features
+
+## Shuffle
+
+The shuffle feature works by maintaining a list of shuffle-eligible playlist indices in parallel to the playlist itself. Every time you start playing a given playlist item, that index is removed from the list of shuffle-eligible playlist indices. When shuffle is enabled, attempting to advance to the next playlist item instead selects a random index from the list of shuffle-eligible playlist indices. We then advance to the playlist item at that index and remove it from the list of shuffle-eligible playlist indices. This approach ensures that no playlist item will ever be surfaced twice by shuffle until after all items in the playlist have been played at least once.
+
+Comparing this to the approach of maintaining two playlists (the original playlist and a pre-randomized one):
+
+**Advantages**
+
+* If the user manually jumps to a specific playlist item, we can mark that item as ineligible for shuffle and then continue shuffling after it finishes. If instead we pre-generated a randomized order for the playlist, then we'd have to account for the user jumping around that order.
+
+* If the user skips an item, we can still come back to it later. This is good for cases where the user may want to listem to an item, but not right this second; but it's bad for cases where the user wants to persistently skip an item (see "disadvantages" below).
+
+**Disadvantages**
+
+* We don't remember history: if the user clicks the "Previous" button in order to replay the last-shuffled media, then we'll instead go to the previous item (relative to the current item) in the original playlist, rather than the previously-played item in the shuffled order. A pre-generated randomized order would act as a history that we can navigate backward through.
+
+* We have to account for the edge-case of the user pausing the player and then mashing the "next" button to jump through the list. We don't want to render playlist items ineligible for shuffling if they haven't actually started playing; yet if the user clicks the "next" button, we need to make sure that they're actually taken to a different item (i.e. if the item they're currently on never started playing, then it's still eligible for shuffling, so A can lead to A unless we specifically catch that case).
+
+* **[NOT YET FIXED]** Suppose the user has a playlist of ten items, and shuffles through nine of them before pausing the player. They don't want to listen to the tenth item right now, so they try to skip it. They'll be taken to another media item, *but* after that, the player will repeatedly lead them back to that tenth item unless and until they let it start playing, because that tenth item is the only index still in the shuffle-eligible indices, and we only reset that list once *everything* has started playing. What's more: if the user instead pauses the player *after* the tenth item starts, and *then* skips it, this problem won't happen. Users who encounter both behaviors may feel like the player is acting inconsistently.
+
+  * What we may want to do is, when the player is paused and the user skips *n* tracks in a row, temporarily consider those *n* tracks ineligible. Make them eligible again once any media starts playing. If, as a result of the skipping, the user runs out of eligible tracks, reset the eligible index list.
+
+
+# Custom elements
+
+## `WMPlayerElement`
+
+A video player element that mimics Windows Media Player 11 and 12's UI. The functionality is similar to `<video />`, but with some additions:
+
+* A built-in system for playlists.
+* Accordingly, "loop" cycles from each end of the playlist to the other, and "shuffle" randomizes playback order. "Previous" and "next" buttons are offered as well.
+
+
+## `WMPlayerSliderElement`
+
+A custom element that acts a slider. Simple enough. This is depended on by `WMPlayerElement`.
+
+There are two reasons why `<input type="range" />` isn't sufficient for our use case:
+
+* Not all browsers offer the ability to style both halves of the slider track (the "full" half and the "empty" half) separately. Hacks exist, relying on `box-shadow`, but we need a gradient fill, so that doesn't work for us.
+
+* Browsers expose the slider thumb as a pseudo-element. There's no way to target the `:hover` state of the thumb itself separately from the `:hover` state of the entire slider. In Windows Media Player, hovering over the slider doesn't highlight the thumb; you have to hover directly over the thumb to highlight it.
+
+There is a small advantage to rolling our own slider element, beyond working around those two limitations: we could potentially add the ability to highlight arbitrary ranges on the slider. This could be a good way to show what portions of the seek slider have currently buffered, for large or streaming video files as opposed to locally-hosted ones. (Not sure how I'll test that, yet, though.)
+
+
+# Notes
+
+## Custom element lifecycle
+
+The lifecycle of a custom element isn't terribly clear: the relative ordering of callbacks is well-defined, but the ordering of these callbacks relative to other operations doesn't seem to be.
+
+To wit: consider the case of a custom element that is present in the HTML source code, after a synchronously-loaded `<script>` tag that defines the element. If attributes are set on that element in the HTML source code (i.e. not dynamically; not post-load), will those attributes be present on the element when its `connectedCallback` runs? The answer is, it depends! In Firefox, attributes in general *may not* be present *unless* they're listed in `observedAttributes`, in which case they seemingly *will always* be present.
+
+```js
+class E extends HTMLElement {
+   constructor() {
+      super();
+   }
+   
+   static observedAttributes = [ "src" ];
+   attributeChangedCallback(name, prior, after) {
+   }
+   
+   #is_first_connection = true;
+   connectedCallback() {
+      if (!this.#is_first_connection)
+         return;
+      this.#is_first_connection = true;
+      
+      // If "src" is not in `observedAttributes` above, then this will 
+      // basically always read as null, even if the attribute is present 
+      // on the element in the page's HTML source code.
+      let test = this.getAttribute("src");
+   }
+};
+```
+
+When an element is upgraded (per [the spec](https://html.spec.whatwg.org/multipage/custom-elements.html#upgrades)), the `attributeChangedCallback` will *always* run for each observed attribute, prior to `connectedCallback`. The algorithm explicitly requires that the browser attempt to queue `attributeChangedCallback` for *all* attributes, with the process of queueing `attributeChangedCallback` described as aborting early for non-bserved attributes. If Firefox skips non-observed attributes on the grounds that they'd end up being no-ops, then that may explain why only observed attributes are visible from within `connectedCallback` in that browser.
+
+Child elements are similarly messy. In general, [it's intentional](https://github.com/WICG/webcomponents/issues/551#issuecomment-241651544) that a custom element is connected before its child nodes are appended, with `MutationObserver` instances being the [intended](https://github.com/WICG/webcomponents/issues/551#issuecomment-241787068) solution for a custom element reacting to its child nodes. (This, despite the fact that there's no reliable way to know if an element has *finished* loading all of its content. The best we can do is use a `MutationObserver` to react to the appearance of a `nextSibling` on the element or any ancestor (or, if it's truly the last element in the document, `DOMContentLoaded`), and that breaks if any JavaScript mucks with the element tree during load. An event like `closeTagReached` has been [proposed](https://github.com/WICG/webcomponents/issues/551#issuecomment-241844398) but seems unpopular given the responses it got when brought up.)
+
+### How this influenced the player design
+
+#### Autoplay
+
+We can't guarantee that the `autoplay` and `src` attributes will be ready from `connectedCallback`, nor that they'll be ready at the same time or in any particular order. For this reason, we react to autoplay asynchronously:
+
+* Once `connectedCallback` fires for the first time, the player is eligible for autoplay for up to half a second.
+
+* If the user interacts with any part of the player UI that directly influences the flow of playback, the player immediately becomes ineligible for autoplay. (So, the stop, previous, next, play, and pause buttons and the seek slider would disqualify autoplay, but not the volume slider or the shuffle and loop buttons.)
+
+* The `attributeChangedCallback` handlers for the `autoplay` and `src` attributes, and the JavaScript setter for the `autoplay` property, both check if the player is eligible for autoplay and if autoplay is enabled. If so, we perform autoplay (i.e. start playing the current media) and then make the player ineligible for autoplay.
+
+#### JS-only playlist definitions
+
+I originally wanted the player to be able to contain media elements (e.g. `<video />`) which could themselves contain `<track />`, `<source />`, and similar elements, as a way of fully configuring a playlist. The goal was to subsume these into a "playlist" on load, and then retain the playlist in JavaScript only without reflecting between HTML and JS post-load. This is not wholly without precedent; plenty of HTML attributes on plenty of elements specify only default or initial values (e.g. `<video muted />`). I ended up abandoning this plan for two reasons:
+
+* The fact that there's no (intentionally!) sane and reliable way to handle child elements at load time. Handling child elements in perpetuity (i.e. including dynamic additions, modifications, and removals) would be cumbersome.
+
+* Defining the playlist content wholly in the HTML would only really be *necessary* to support user-agents with JavaScript disabled. In these cases, the playlist functionality would be unworkable (since there's no platform-native way to set up playlists), and preventing all but the first media element from loading and playing would similarly be unworkable (since `preload` doesn't default to `none` and without scripts, I can't force it to). Since the player can only function sanely with JavaScript, better to just make it and its functionality JS-only.
+
+The current design allows the use of the `src` attribute for setting the player's initial video, but you can only manipulate the playlist through JavaScript.
