@@ -506,8 +506,26 @@ class WMPlayerElement extends HTMLElement {
          let i;
          let list = this.#playlist_shuffle_indices;
          if (list.length) {
-            i    = Math.floor(Math.random() * list.length);
-            next = list[i];
+            //
+            // EDGE-CASE: Suppose you enable shuffle, pause the player, 
+            // and click "next" five times. None of the media that you 
+            // skip should be disqualified from shuffling in the future: 
+            // we should only disqualify media once it actually starts 
+            // to play...
+            //
+            // BUT (and this is the edge-case) because we don't prevent 
+            // media from being shuffled to unless it's started playing, 
+            // if we only roll for a random playlist item one time, then 
+            // we may actually navigate from the current playlist item 
+            // to itself. We need to re-roll in those cases.
+            //
+            // This will only happen if the player pauses the player and 
+            // then clicks the "next" button.
+            //
+            do {
+               i    = Math.floor(Math.random() * list.length);
+               next = list[i];
+            } while (next == this.#current_playlist_index);
          } else {
             i    = Math.floor(Math.random() * this.#playlist.length);
             next = i;
