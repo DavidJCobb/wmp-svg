@@ -445,6 +445,8 @@ class WMPlayerElement extends HTMLElement {
       // Copy all observed attributes from ourselves to the wrapped <media/> element.
       //
       for(let name of this.constructor.observedAttributes) {
+         if (name == "autoplay" || name == "loop" || name == "src")
+            continue;
          let attr = this.getAttribute(name);
          if (attr === null)
             continue;
@@ -453,7 +455,8 @@ class WMPlayerElement extends HTMLElement {
       
       this.#update_play_state();
       this.#update_shuffle_tooltip();
-      this.#update_loop_tooltip(this.loop);
+      
+      this.loop = this.hasAttribute("loop");
       
       this.#mute_button.checked = this.#media.muted; // account for `defaultMuted`
       this.#update_mute_tooltip();

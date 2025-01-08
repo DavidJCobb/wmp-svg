@@ -80,7 +80,7 @@
 :host(:hover) .thumb {
    --sprite: url(spritesheet-jewel-no-shadow.svg#normal);
 }
-:host(:hover):not(:active):not(:state(active)) .thumb:hover {
+:host(:hover:not(:active):not(:state(active))) .thumb:hover {
    --sprite: url(spritesheet-jewel-no-shadow.svg#hover);
 }
 :host(:active) .thumb,

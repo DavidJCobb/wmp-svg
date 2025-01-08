@@ -156,7 +156,7 @@ video {
       pointer-events: none;
       
       --extent:       calc(var(--play-pause-button-hitbox) + (var(--padding) + var(--border-thickness))*2);
-      --area-to-show: calc(11px*var(--scale,1));
+      --area-to-show: calc(11px * var(--scale,1));
       
       width:   var(--play-pause-button-hitbox);
       height:  var(--play-pause-button-hitbox);
@@ -183,7 +183,7 @@ video {
             to bottom,
             #FFF 0%,
             #FFF 100%
-         ) luminance 6px 5px/43px 39px no-repeat
+         ) luminance calc(6px*var(--scale,1)) calc(5px*var(--scale,1))/var(--play-pause-button-hitbox) calc(39px*var(--scale,1)) no-repeat
       ;
    }
 }
