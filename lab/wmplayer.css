@@ -7,11 +7,20 @@
       "controls"
    ;
    
+   /* Guide the aspect ratio of the video player. */
+   --aspect-ratio: auto;
+   
+   --min-video-width:  0;
+   --min-video-height: 0;
+   --max-video-width:  100%;
+   --max-video-height: none;
+   
+   /* Scale the player UI. */
    --scale: 1;
 }
 
 :host(.theater) {
-   video {
+   .content {
       grid-row: 1 / span 100;
    }
    .seek {
@@ -26,9 +35,30 @@
    }
 }
 
+.content {
+   grid-area:  content;
+   max-width:  100%;
+   min-height: 0px; /* allow this grid region to shrink if the player container shrinks */
+   
+   background: #000;
+   
+   display: grid;
+   grid-template: "video";
+   justify-items: center;
+   align-items: center;
+}
 video {
-   grid-area: content;
-   max-width: 100%;
+   min-width:  var(--min-video-width, 0);
+   max-height: var(--min-video-height, 0);
+   max-width:  var(--max-video-width, 100%);
+   max-height: var(--max-video-height, none);
+   
+   aspect-ratio: var(--aspect-ratio, auto);
+   object-fit:   contain;
+   
+   /* ensure we shrink to fit the player when necessary */
+   width:  100%;
+   height: 100%;
 }
 
 .seek {
@@ -189,6 +219,10 @@ video {
    --sprite-x: calc(-4px * var(--scale,1));
    --sprite-y: calc(-2px * var(--scale,1));
    
+   --glyph-size: calc(25px * var(--scale,1));
+   --glyph-x:    calc(3px  * var(--scale,1));
+   --glyph-y:    calc(1px  * var(--scale,1));
+   
    --sprite: url(spritesheet-generic.svg#normal);
    --glyph:  linear-gradient(to bottom, transparent, transparent); /* dummy "no glyph" value */
    
@@ -215,9 +249,27 @@ video {
       top:      var(--sprite-y);
       
       background:
-         var(--glyph)  left top/var(--sprite-w) var(--sprite-h) no-repeat,
+         var(--glyph)  var(--glyph-x) var(--glyph-y)/var(--glyph-size) var(--glyph-size) no-repeat,
          var(--sprite) left top/var(--sprite-w) var(--sprite-h) no-repeat
       ;
+   }
+}
+.basic-button.shuffle {
+   --glyph: url(spritesheet-glyphs-general.svg#shuffle-off);
+   &:checked {
+      --glyph: url(spritesheet-glyphs-general.svg#shuffle-on);
+   }
+}
+.basic-button.loop {
+   --glyph: url(spritesheet-glyphs-general.svg#loop-off);
+   &:checked {
+      --glyph: url(spritesheet-glyphs-general.svg#loop-on);
+   }
+}
+button.stop {
+   --glyph: url(spritesheet-glyphs-general.svg#stop-enabled);
+   &:disabled {
+      --glyph: url(spritesheet-glyphs-general.svg#stop-disabled);
    }
 }
 

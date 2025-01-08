@@ -1,248 +1,97 @@
 
-class WMPlayerSliderElement extends HTMLElement {
-   #internals;
-   #shadow;
-   #track_full;
-   #track_bare;
-   #thumb;
+class WMPlaylistItem {
+   #audio_only = false;
+   #src        = null;
+   #sources    = []; // Array<HTMLSourceElement>
+   #tracks     = []; // Array<HTMLTrackElement>
    
-   #bound_drag_move_handler;
-   #bound_drag_stop_handler;
+   constructor(o) {
+      this.#audio_only = o?.audio_only || false; // force audio-only even if a video file
+      this.#src        = o?.src || null;
+      this.#realize(o?.tracks, o?.sources);
+   }
    
-   #orientation = "horizontal";
-   #minimum = 0;
-   #maximum = 100;
-   #step    = 0;
-   #value   = 0;
-   
-   #has_ever_been_connected = false;
-   #is_dragging = false;
-   
-   constructor() {
-      super();
-      this.#internals = this.attachInternals();
-      this.#shadow    = this.attachShadow({ mode: "open" });
-      {
-         let link = document.createElement("link");
-         link.setAttribute("rel", "stylesheet");
-         link.setAttribute("href", "wmplayer.slider.css");
-         this.#shadow.append(link);
+   get empty() {
+      if (this.#src)
+         return false;
+      if (this.#sources.length == 0)
+         return true;
+      for(let source of this.#sources) {
+         if (source.src || source.srcset)
+            return false;
       }
-      
-      this.#track_bare = document.createElement("div");
-      this.#track_full = document.createElement("div");
-      this.#thumb = document.createElement("div");
-      
-      this.#track_bare.classList.add("track-bare");
-      this.#track_full.classList.add("track-full");
-      this.#thumb.classList.add("thumb");
-      
-      this.#shadow.append(
-         this.#track_bare,
-         this.#track_full,
-         this.#thumb
-      );
-      
-      {
-         let bound = this.#on_drag_start.bind(this);
-         this.addEventListener("mousedown", bound);
-         this.addEventListener("pointerdown", bound);
-         this.addEventListener("touchstart", bound);
+      return true;
+   }
+   
+   populateMediaElement(media) {
+      media.src = this.#src || "";
+      media.append(this.#sources.concat(this.#tracks));
+      media.currentTime = 0;
+   }
+   
+   #realize(tracks, sources) {
+      if (sources) {
+         let list = sources;
+         let size = list.length;
+         for(let i = 0; i < size; ++i) {
+            let item = list[i];
+            if (item instanceof HTMLSourceElement) {
+               this.#sources.push(item);
+               continue;
+            }
+            let node = document.createElement("source");
+            for(let attr of ["height", "media", "sizes", "src", "srcset", "type", "width"]) {
+               let data = item[attr];
+               if (data)
+                  node[attr] = data;
+            }
+            this.#sources.push(node);
+         }
       }
-      this.#bound_drag_move_handler = this.#on_drag_tick.bind(this);
-      this.#bound_drag_stop_handler = this.#on_drag_end.bind(this);
-   }
-   
-   #setting_attribute = false;
-   static observedAttributes = ["max", "min", "step"];
-   attributeChangedCallback(name, prior, after) {
-      if (this.#setting_attribute)
-         return;
-      switch (name) {
-         case "max":
-            this.maximum = after;
-            return;
-         case "min":
-            this.minimum = after;
-            return;
-         case "step":
-            this.step = after;
-            return;
+      if (tracks) {
+         let list = tracks;
+         let size = list.length;
+         for(let i = 0; i < size; ++i) {
+            let item = list[i];
+            if (item instanceof HTMLTrackElement) {
+               this.#tracks.push(item);
+               continue;
+            }
+            let node = document.createElement("track");
+            for(let attr of ["kind", "label", "src", "srclang"]) {
+               let data = item[attr];
+               if (data)
+                  node[attr] = data;
+            }
+            if (item.default)
+               node.setAttribute("default", "default");
+            this.#tracks.push(node);
+         }
       }
-   }
-   
-   connectedCallback() {
-      if (this.#has_ever_been_connected)
-         return;
-      this.#has_ever_been_connected = true;
-      
-      let attr;
-      
-      attr = this.getAttribute("max");
-      if (!isNaN(+attr))
-         this.maximum = +attr;
-      
-      attr = this.getAttribute("min");
-      if (!isNaN(+attr))
-         this.minimum = +attr;
-      
-      attr = this.getAttribute("step");
-      if (!isNaN(+attr))
-         this.step = +attr;
-      
-      attr = this.getAttribute("value");
-      if (!isNaN(+attr))
-         this.value = +attr;
-   }
-   
-   get value() { return this.#value; }
-   set value(v) {
-      this.#value = Math.min(this.#maximum, Math.max(this.#minimum, +v));
-      this.style.setProperty("--value", v);
-   }
-   
-   get step() { return this.#step; }
-   set step(v) {
-      this.#step = Math.max(0, +v);
-      
-      this.#setting_attribute = true;
-      this.setAttribute("step", v);
-      this.#setting_attribute = false;
-   }
-   
-   get minimum() { return this.#minimum; }
-   set minimum(v) {
-      v = +v;
-      this.#minimum = v;
-      this.style.setProperty("--minimum", v);
-      if (this.#value < v)
-         this.#value = v;
-      
-      this.#setting_attribute = true;
-      this.setAttribute("min", v);
-      this.#setting_attribute = false;
-   }
-   
-   get maximum() { return this.#maximum; }
-   set maximum(v) {
-      v = +v;
-      this.#maximum = v;
-      this.style.setProperty("--maximum", v);
-      if (this.#value > v)
-         this.#value = v;
-      
-      this.#setting_attribute = true;
-      this.setAttribute("max", v);
-      this.#setting_attribute = false;
-   }
-   
-   is_being_edited() { return this.#is_dragging; }
-   
-   #pointer_pos_to_slider_pos(e) {
-      let bounds = this.getBoundingClientRect();
-      let thumb  = this.#thumb.getBoundingClientRect();
-      let start;
-      let end;
-      let pointer;
-      if (this.#orientation == "vertical") {
-         let thumb_half_size = thumb.height / 2;
-         start   = bounds.top    + thumb_half_size;
-         end     = bounds.bottom - thumb_half_size;
-         pointer = e.clientY;
-      } else {
-         let thumb_half_size = thumb.width / 2;
-         start   = bounds.left  + thumb_half_size;
-         end     = bounds.right - thumb_half_size;
-         pointer = e.clientX;
-      }
-      return (pointer - start) / (end - start);
-   }
-   
-   #on_drag_start(e) {
-      if (e.button)
-         return;
-      
-      this.#is_dragging = true;
-      if (this.#internals.states)
-         this.#internals.states.add("active");
-      
-      e.preventDefault();
-      {
-         window.addEventListener("mousemove",   this.#bound_drag_move_handler);
-         window.addEventListener("pointermove", this.#bound_drag_move_handler);
-         window.addEventListener("touchmove",   this.#bound_drag_move_handler);
-         window.addEventListener("mouseup",     this.#bound_drag_stop_handler);
-         window.addEventListener("pointerup",   this.#bound_drag_stop_handler);
-         window.addEventListener("touchend",    this.#bound_drag_stop_handler);
-      }
-      if (e.target != this.#thumb) {
-         let pos = this.#pointer_pos_to_slider_pos(e);
-         this.#set_relative_position(pos);
-         this.dispatchEvent(new Event("change"));
-      }
-      this.dispatchEvent(new Event("edit-start"));
-   }
-   #on_drag_tick(e) {
-      e.preventDefault();
-      let pos = this.#pointer_pos_to_slider_pos(e);
-      this.#set_relative_position(pos);
-      this.dispatchEvent(new Event("change"));
-   }
-   #on_drag_end(e) {
-      this.#is_dragging = false;
-      {
-         window.removeEventListener("mousemove",   this.#bound_drag_move_handler);
-         window.removeEventListener("pointermove", this.#bound_drag_move_handler);
-         window.removeEventListener("touchmove",   this.#bound_drag_move_handler);
-         window.removeEventListener("mouseup",     this.#bound_drag_stop_handler);
-         window.removeEventListener("pointerup",   this.#bound_drag_stop_handler);
-         window.removeEventListener("touchend",    this.#bound_drag_stop_handler);
-      }
-      if (this.#internals.states)
-         this.#internals.states.delete("active");
-      
-      if (this.#step) {
-         this.style.setProperty("--value", this.#value);
-      }
-      this.dispatchEvent(new Event("edit-stop"));
-   }
-   
-   #clamp(value) {
-      return Math.max(this.#minimum, Math.min(this.#maximum, value));
-   }
-   
-   #set_relative_position(pos) { // v is in the range [0, 1]
-      if (pos < 0)
-         pos = 0;
-      else if (pos > 1)
-         pos = 1;
-      
-      let value = pos * (this.#maximum - this.#minimum) + this.#minimum;
-      if (this.#is_dragging) {
-         if (this.#step)
-            this.#value = this.#clamp(Math.round(value / this.#step) * this.#step);
-         else
-            this.#value = value;
-      } else {
-         if (this.#step)
-            value = this.#clamp(Math.round(value / this.#step) * this.#step);
-         this.#value = value;
-      }
-      this.style.setProperty("--value", value);
    }
 };
-customElements.define(
-   "wm-slider",
-   WMPlayerSliderElement
-);
 
 class WMPlayerElement extends HTMLElement {
+   #playlist = []; // Array<WMPlaylistItem>
+   #loop     = false;
+   #shuffle  = false;
+   
+   #current_playlist_index         = 0;
+   #current_playlist_index_started = false;
+   #playlist_shuffle_indices       = [];
+   
    #shadow;
    #internals;
    
    #media;
+   
+   #loop_button;
+   #mute_button;
+   #next_button;
    #play_pause_button;
+   #prev_button;
    #seek_slider;
+   #shuffle_button;
    #stop_button;
    #volume_slider;
    
@@ -250,15 +99,14 @@ class WMPlayerElement extends HTMLElement {
    
    static #HTML = `
 <link rel="stylesheet" href="wmplayer.css" />
-<video>
-   <slot> <!-- for <track/> elements -->
-   </slot>
-</video>
+<div class="content">
+   <video></video>
+</div>
 <wm-slider class="seek"></wm-slider>
 <div class="controls"><!--
 --><div class="left"><!--
-   --><button class="basic-button shuffle">Shuffle</button><!--
-   --><button class="basic-button loop">Loop</button><!--
+   --><input type="checkbox" class="basic-button shuffle" /><!--
+   --><input type="checkbox" class="basic-button loop" /><!--
    --><hr /><!--
    --><button class="basic-button stop" disabled title="Stop">Stop</button><!--
    --><button class="prev-rw" disabled>Previous</button><!--
@@ -266,7 +114,7 @@ class WMPlayerElement extends HTMLElement {
 --><button class="play-pause">Play</button><!--
 --><div class="right"><!--
    --><button class="next-ff" disabled>Next</button><!--
-   --><button class="basic-button mute" title="Mute">Mute</button><!--
+   --><input type="checkbox" class="basic-button mute" /><!--
    --><wm-slider class="volume constant-thumb circular-thumb" min="0" max="1" value="1" step="0.01" title="Volume"></wm-slider><!--
 --></div><!--
 --></div>
@@ -322,14 +170,14 @@ class WMPlayerElement extends HTMLElement {
          });
       }
       
-      this.observedAttributes = [];
+      this.observedAttributes = [ "src" ];
       
       for(const name of [
          // HTMLMediaElement:
          "autoplay",
          //"controls",
          //"controlslist",
-         "src",
+         //"src",
          // HTMLVideoElement:
          "height",
          "poster",
@@ -396,12 +244,13 @@ class WMPlayerElement extends HTMLElement {
       this.#shadow.append(template.content.cloneNode(true));
       
       this.#media = this.#shadow.querySelector("video");
+      this.#media.addEventListener("loadedmetadata", this.#on_loaded_metadata.bind(this));
       this.#media.addEventListener("timeupdate", this.#on_current_time_change.bind(this));
       this.#media.addEventListener("durationchange", this.#on_duration_change.bind(this));
       this.#media.addEventListener("volumechange", this.#on_volume_change.bind(this));
-      this.#media.addEventListener("play", this.#update_play_state.bind(this));
+      this.#media.addEventListener("play", this.#on_media_play.bind(this));
       this.#media.addEventListener("pause", this.#update_play_state.bind(this));
-      this.#media.addEventListener("ended", this.#update_play_state.bind(this));
+      this.#media.addEventListener("ended", this.#on_media_ended.bind(this));
       {
          let bound = this.#update_buffering_state.bind(this);
          this.#media.addEventListener("buffering", bound);
@@ -413,20 +262,88 @@ class WMPlayerElement extends HTMLElement {
       this.#seek_slider = this.#shadow.querySelector(".seek");
       this.#seek_slider.addEventListener("change", this.#on_seek_slider_change.bind(this));
       
+      this.#shuffle_button = this.#shadow.querySelector(".shuffle");
+      this.#shuffle_button.addEventListener("change", this.#on_shuffle_ui_toggled.bind(this));
+      
+      this.#loop_button = this.#shadow.querySelector(".loop");
+      this.#loop_button.addEventListener("change", this.#on_loop_ui_toggled.bind(this));
+      
       this.#play_pause_button = this.#shadow.querySelector("button.play-pause");
       this.#play_pause_button.addEventListener("click", this.#on_play_pause_click.bind(this));
       
       this.#stop_button = this.#shadow.querySelector("button.stop");
       this.#stop_button.addEventListener("click", this.#on_stop_click.bind(this));
       
+      this.#mute_button = this.#shadow.querySelector(".mute");
+      this.#mute_button.addEventListener("click", this.#on_mute_ui_toggled.bind(this));
+      
       this.#volume_slider = this.#shadow.querySelector(".volume");
       this.#volume_slider.addEventListener("change", this.#on_volume_slider_change.bind(this));
+      
+      this.#next_button = this.#shadow.querySelector(".next-ff");
+      this.#next_button.addEventListener("click", this.toNextMedia.bind(this));
+      this.#prev_button = this.#shadow.querySelector(".prev-rw");
+      this.#prev_button.addEventListener("click", this.#on_prev_click.bind(this));
    }
+   
+   //
+   // Accessors and APIs
+   //
+   
+   get loop() { return this.#loop; }
+   set loop(v) {
+      v = !!v;
+      if (v == this.#loop)
+         return;
+      this.#loop = v;
+      this.#loop_button.checked = v;
+      if (this.#playlist.length == 1) {
+         this.#media[v ? "setAttribute" : "removeAttribute"]("loop", "loop");
+      }
+      this.#update_loop_tooltip();
+   }
+   
+   get shuffle() { return this.#shuffle; }
+   set shuffle(v) {
+      v = !!v;
+      if (v == this.#shuffle)
+         return;
+      this.#shuffle = v;
+      this.#shuffle_button.checked = v;
+      this.#update_shuffle_tooltip();
+   }
+   
+   //
+   // Custom element lifecycle
+   //
    
    attributeChangedCallback(name, prior, after) {
       if (this.#setting_attribute)
          return;
       this.#media.setAttribute(name, after);
+      
+      if (name == "loop") {
+         let state = after !== null;
+         this.#loop_button.checked = state;
+         this.#update_loop_tooltip(state);
+      }
+      if (name == "src") {
+         //
+         // We want to react to an initially present `src` attribute only (compare to 
+         // the `value` attribute indicating defaults on a form element). However, the 
+         // ordering of callbacks is not defined. In Firefox, if I observe the `src` 
+         // attribute for this callback, then the `src` attribute will be available by 
+         // the time our connectedCallback runs; however, if I don't observe the `src` 
+         // attribute, then connectedCallback runs before Firefox has parsed, loaded, 
+         // and applied the `src` attribute specified in the HTML file. I assume that 
+         // other browsers are similarly messy; in general, the custom elements spec 
+         // doesn't do a good job of clearly defining the ordering of lifecycle events.
+         //
+         if (after !== null && after) {
+            let item = new WMPlaylistItem({ src: after });
+            this.#replace_playlist([ item ]);
+         }
+      }
    }
    
    #has_ever_been_connected = false;
@@ -441,7 +358,154 @@ class WMPlayerElement extends HTMLElement {
             continue;
          this.#media.setAttribute(name, attr);
       }
+      
       this.#update_play_state();
+      this.#update_shuffle_tooltip();
+      this.#update_loop_tooltip(this.loop);
+      this.#update_mute_tooltip();
+   }
+   
+   //
+   // Playlist
+   //
+   
+   #mark_current_playlist_item_for_no_shuffle() {
+      if (!this.#current_playlist_index_started) {
+         this.#current_playlist_index_started = true;
+         
+         let list = this.#playlist_shuffle_indices;
+         let i    = list.indexOf(this.#current_playlist_index);
+         if (i >= 0)
+            list.splice(i, 1);
+      }
+   }
+   #on_playlist_modified() {
+      let no_media = this.#playlist.length == 0;
+      
+      this.#play_pause_button.disabled = no_media;
+      if (no_media) {
+         this.#stop_button.disabled = true;
+         this.#next_button.disabled = true;
+         this.#prev_button.disabled = true;
+      } else {
+         this.#next_button.disabled = this.#current_playlist_index == this.#playlist.length - 1;
+         this.#prev_button.disabled = this.#current_playlist_index == 0;
+      }
+      
+      if (this.#playlist.length == 1) {
+         this.#media[this.#loop ? "setAttribute" : "removeAttribute"]("loop", "loop");
+      } else {
+         this.#media.removeAttribute("loop");
+      }
+   }
+   #replace_playlist(items) {
+      this.#playlist = items;
+      this.#playlist_shuffle_indices = Object.keys(items);
+      this.#media.pause();
+      this.#on_playlist_modified();
+      this.#set_playlist_index(0);
+   }
+   
+   // Returns `true` if we successfully navigated to another playlist 
+   // item, or `false` if there was nothing to navigate to.
+   #set_playlist_index(v) {
+      v = +v;
+      if (v < 0 || v >= this.#playlist.length) {
+         if (!this.#loop || !this.#playlist.length)
+            return false;
+         
+         if (v < 0)
+            v = this.#playlist.length - 1;
+         else
+            v = 0;
+      }
+      this.#current_playlist_index = v;
+      this.#current_playlist_index_started = false;
+      
+      let item = this.#playlist[v];
+      let next = this.#playlist[v + 1];
+      this.#media.pause();
+      item.populateMediaElement(this.#media);
+      this.#next_button.disabled = v == this.#playlist.length - 1;
+      this.#prev_button.disabled = v == 0;
+      if (v > 0) {
+         this.#stop_button.disabled = false;
+      }
+      if (next) {
+         // TODO: preload
+      }
+      return true;
+   }
+   
+   // Returns `true` if we successfully navigated to another playlist 
+   // item, or `false` if there was nothing to navigate to.
+   #to_next_playlist_item(ignore_shuffle) {
+      let next = this.#current_playlist_index + 1;
+      if (this.#shuffle && !ignore_shuffle) {
+         if (this.#playlist.length == 1) {
+            return false;
+         }
+         let i;
+         let list = this.#playlist_shuffle_indices;
+         if (list.length) {
+            i    = Math.floor(Math.random() * list.length);
+            next = list[i];
+         } else {
+            i    = Math.floor(Math.random() * this.#playlist.length);
+            next = i;
+            this.#playlist_shuffle_indices = Object.keys(this.#playlist);
+            this.#playlist_shuffle_indices.splice(i, 1);
+         }
+      }
+      return this.#set_playlist_index(next);
+   }
+   
+   addToPlaylist(item) {
+      if (!(item instanceof WMPlaylistItem)) {
+         if (item + "" === item) {
+            if (!item)
+               return;
+            item = new WMPlaylistItem({ src: item });
+         } else {
+            item = new WMPlaylistItem(item);
+            if (item.empty)
+               return;
+         }
+      }
+      this.#playlist.push(item);
+      this.#playlist_shuffle_indices.push(this.#playlist.length - 1);
+      this.#on_playlist_modified();
+   }
+   clearPlaylist() {
+      this.#media.pause();
+      this.#media.src = "";
+      this.#playlist = [];
+      this.#current_playlist_index = 0;
+      this.#current_playlist_index_started = false;
+      this.#playlist_shuffle_indices = [];
+      this.#on_playlist_modified();
+   }
+   
+   toPrevMedia() {
+      if (this.#set_playlist_index(this.#current_playlist_index - 1)) {
+         this.#media.play();
+      }
+   }
+   toNextMedia(ignore_shuffle) {
+      let playing = !this.#media.paused;
+      if (!this.#to_next_playlist_item(ignore_shuffle))
+         return;
+      if (playing)
+         this.#media.play();
+   }
+   
+   //
+   // Media events
+   //
+   
+   #on_loaded_metadata(e) {
+      this.#media.width  = this.#media.videoWidth  || 0;
+      this.#media.height = this.#media.videoHeight || 0;
    }
    
    #on_current_time_change(e) {
@@ -455,7 +519,86 @@ class WMPlayerElement extends HTMLElement {
    #on_volume_change(e) {
       if (this.#volume_slider.is_being_edited())
          return;
-      this.#volume_slider = this.#media.volume;
+      this.#volume_slider.value = this.#media.volume;
+   }
+   
+   #on_media_play(e) {
+      this.#mark_current_playlist_item_for_no_shuffle();
+      this.#update_play_state();
+   }
+   #on_media_ended(e) {
+      //
+      // WARNING: The `ended` event doesn't fire if a video has the HTML `loop` attribute, 
+      // reaches its end, and loops. It only fires if the video isn't looping.
+      //
+      if (this.#to_next_playlist_item())
+         this.#media.play();
+      this.#update_play_state();
+   }
+   
+   //
+   // Loop
+   //
+   
+   #on_loop_ui_toggled() {
+      this.loop = !this.#loop;
+   }
+   #update_loop_tooltip(state) {
+      let node = this.#loop_button;
+      if (state) {
+         node.title = "Turn repeat off";
+      } else {
+         node.title = "Turn repeat on";
+      }
+   }
+   
+   //
+   // Shuffle
+   //
+   
+   #on_shuffle_ui_toggled() {
+      this.#shuffle = this.#shuffle_button.checked;
+      this.#update_shuffle_tooltip();
+   }
+   #update_shuffle_tooltip() {
+      let node = this.#shuffle_button;
+      if (this.#shuffle) {
+         node.title = "Turn shuffle off";
+      } else {
+         node.title = "Turn shuffle on";
+      }
+   }
+   
+   //
+   // Volume button
+   //
+   
+   #on_mute_ui_toggled() {
+      let state = this.#mute_button.checked;
+      this.#media.muted = state;
+      this.#update_mute_tooltip(state);
+   }
+   #update_mute_tooltip(state) {
+      let node = this.#mute_button;
+      if (state === void 0)
+         state = this.#media.muted;
+      if (state) {
+         node.title = "Sound";
+      } else {
+         node.title = "Mute";
+      }
+   }
+   
+   //
+   // Simple UI interactions
+   //
+   
+   #on_prev_click() {
+      if (this.#media.currentTime > 3) {
+         this.#media.currentTime = 0;
+         return;
+      }
+      this.toPrevMedia();
    }
    
    #on_play_pause_click(e) {
@@ -467,8 +610,8 @@ class WMPlayerElement extends HTMLElement {
       }
    }
    #on_stop_click(e) {
-      this.#media.pause();
-      this.#media.currentTime = 0;
+      this.#set_playlist_index(0); // also pauses the media
+      this.#update_play_state();
       this.#stop_button.setAttribute("disabled", "disabled");
    }
    
@@ -478,6 +621,10 @@ class WMPlayerElement extends HTMLElement {
    #on_volume_slider_change(e) {
       this.#media.volume = this.#seek_slider.value;
    }
+   
+   //
+   // Misc
+   //
    
    #update_play_state() {
       if (this.#media.paused) {
