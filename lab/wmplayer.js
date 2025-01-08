@@ -73,6 +73,7 @@ class WMPlaylistItem {
 
 class WMPlayerElement extends HTMLElement {
    #playlist = []; // Array<WMPlaylistItem>
+   #autoplay = false;
    #loop     = false;
    #shuffle  = false;
    
@@ -156,7 +157,7 @@ class WMPlayerElement extends HTMLElement {
          "currentTime",
          "defaultPlaybackRate",
          "disableRemotePlayback",
-         "muted",
+         //"muted",
          "playbackRate",
          "preservesPitch",
          "srcObject",
@@ -170,18 +171,18 @@ class WMPlayerElement extends HTMLElement {
          });
       }
       
-      this.observedAttributes = [ "src" ];
+      this.observedAttributes = [ "autoplay", "src" ];
       
       for(const name of [
          // HTMLMediaElement:
-         "autoplay",
+         //"autoplay",
          //"controls",
          //"controlslist",
          //"src",
          // HTMLVideoElement:
-         "height",
+         //"height",
          "poster",
-         "width",
+         //"width",
       ]) {
          this.observedAttributes.push(name);
          Object.defineProperty(this, name, {
@@ -281,7 +282,7 @@ class WMPlayerElement extends HTMLElement {
       this.#volume_slider.addEventListener("change", this.#on_volume_slider_change.bind(this));
       
       this.#next_button = this.#shadow.querySelector(".next-ff");
-      this.#next_button.addEventListener("click", this.toNextMedia.bind(this));
+      this.#next_button.addEventListener("click", this.#on_next_click.bind(this));
       this.#prev_button = this.#shadow.querySelector(".prev-rw");
       this.#prev_button.addEventListener("click", this.#on_prev_click.bind(this));
    }
@@ -289,6 +290,39 @@ class WMPlayerElement extends HTMLElement {
    //
    // Accessors and APIs
    //
+   
+   get autoplay() { return this.#autoplay; }
+   set autoplay(v) {
+      v = !!v;
+      if (v == this.#autoplay)
+         return;
+      this.#autoplay = v;
+      if (this.#has_ever_been_connected) {
+         this.#setting_attribute = true;
+         this[v ? "setAttribute" : "removeAttribute"]("autoplay", "autoplay");
+         this.#setting_attribute = false;
+      }
+      if (this.isConnected) {
+         this.#try_autoplay();
+      }
+   }
+   #try_autoplay() {
+      if (!this.#ready_to_autoplay)
+         return;
+      if (!this.#playlist.length)
+         return;
+      if (this.#current_playlist_index != 0)
+         return;
+      if (!this.#media.paused)
+         return;
+      if (this.#media.currentTime != 0)
+         return;
+      this.#ready_to_autoplay = false;
+      this.#media.play();
+   }
+   
+   get currentPlaylistIndex() { return this.#current_playlist_index; }
+   set currentPlaylistIndex(v) { this.#set_playlist_index(v); }
    
    get loop() { return this.#loop; }
    set loop(v) {
@@ -301,6 +335,15 @@ class WMPlayerElement extends HTMLElement {
          this.#media[v ? "setAttribute" : "removeAttribute"]("loop", "loop");
       }
       this.#update_loop_tooltip();
+      this.#update_prev_next_state();
+   }
+   
+   get muted() { return this.#media.muted; }
+   set muted(v) {
+      v = !!v;
+      this.#media.muted = v;
+      this.#mute_button.checked = v;
+      this.#update_mute_tooltip(v);
    }
    
    get shuffle() { return this.#shuffle; }
@@ -317,6 +360,19 @@ class WMPlayerElement extends HTMLElement {
    // Custom element lifecycle
    //
    
+   #has_ever_been_connected = false;
+   #ready_to_autoplay       = true;
+   
+   #disqualify_autoplay_on_playback_control_by_user() {
+      //
+      // If the user interacts with any part of the player that actually influences 
+      // playback, e.g. the seek slider or play/pause button, then disqualify any 
+      // pending autoplay. (We don't care about interactions with widgets that don't 
+      // alter the flow of playback, e.g. the Shuffle button or the Volume slider.)
+      //
+      this.#ready_to_autoplay = false;
+   }
+   
    attributeChangedCallback(name, prior, after) {
       if (this.#setting_attribute)
          return;
@@ -324,8 +380,10 @@ class WMPlayerElement extends HTMLElement {
       
       if (name == "loop") {
          let state = after !== null;
+         this.#loop = state;
          this.#loop_button.checked = state;
          this.#update_loop_tooltip(state);
+         this.#update_prev_next_state();
       }
       if (name == "src") {
          //
@@ -342,11 +400,11 @@ class WMPlayerElement extends HTMLElement {
          if (after !== null && after) {
             let item = new WMPlaylistItem({ src: after });
             this.#replace_playlist([ item ]);
+            this.#try_autoplay();
          }
       }
    }
    
-   #has_ever_been_connected = false;
    connectedCallback() {
       if (this.#has_ever_been_connected)
          return;
@@ -363,6 +421,10 @@ class WMPlayerElement extends HTMLElement {
       this.#update_shuffle_tooltip();
       this.#update_loop_tooltip(this.loop);
       this.#update_mute_tooltip();
+      
+      window.setTimeout((function() {
+         this.#ready_to_autoplay = false;
+      }).bind(this), 200);
    }
    
    //
@@ -383,14 +445,10 @@ class WMPlayerElement extends HTMLElement {
       let no_media = this.#playlist.length == 0;
       
       this.#play_pause_button.disabled = no_media;
-      if (no_media) {
+      if (no_media)
          this.#stop_button.disabled = true;
-         this.#next_button.disabled = true;
-         this.#prev_button.disabled = true;
-      } else {
-         this.#next_button.disabled = this.#current_playlist_index == this.#playlist.length - 1;
-         this.#prev_button.disabled = this.#current_playlist_index == 0;
-      }
+      
+      this.#update_prev_next_state();
       
       if (this.#playlist.length == 1) {
          this.#media[this.#loop ? "setAttribute" : "removeAttribute"]("loop", "loop");
@@ -426,8 +484,7 @@ class WMPlayerElement extends HTMLElement {
       let next = this.#playlist[v + 1];
       this.#media.pause();
       item.populateMediaElement(this.#media);
-      this.#next_button.disabled = v == this.#playlist.length - 1;
-      this.#prev_button.disabled = v == 0;
+      this.#update_prev_next_state();
       if (v > 0) {
          this.#stop_button.disabled = false;
       }
@@ -438,7 +495,8 @@ class WMPlayerElement extends HTMLElement {
    }
    
    // Returns `true` if we successfully navigated to another playlist 
-   // item, or `false` if there was nothing to navigate to.
+   // item, or `false` if there was nothing to navigate to. Applies 
+   // all relevant "shuffle" logic.
    #to_next_playlist_item(ignore_shuffle) {
       let next = this.#current_playlist_index + 1;
       if (this.#shuffle && !ignore_shuffle) {
@@ -487,9 +545,11 @@ class WMPlayerElement extends HTMLElement {
    }
    
    toPrevMedia() {
-      if (this.#set_playlist_index(this.#current_playlist_index - 1)) {
+      let playing = !this.#media.paused;
+      if (!this.#set_playlist_index(this.#current_playlist_index - 1))
+         return;
+      if (playing)
          this.#media.play();
-      }
    }
    toNextMedia(ignore_shuffle) {
       let playing = !this.#media.paused;
@@ -507,14 +567,13 @@ class WMPlayerElement extends HTMLElement {
       this.#media.width  = this.#media.videoWidth  || 0;
       this.#media.height = this.#media.videoHeight || 0;
    }
-   
+   #on_duration_change(e) {
+      this.#seek_slider.maximum = this.#media.duration;
+   }
    #on_current_time_change(e) {
       if (this.#seek_slider.is_being_edited())
          return;
       this.#seek_slider.value = this.#media.currentTime;
-   }
-   #on_duration_change(e) {
-      this.#seek_slider.maximum = this.#media.duration;
    }
    #on_volume_change(e) {
       if (this.#volume_slider.is_being_edited())
@@ -574,9 +633,7 @@ class WMPlayerElement extends HTMLElement {
    //
    
    #on_mute_ui_toggled() {
-      let state = this.#mute_button.checked;
-      this.#media.muted = state;
-      this.#update_mute_tooltip(state);
+      this.muted = this.#mute_button.checked;
    }
    #update_mute_tooltip(state) {
       let node = this.#mute_button;
@@ -590,18 +647,11 @@ class WMPlayerElement extends HTMLElement {
    }
    
    //
-   // Simple UI interactions
+   // Play/Pause button
    //
    
-   #on_prev_click() {
-      if (this.#media.currentTime > 3) {
-         this.#media.currentTime = 0;
-         return;
-      }
-      this.toPrevMedia();
-   }
-   
    #on_play_pause_click(e) {
+      this.#disqualify_autoplay_on_playback_control_by_user();
       if (this.#media.paused) {
          this.#media.play();
          this.#stop_button.removeAttribute("disabled");
@@ -609,23 +659,6 @@ class WMPlayerElement extends HTMLElement {
          this.#media.pause();
       }
    }
-   #on_stop_click(e) {
-      this.#set_playlist_index(0); // also pauses the media
-      this.#update_play_state();
-      this.#stop_button.setAttribute("disabled", "disabled");
-   }
-   
-   #on_seek_slider_change(e) {
-      this.#media.currentTime = this.#seek_slider.value;
-   }
-   #on_volume_slider_change(e) {
-      this.#media.volume = this.#seek_slider.value;
-   }
-   
-   //
-   // Misc
-   //
-   
    #update_play_state() {
       if (this.#media.paused) {
          this.#internals.states.add("paused");
@@ -637,6 +670,63 @@ class WMPlayerElement extends HTMLElement {
          this.#play_pause_button.title = "Pause";
       }
    }
+   
+   //
+   // Previous/Next buttons
+   //
+   
+   #on_next_click() {
+      this.#disqualify_autoplay_on_playback_control_by_user();
+      this.toNextMedia();
+   }
+   #on_prev_click() {
+      this.#disqualify_autoplay_on_playback_control_by_user();
+      if (this.#media.currentTime > 3) {
+         this.#media.currentTime = 0;
+         return;
+      }
+      this.toPrevMedia();
+   }
+   
+   #update_prev_next_state() {
+      let no_prev = false;
+      let no_next = false;
+      {
+         let count = this.#playlist.length;
+         if (!count) {
+            no_prev = no_next = true;
+         } else if (!this.#loop) {
+            let current = this.#current_playlist_index;
+            no_prev = current == 0;
+            no_next = current == count - 1;
+         }
+      }
+      this.#prev_button.disabled = no_prev;
+      this.#next_button.disabled = no_next;
+   }
+   
+   //
+   // Simple UI interactions
+   //
+   
+   #on_stop_click(e) {
+      this.#disqualify_autoplay_on_playback_control_by_user();
+      this.#set_playlist_index(0); // also pauses the media
+      this.#update_play_state();
+      this.#stop_button.setAttribute("disabled", "disabled");
+   }
+   
+   #on_seek_slider_change(e) {
+      this.#media.currentTime = this.#seek_slider.value;
+      this.#disqualify_autoplay_on_playback_control_by_user();
+   }
+   #on_volume_slider_change(e) {
+      this.#media.volume = this.#seek_slider.value;
+   }
+   
+   //
+   // UI updates
+   //
    
    #update_buffering_state(e) {
       if (e.name == "buffering") {
