@@ -340,6 +340,8 @@ class WMPlayerElement extends HTMLElement {
    #try_autoplay() {
       if (!this.#ready_to_autoplay)
          return;
+      if (!this.#autoplay)
+         return;
       if (!this.#playlist.length)
          return;
       if (this.#current_playlist_index != 0)
