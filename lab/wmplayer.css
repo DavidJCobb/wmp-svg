@@ -296,6 +296,24 @@ button.stop {
       --glyph: url(spritesheet-glyphs-general.svg#stop-disabled);
    }
 }
+.basic-button.mute {
+   --glyph: url(spritesheet-glyphs-general.svg#volume-high);
+   &[data-glyph="empty"] {
+      --glyph: url(spritesheet-glyphs-general.svg#volume-empty);
+   }
+   &[data-glyph="low"] {
+      --glyph: url(spritesheet-glyphs-general.svg#volume-low);
+   }
+   &[data-glyph="medium"] {
+      --glyph: url(spritesheet-glyphs-general.svg#volume-medium);
+   }
+   &[data-glyph="high"] {
+      --glyph: url(spritesheet-glyphs-general.svg#volume-high);
+   }
+   &:checked {
+      --glyph: url(spritesheet-glyphs-general.svg#volume-muted);
+   }
+}
 
 /*
    The "previous" and "next" buttons. The former is just the latter rotated 
@@ -343,15 +361,18 @@ button.stop {
       top:      0;
    }
    
-   --sprite: url(spritesheet-next.svg#normal-next);
+   --sprite: url(spritesheet-next.svg#normal);
+   --glyph:  url(spritesheet-glyphs-next.svg#next-enabled);
+   
    &:hover {
-      --sprite: url(spritesheet-next.svg#hover-next);
+      --sprite: url(spritesheet-next.svg#hover);
    }
    &:active {
-      --sprite: url(spritesheet-next.svg#active-next);
+      --sprite: url(spritesheet-next.svg#active);
    }
    &:disabled {
-      --sprite: url(spritesheet-next.svg#disabled-next);
+      --sprite: url(spritesheet-next.svg#disabled);
+      --glyph:  url(spritesheet-glyphs-next.svg#next-disabled);
    }
    
    &::before { /* visuals */
@@ -361,7 +382,10 @@ button.stop {
       
       top: calc(-6px * var(--scale,1));
       
-      background: var(--sprite) left top/var(--sprite-w) var(--sprite-h) no-repeat;
+      background:
+         var(--glyph)  left top/var(--sprite-w) var(--sprite-h) no-repeat,
+         var(--sprite) left top/var(--sprite-w) var(--sprite-h) no-repeat
+      ;
    }
    &::after { /* hitbox */
       /* can't use CSS variables in a path(), so scale the whole hitbox instead. */
@@ -373,6 +397,14 @@ button.stop {
       clip-path: path("M 2 0 l 39.5 0 q 7.5 0 7.5 11.5 q 0 11.5 -7.5 11.5 l -39 0 q -1.5 0 -1.5 -1 C 1 21 3 18.5 3 11.5 c 0 -7 -2 -9.5 -2 -10.5 Q 1 0 2.5 0 z");
       transform: scale(var(--scale, 1));
       transform-origin: left top;
+   }
+   
+   &.fast-forward,
+   &.rewind {
+      --glyph: url(spritesheet-glyphs-next.svg#fast-forward-enabled);
+      &:disabled {
+         --glyph: url(spritesheet-glyphs-next.svg#fast-forward-disabled);
+      }
    }
    
    &:focus-visible::before {

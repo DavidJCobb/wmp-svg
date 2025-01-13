@@ -2,14 +2,19 @@
 # To-do
 
 * `WMPlayerElement`
-  * ARIA attributes and keyboard navigation support
+  * Shim programmatic access to the `playbackRate` property on the wrapped media element.
+    * Track the `playbackRate` privately, so we can restore it when fast-forwarding stops.
+    * If the playback rate is modified while fast-forwarding, halt the fast-forwarding operation ([consistent with WMP](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/wmp/controls-fastreverse)).
   * Switch from using SVG views to using `background-position`, since the former can still tricker a flicker (as if the browser is actually reloading the SVG?!) when a sprite changes.
   * The "theater" mode (wherein the player controls are overlaid on the video) uses different glyphs from the normal player &mdash; specifically, white glyphs rather than blue.
   * We need "disabled" states for the "previous" and "next" buttons' glassy backing. In the normal player UI, these buttons are never disabled (because WMP will just pick something from your library, same as play/pause), but they can be disabled in the "theater" UI  (wherein the player controls are overlaid on the video). We're mimicking WMP's UI, not the full program design: we won't always have a previous or next media item, so I think we want more visible disable states. (Plus, we just need the graphics for "theater" mode anyway.)
   * Timestamp display (to the left of the controls)
-  * Clicking and holding on the "next" button should engage fast-forward
   * Clicking and holding on the "prev" button should engage rewind
-  * Tooltips for next/fast-forward and prev/rewind
+    * Only when watching a video. Disable the button during audio-only playback.
+    * WMP implements this by rewinding at 500% speed but only showing keyframes. Not all browsers support negative `playbackRate`s, so we'll have to do something similar: pause the video for as long as the button is held, and jump back 5 seconds in the video for every 1 second the button is held. Then, auto-resume the video when the rewind button is released.
+      * Windows Media Player updates the state of the play/pause button while rewinding, as if the video is paused.
+      * Windows Media Player resumes playback of the video even if the rewind operation began while the video was paused. I don't think we should mimic this behavior.
+  * Tooltips for prev/rewind
   * Look into a better way to handle the "tray" borders
   * Look into replicating the WMP dark theme for the "tray"
   * Look into offering differing arrangements of buttons
@@ -35,10 +40,4 @@
   * The bare minimum fix for this would be to guarantee a minimum outline thickness of 1px using a `non-scaling-stroke`. We already had to split the slider thumb into a separate graphic so we could get rid of the alpha mask and drop shadow that were built into the play/pause button, so we *can* make this fix.
     * But the graphics still end up looking bad at larger sizes (e.g. 2x scale, 3x scale) because the outlines should be thicker for the scrollbar thumbs, basically.
 * Button glyphs
-  * Volume
-    * Muted
-    * 0%
-    * 33%
-    * 66%
-    * Full
   * Full-screen (enter/exit)

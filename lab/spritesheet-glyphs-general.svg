@@ -5,6 +5,11 @@
    <view id="shuffle-on" viewBox="50 50 50 50" />
    <view id="stop-enabled" viewBox="0 100 50 50" />
    <view id="stop-disabled" viewBox="50 100 50 50" />
+   <view id="volume-empty" viewBox="0 150 50 50" />
+   <view id="volume-low" viewBox="50 150 50 50" />
+   <view id="volume-medium" viewBox="100 150 50 50" />
+   <view id="volume-high" viewBox="150 150 50 50" />
+   <view id="volume-muted" viewBox="200 150 50 50" />
    <!--
       Glyphs are, formally, 50x50px graphics, but in general they don't 
       extend very far beyond a 26x26px AABB.
@@ -107,7 +112,7 @@
                   <stop offset="1" stop-color="#000" />
                </radialGradient>
             </defs>
-            <g shape-rendering="crispedges" transform="translate(0 2px)">
+            <g shape-rendering="crispedges" transform="translate(0 2)">
                <!--
                   Split the glow in half and skew each half differently, 
                   to get a glow that's wider at the top and narrower at 
@@ -227,6 +232,87 @@
             stroke="#00000002"
             stroke-width="1"
          />
+      </g>
+   </g>
+   
+   <!-- Volume -->
+   <g transform="translate(0 150)">
+      <defs>
+         <path id="volume-speaker-shape-layer"
+            fill="currentColor"
+            stroke="currentColor"
+            d="M 8 21 A 1 1 0 0 1 9 20 L 12 20 C 13 17 16 13 18 12 C 22 16 21 21 23 23 C 24 24 24 25 24 25 C 24 25 24 26 23 27 C 21 29 22 34 18 38 C 16 37 13 33 12 30 L 9 30 A 1 1 0 0 1 8 29 z"
+         />
+         <path id="volume-wave-1"
+            fill="currentColor"
+            stroke="currentColor"
+            d="M 25 20 C 27 20 30 22 30 25 C 30 28 27 30 25 30 c 2 -3 2 -7 0 -10 z"
+         />
+         <path id="volume-wave-2"
+            fill="currentColor"
+            stroke="currentColor"
+            d="M 28 16 C 32 16 36 20 36 25 C 36 30 32 34 28 34 c 5 -5 5 -14 0 -18 z"
+         />
+         <path id="volume-wave-3"
+            fill="currentColor"
+            stroke="currentColor"
+            d="M 31 12 C 39 14 42 19 42 25 C 42 31 39 36 31 38 c 9 -8 9 -18 0 -26 z"
+         />
+         
+         <g id="volume-speaker-shape">
+            <use href="#volume-speaker-shape-layer" color="#FFFFFF" stroke-width="2" />
+            <use href="#volume-speaker-shape-layer" color="#0064cc" stroke-width="0" />
+         </g>
+         <g id="volume-wave-1-shape">
+            <use href="#volume-wave-1" color="#FFFFFF" stroke-width="2" />
+            <use href="#volume-wave-1" color="#0064cc" stroke-width="0" />
+         </g>
+         <g id="volume-wave-2-shape">
+            <use href="#volume-wave-2" color="#FFFFFF" stroke-width="2" />
+            <use href="#volume-wave-2" color="#0064cc" stroke-width="0" />
+         </g>
+         <g id="volume-wave-3-shape">
+            <use href="#volume-wave-3" color="#FFFFFF" stroke-width="2" />
+            <use href="#volume-wave-3" color="#0064cc" stroke-width="0" />
+         </g>
+      </defs>
+      
+      <!-- empty -->
+      <g>
+         <use href="#volume-speaker-shape" />
+      </g>
+      
+      <!-- 33% -->
+      <g transform="translate(50 0)">
+         <use href="#volume-speaker-shape" />
+         <use href="#volume-wave-1-shape" />
+      </g>
+      
+      <!-- 66% -->
+      <g transform="translate(100 0)">
+         <use href="#volume-speaker-shape" />
+         <use href="#volume-wave-1-shape" />
+         <use href="#volume-wave-2-shape" />
+      </g>
+      
+      <!-- 100% -->
+      <g transform="translate(150 0)">
+         <use href="#volume-speaker-shape" />
+         <use href="#volume-wave-1-shape" />
+         <use href="#volume-wave-2-shape" />
+         <use href="#volume-wave-3-shape" />
+      </g>
+      
+      <!-- muted -->
+      <g transform="translate(200 0)">
+         <use href="#volume-speaker-shape" />
+         <g transform="translate(32 25) scale(0.8)">
+            <circle cx="0" cy="0" r="12.5" fill="#FFF" />
+            <g fill="none" stroke-width="2" stroke="red">
+               <circle cx="0" cy="0" r="10.5" />
+               <line x1="-7.4235" y1="-7.4235" x2="7.4235" y2="7.4235" />
+            </g>
+         </g>
       </g>
    </g>
 </svg>

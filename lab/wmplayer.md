@@ -34,6 +34,11 @@ A video player element that mimics Windows Media Player 11 and 12's UI. The func
 * Accordingly, "loop" cycles from each end of the playlist to the other, and "shuffle" randomizes playback order. "Previous" and "next" buttons are offered as well.
 
 
+### Usage notes
+
+* Windows Media Player uses a 500% fast-forward speed ([source](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/wmp/controls-fastforward)), but we default our fast-forward speed to 400% because Gecko will mute media if it has a playback rate outside the range [25%, 400%]. You can set `fastForwardSpeed` to change the speed (the value you specify must be greater than `1` i.e. 100% speed).
+
+
 ## `WMPlayerSliderElement`
 
 A custom element that acts a slider. Simple enough. This is depended on by `WMPlayerElement`.

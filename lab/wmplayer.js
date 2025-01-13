@@ -76,10 +76,16 @@ class WMPlayerElement extends HTMLElement {
    #autoplay = false;
    #loop     = false;
    #shuffle  = false;
+   //
+   #fast_forward_delay = 1; // hold Next down for this many seconds to start fast-forwarding
+   #fast_forward_speed = 4; // WMP uses 5, but Gecko mutes audio for speeds outside [0.25, 4]
    
    #current_playlist_index         = 0;
    #current_playlist_index_started = false;
    #playlist_shuffle_indices       = [];
+   
+   #hold_to_fast_forward_timeout = null;
+   #is_fast_forwarding = false;
    
    #shadow;
    #internals;
@@ -114,7 +120,7 @@ class WMPlayerElement extends HTMLElement {
    </div>
    <button class="play-pause">Play</button>
    <div class="right">
-      <button class="next-ff" disabled>Next</button>
+      <button class="next-ff" disabled title="Next (press and hold to fast-forward)">Next</button>
       <input type="checkbox" aria-label="Mute" aria-role="switch" class="basic-button mute" />
       <wm-slider aria-label="Volume" class="volume constant-thumb circular-thumb" min="0" max="100" value="100" step="1" title="Volume"></wm-slider>
    </div>
@@ -319,7 +325,11 @@ class WMPlayerElement extends HTMLElement {
       this.#volume_slider.addEventListener("change", this.#on_volume_slider_change.bind(this));
       
       this.#next_button = this.#shadow.querySelector(".next-ff");
-      this.#next_button.addEventListener("click", this.#on_next_click.bind(this));
+      //this.#next_button.addEventListener("click", this.#on_next_click.bind(this));
+      this.#next_button.addEventListener("mousedown", this.#on_next_mousedown.bind(this));
+      this.#next_button.addEventListener("mouseup", this.#on_next_mouseup.bind(this));
+      
+      
       this.#prev_button = this.#shadow.querySelector(".prev-rw");
       this.#prev_button.addEventListener("click", this.#on_prev_click.bind(this));
       
@@ -357,7 +367,7 @@ class WMPlayerElement extends HTMLElement {
    }
    
    //
-   // Accessors and APIs
+   // Accessors
    //
    
    get autoplay() { return this.#autoplay; }
@@ -395,6 +405,25 @@ class WMPlayerElement extends HTMLElement {
    get currentPlaylistIndex() { return this.#current_playlist_index; }
    set currentPlaylistIndex(v) { this.#set_playlist_index(v); }
    
+   get fastForwardDelay() { return this.#fast_forward_delay; }
+   set fastForwardDelay(v) {
+      v = +v;
+      if (v <= 0)
+         throw new Error("invalid duration");
+      this.#fast_forward_delay = v;
+   }
+   
+   get fastForwardSpeed() { return this.#fast_forward_speed; }
+   set fastForwardSpeed(v) {
+      v = +v;
+      if (v <= 1)
+         throw new Error("fast-forward speed multiplier must be greater than 1");
+      this.#fast_forward_speed = v;
+      if (this.#is_fast_forwarding) {
+         this.#media.playbackRate = v;
+      }
+   }
+   
    get loop() { return this.#loop; }
    set loop(v) {
       v = !!v;
@@ -415,6 +444,7 @@ class WMPlayerElement extends HTMLElement {
       this.#media.muted = v;
       this.#mute_button.checked = v;
       this.#update_mute_tooltip(v);
+      this.#update_mute_glyph(this.#volume_slider.value);
    }
    
    get shuffle() { return this.#shuffle; }
@@ -677,7 +707,9 @@ class WMPlayerElement extends HTMLElement {
    #on_volume_change(e) {
       if (this.#volume_slider.is_being_edited())
          return;
-      this.#volume_slider.value = Math.floor(this.#media.volume * 100);
+      let value = Math.floor(this.#media.volume * 100);
+      this.#volume_slider.value = value;
+      this.#update_mute_glyph(value);
    }
    
    #on_media_play(e) {
@@ -774,10 +806,10 @@ class WMPlayerElement extends HTMLElement {
    // Previous/Next buttons
    //
    
-   #on_next_click() {
+   /*#on_next_click() {
       this.#disqualify_autoplay_on_playback_control_by_user();
       this.toNextMedia();
-   }
+   }*/
    #on_prev_click() {
       this.#disqualify_autoplay_on_playback_control_by_user();
       if (this.#media.currentTime > 3) {
@@ -785,6 +817,33 @@ class WMPlayerElement extends HTMLElement {
          return;
       }
       this.toPrevMedia();
+   }
+   
+   #on_next_mousedown() {
+      this.#disqualify_autoplay_on_playback_control_by_user();
+      this.#hold_to_fast_forward_timeout = window.setTimeout(this.#held_to_fast_forward.bind(this), this.#fast_forward_delay * 1000);
+   }
+   #held_to_fast_forward() {
+      this.#hold_to_fast_forward_timeout = null;
+      this.#media.playbackRate = this.#fast_forward_speed;
+      this.#is_fast_forwarding = true;
+      this.#next_button.classList.add("fast-forward");
+      if (this.#media.paused) {
+         this.#media.play();
+      }
+   }
+   #on_next_mouseup() {
+      if (this.#hold_to_fast_forward_timeout !== null) {
+         clearTimeout(this.#hold_to_fast_forward_timeout);
+         this.#hold_to_fast_forward_timeout = null;
+      }
+      if (this.#is_fast_forwarding) {
+         this.#media.playbackRate = 1.0;
+         this.#is_fast_forwarding = false;
+         this.#next_button.classList.remove("fast-forward");
+      } else {
+         this.toNextMedia();
+      }
    }
    
    #update_prev_next_state() {
@@ -820,7 +879,9 @@ class WMPlayerElement extends HTMLElement {
       this.#disqualify_autoplay_on_playback_control_by_user();
    }
    #on_volume_slider_change(e) {
-      this.#media.volume = this.#volume_slider.value / 100;
+      let value = this.#volume_slider.value;
+      this.#media.volume = value / 100;
+      this.#update_mute_glyph(value);
    }
    
    //
@@ -838,6 +899,25 @@ class WMPlayerElement extends HTMLElement {
          this.#internals.states.delete("stalled");
          this.#internals.states.delete("buffering");
       }
+   }
+   
+   #update_mute_glyph(volume) {
+      let node  = this.#mute_button;
+      let glyph = "high";
+      if (this.#media.muted) {
+         glyph = "muted";
+      } else {
+         if (!volume) {
+            glyph = "empty";
+         } else if (volume < 33) {
+            glyph = "low";
+         } else if (volume < 66) {
+            glyph = "medium";
+         } else {
+            glyph = "high";
+         }
+      }
+      node.setAttribute("data-glyph", glyph);
    }
    
 };
