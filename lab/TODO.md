@@ -2,9 +2,6 @@
 # To-do
 
 * `WMPlayerElement`
-  * Shim programmatic access to the `playbackRate` property on the wrapped media element.
-    * Track the `playbackRate` privately, so we can restore it when fast-forwarding stops.
-    * If the playback rate is modified while fast-forwarding, halt the fast-forwarding operation ([consistent with WMP](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/wmp/controls-fastreverse)).
   * Switch from using SVG views to using `background-position`, since the former can still tricker a flicker (as if the browser is actually reloading the SVG?!) when a sprite changes. The flickering isn't common but seems to occur after multitasking for a while on other pages/applications.
     * Be sure to stress-test this change. It's possible (though hopefully unlikely) that the flicker is repaint lag instead and would therefore not be fixed by this change.
   * The "theater" mode (wherein the player controls are overlaid on the video) uses different glyphs from the normal player &mdash; specifically, white glyphs rather than blue.

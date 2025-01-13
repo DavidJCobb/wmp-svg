@@ -58,6 +58,10 @@ There is a small advantage to rolling our own slider element, beyond working aro
 
 The lifecycle of a custom element isn't terribly clear: the relative ordering of callbacks is well-defined, but the ordering of these callbacks relative to other operations doesn't seem to be.
 
+### A classification of jank
+
+#### Attributes
+
 To wit: consider the case of a custom element that is present in the HTML source code, after a synchronously-loaded `<script>` tag that defines the element. If attributes are set on that element in the HTML source code (i.e. not dynamically; not post-load), will those attributes be present on the element when its `connectedCallback` runs? The answer is, it depends! In Firefox, attributes in general *may not* be present *unless* they're listed in `observedAttributes`, in which case they seemingly *will always* be present.
 
 ```js
@@ -86,7 +90,121 @@ class E extends HTMLElement {
 
 When an element is upgraded (per [the spec](https://html.spec.whatwg.org/multipage/custom-elements.html#upgrades)), the `attributeChangedCallback` will *always* run for each observed attribute, prior to `connectedCallback`. The algorithm explicitly requires that the browser attempt to queue `attributeChangedCallback` for *all* attributes, with the process of queueing `attributeChangedCallback` described as aborting early for non-bserved attributes. If Firefox skips non-observed attributes on the grounds that they'd end up being no-ops, then that may explain why only observed attributes are visible from within `connectedCallback` in that browser.
 
+#### Child elements
+
 Child elements are similarly messy. In general, [it's intentional](https://github.com/WICG/webcomponents/issues/551#issuecomment-241651544) that a custom element is connected before its child nodes are appended, with `MutationObserver` instances being the [intended](https://github.com/WICG/webcomponents/issues/551#issuecomment-241787068) solution for a custom element reacting to its child nodes. (This, despite the fact that there's no reliable way to know if an element has *finished* loading all of its content. The best we can do is use a `MutationObserver` to react to the appearance of a `nextSibling` on the element or any ancestor (or, if it's truly the last element in the document, `DOMContentLoaded`), and that breaks if any JavaScript mucks with the element tree during load. An event like `closeTagReached` has been [proposed](https://github.com/WICG/webcomponents/issues/551#issuecomment-241844398) but seems unpopular given the responses it got when brought up.)
+
+#### Class-level [gs]etters
+
+It's quite common to define getters and setters on a custom element class. Unfortunately, it's possible for JavaScript code to create a custom element instance, and then set properties on it *before* the element is actually upgraded (i.e. before the custom element constructor runs, and before the element is imbued with whatever [gs]etters are defined on the custom element class). If one of the properties being set is [meant to be] a class-level setter, then this can cause clients to inadvertently bypass the setter and create an expando property with the same name on the new custom element.
+
+Put more simply, it's possible for this code to fail under certain circumstances:
+
+```javascript
+class Foo extends HTMLElement {
+   constructor() {
+      super();
+      this.real_bar = 5;
+   }
+   
+   set bar(v) { this.real_bar = v; }
+};
+customElements.define("foo-element", Foo);
+
+(function() {
+   let my_foo = /* some code which creates a foo-element */;
+   
+   my_foo.bar = 12345;
+   if (my_foo.real_bar != 12345)
+      throw new Error("wtf?");
+})();
+```
+
+Known scenarios where this code may fail include:
+
+* Cloning a `foo-element` node, or deep-cloning an ancestor thereof. The [algorithm for cloning a single node](https://dom.spec.whatwg.org/#clone-a-single-node) invokes the [element creation algorithm](https://dom.spec.whatwg.org/#concept-create-element) with inputs that cause it to upgrade any created custom elements asynchronously.
+
+Known scenarios where this code should never fail include:
+
+* Creating a `foo-element` node via `document.createElement`. That API [invokes](https://dom.spec.whatwg.org/#ref-for-concept-create-element%E2%91%A0) the element creation algorithm with inputs that should cause it to upgrade a created custom element synchronously.
+
+* Creating a `foo-element` node by setting `someElement.innerHTML` or `someShadowRoot.innerHTML`. [Those APIs](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-innerhtml) run the [fragment parsing algorithm](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#fragment-parsing-algorithm-steps). Since we're generally working in HTML rather than XML, that routes to the [HTML fragment parsing algorithm](https://html.spec.whatwg.org/multipage/parsing.html#html-fragment-parsing-algorithm), which spawns an HTML parser that's been configured for the special case of parsing "fragments" like those used for `innerHTML` setters. Within the general HTML parsing rules, the algorithm to [create an element for a \[parsed\] token](https://html.spec.whatwg.org/multipage/parsing.html#create-an-element-for-the-token) invokes the general element creation algorithm, and since we're in the fragment case, it does so with inputs that should cause that algorithm to upgrade a created custom element synchronously.
+
+A common mistake is to have a custom element create its contents using an `HTMLTemplateElement` as an intermediary &mdash; setting the template element's `innerHTML` and then using `myTemplate.content.cloneNode(true)` to move the content into the custom element's shadow root. Doing this can cause any nested custom elements (within the HTML string) to be updated asynchronously, such that attempting to use their setters will instead shadow the setters with expandos. The solution is to set `myShadowRoot.innerHTML` instead.
+
+That said, if you wish to make a custom element behave more sanely when created via `cloneNode`, you could try this, to retroactively apply any bypassed [gs]etters:
+
+```javascript
+class Foo extends HTMLElement {
+   constructor() {
+      super();
+      this.real_bar = 5;
+      
+      for(let name of Object.getOwnPropertyNames(this)) {
+         if (name[0] == '#')
+            continue;
+            
+         // NOTE: If we subclassed another custom element, then we'd have to walk 
+         // the prototype chain and deal with all base classes, too.
+         let desc = Object.getOwnPropertyDescriptor(this.constructor.prototype, name);
+         if (!desc) {
+            continue; // not an override; ignore
+         }
+         if (!desc.get && !desc.set) {
+            continue; // overridden property not a [gs]etter; ignore
+         }
+         let value = this[name];
+         delete this[name]; // clear the override.
+         if (desc.set) {
+            this[name] = value; // re-invoke setter with the value that slipped past it
+         }
+      }
+   }
+   
+   set bar(v) { this.real_bar = v; }
+};
+customElements.define("foo-element", Foo);
+```
+
+Alternatively, you could choose to detect and warn about this scenario:
+
+```javascript
+class Foo extends HTMLElement {
+   constructor() {
+      super();
+      
+      {
+         let broken = [];
+         for(let name of Object.getOwnPropertyNames(this)) {
+            if (name[0] == '#')
+               continue;
+               
+            // NOTE: If we subclassed another custom element, then we'd have to walk 
+            // the prototype chain and deal with all base classes, too.
+            let desc = Object.getOwnPropertyDescriptor(this.constructor.prototype, name);
+            if (!desc) {
+               continue; // not an override; ignore
+            }
+            if (!desc.get && !desc.set) {
+               continue; // overridden property not a [gs]etter; ignore
+            }
+            broken.push(name);
+         }
+         if (broken.length) {
+            console.groupCollapsed("warning: custom element created improperly");
+            console.warn(`the following properties were set on a ${this.constructor.name} custom element before the element was upgraded:`);
+            console.log(broken);
+            console.log("broken element: ", this);
+            console.info("tip: avoid creating custom elements with Element.cloneNode, as this can cause the elements to be upgraded asynchronously (the created element is a bare HTMLElement until the next spin of the event loop); document.createElement and the innerHTML setter are known to avoid this problem");
+            console.groupEnd();
+         }
+      }
+   }
+};
+customElements.define("foo-element", Foo);
+```
+
+WMPlayerElement and its sub-components don't take either approach.
 
 ### How this influenced the player design
 

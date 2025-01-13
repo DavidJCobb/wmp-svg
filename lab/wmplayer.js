@@ -76,6 +76,7 @@ class WMPlayerElement extends HTMLElement {
    #autoplay = false;
    #loop     = false;
    #shuffle  = false;
+   #speed    = 1; // playbackRate
    //
    #fast_forward_delay = 1; // hold Next down for this many seconds to start fast-forwarding
    #fast_forward_speed = 4; // WMP uses 5, but Gecko mutes audio for speeds outside [0.25, 4]
@@ -164,6 +165,11 @@ class WMPlayerElement extends HTMLElement {
       // triggered when a media element is programmatically muted. We 
       // have to intercept that in order to update our UI.
       //
+      // We handle `playbackRate` ourselves, so that we can let clients 
+      // set the base playback rate independently of fast-forwarding. 
+      // We need to shim the setter so that when fast-forwarding stops, 
+      // we know what rate to return the video to.
+      //
       for(const name of [
          // HTMLMediaElement:
          "audioTracks",
@@ -172,7 +178,7 @@ class WMPlayerElement extends HTMLElement {
          "defaultPlaybackRate",
          "disableRemotePlayback",
          //"muted",
-         "playbackRate",
+         //"playbackRate",
          "preservesPitch",
          "srcObject",
          "volume",
@@ -280,9 +286,7 @@ class WMPlayerElement extends HTMLElement {
       this.#internals = this.attachInternals();
       this.#shadow    = this.attachShadow({ mode: "open" });
       
-      let template = document.createElement("template");
-      template.innerHTML = WMPlayerElement.#HTML;
-      this.#shadow.append(template.content.cloneNode(true));
+      this.#shadow.innerHTML = WMPlayerElement.#HTML;
       
       this.#media = this.#shadow.querySelector("video");
       this.#media.addEventListener("loadedmetadata", this.#on_loaded_metadata.bind(this));
@@ -336,38 +340,6 @@ class WMPlayerElement extends HTMLElement {
       
       this.#prev_button = this.#shadow.querySelector(".prev-rw");
       this.#prev_button.addEventListener("click", this.#on_prev_click.bind(this));
-      
-      //
-      // JavaScript code can in some cases create a custom element instance 
-      // and set properties on it before the element is upgraded (i.e. before 
-      // the custom element constructor runs), even when the custom element 
-      // has already been defined. This means that clients can inadvertently 
-      // bypass any class-level [gs]etters, setting values as instance-level 
-      // expando properties instead. We'll need to fix these up here.
-      //
-      for(let name of Object.getOwnPropertyNames(this)) {
-         if (name[0] == '#')
-            continue;
-         let desc = Object.getOwnPropertyDescriptor(this.constructor.prototype, name);
-         if (!desc) {
-            //
-            // Expando. (NOTE: This logic wouldn't be enough were we concerned 
-            // with any [gs]etters on our base/ancestor classes.)
-            //
-            continue;
-         }
-         if (!desc.get && !desc.set) {
-            //
-            // Not a [gs]etter.
-            //
-            continue;
-         }
-         let value = this[name];
-         delete this[name];
-         if (desc.set) {
-            this[name] = value;
-         }
-      }
    }
    
    //
@@ -407,6 +379,10 @@ class WMPlayerElement extends HTMLElement {
       this.#media.play();
    }
    
+   // Get the current playback rate, accounting for both the desired 
+   // base rate (`playbackRate`) and for whether we're fast-forwarding.
+   get currentPlaybackRate() { return this.#media.playbackRate; }
+   
    get currentPlaylistIndex() { return this.#current_playlist_index; }
    set currentPlaylistIndex(v) { this.#set_playlist_index(v); }
    
@@ -426,6 +402,22 @@ class WMPlayerElement extends HTMLElement {
       this.#fast_forward_speed = v;
       if (this.#is_fast_forwarding) {
          this.#media.playbackRate = v;
+      }
+   }
+   
+   get isFastForwarding() { return this.#is_fast_forwarding; }
+   set isFastForwarding(v) {
+      v = !!v;
+      this.#is_fast_forwarding = v;
+      if (v) {
+         this.#next_button.classList.add("fast-forward");
+         this.#media.playbackRate = this.#fast_forward_speed;
+         if (this.#media.paused) {
+            this.#media.play();
+         }
+      } else {
+         this.#media.playbackRate = this.#speed;
+         this.#next_button.classList.remove("fast-forward");
       }
    }
    
@@ -450,6 +442,22 @@ class WMPlayerElement extends HTMLElement {
       this.#mute_button.checked = v;
       this.#update_mute_tooltip(v);
       this.#update_mute_glyph(this.#volume_slider.value);
+   }
+   
+   get playbackRate() { return this.#speed; }
+   set playbackRate(raw) {
+      let v = +raw;
+      if (isNaN(v) || v <= 0)
+         throw new Error(`playback rate must be a number greater than zero (seen: ${raw})`);
+      this.#speed = v;
+      if (!this.#is_fast_forwarding)
+         this.#media.playbackRate = v;
+      
+      // Consistency with WMP internals: halt fast-forwarding if the playback 
+      // rate is adjusted during fast-forwarding.
+      //
+      // Ref: https://learn.microsoft.com/en-us/previous-versions/windows/desktop/wmp/controls-fastreverse
+      this.isFastForwarding = false;
    }
    
    get shuffle() { return this.#shuffle; }
@@ -841,12 +849,7 @@ class WMPlayerElement extends HTMLElement {
    }
    #held_to_fast_forward() {
       this.#hold_to_fast_forward_timeout = null;
-      this.#media.playbackRate = this.#fast_forward_speed;
-      this.#is_fast_forwarding = true;
-      this.#next_button.classList.add("fast-forward");
-      if (this.#media.paused) {
-         this.#media.play();
-      }
+      this.isFastForwarding = true;
    }
    #on_next_mouseup() {
       if (this.#hold_to_fast_forward_timeout !== null) {
@@ -854,9 +857,7 @@ class WMPlayerElement extends HTMLElement {
          this.#hold_to_fast_forward_timeout = null;
       }
       if (this.#is_fast_forwarding) {
-         this.#media.playbackRate = 1.0;
-         this.#is_fast_forwarding = false;
-         this.#next_button.classList.remove("fast-forward");
+         this.isFastForwarding = false;
       } else {
          this.toNextMedia();
       }

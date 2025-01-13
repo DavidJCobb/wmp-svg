@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+   <body>
+      <script>
+class Foo extends HTMLElement {
+   constructor() {
+      super();
+      this.real_bar = 5;
+      
+      {
+         let broken = [];
+         for(let name of Object.getOwnPropertyNames(this)) {
+            if (name[0] == '#')
+               continue;
+               
+            // NOTE: If we subclassed another custom element, then we'd have to walk 
+            // the prototype chain and deal with all base classes, too.
+            let desc = Object.getOwnPropertyDescriptor(this.constructor.prototype, name);
+            if (!desc) {
+               continue; // not an override; ignore
+            }
+            if (!desc.get && !desc.set) {
+               continue; // overridden property not a [gs]etter; ignore
+            }
+            broken.push(name);
+         }
+         if (broken.length) {
+            console.groupCollapsed("warning: custom element created improperly");
+            console.warn(`the following properties were set on a ${this.constructor.name} custom element before the element was upgraded:`);
+            console.log(broken);
+            console.log("broken element: ", this);
+            console.info("tip: avoid creating custom elements with Element.cloneNode, as this can cause the elements to be upgraded asynchronously (the created element is a bare HTMLElement until the next spin of the event loop); document.createElement and the innerHTML setter are known to avoid this problem");
+            console.groupEnd();
+         }
+      }
+   }
+   
+   set bar(v) { this.real_bar = v; }
+};
+customElements.define("foo-element", Foo);
+
+class FooOwner extends HTMLElement {
+   constructor() {
+      super();
+      let shadow = this.attachShadow({ mode: "open" });
+      let template = document.createElement("template");
+      template.innerHTML = "<foo-element></foo-element>";
+      shadow.append(template.content.cloneNode(true));
+      
+      let foo = this.foo = shadow.querySelector("foo-element");
+      shadow.append(foo);
+      foo.bar = 12345;
+      
+      if (foo.real_bar != 12345)
+         console.warn("setter not invoked");
+      
+      if (!(foo instanceof Foo))
+         console.warn("not class instance");
+   }
+};
+customElements.define("foo-owner-element", FooOwner);
+      </script>
+      
+      <foo-owner-element></foo-owner-element>
+   </body>
+</html>

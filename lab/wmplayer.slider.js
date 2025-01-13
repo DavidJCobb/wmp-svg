@@ -65,39 +65,6 @@ class WMPlayerSliderElement extends HTMLElement {
       this.#internals.ariaValueNow = this.#value;
       this.#internals.ariaValueMin = this.#minimum;
       this.#internals.ariaValueMax = this.#maximum;
-      
-      //
-      // JavaScript code can in some cases create a custom element instance 
-      // and set properties on it before the element is upgraded (i.e. before 
-      // the custom element constructor runs), even when the custom element 
-      // has already been defined. This means that clients can inadvertently 
-      // bypass any class-level [gs]etters, setting values as instance-level 
-      // expando properties instead. We'll need to fix these up here.
-      //
-      for(let name of Object.getOwnPropertyNames(this)) {
-         if (name[0] == '#')
-            continue;
-         let desc = Object.getOwnPropertyDescriptor(this.constructor.prototype, name);
-         if (!desc) {
-            //
-            // Expando. (NOTE: This logic wouldn't be enough were we concerned 
-            // with any [gs]etters on our base/ancestor classes.)
-            //
-            continue;
-         }
-         if (!desc.get && !desc.set) {
-            //
-            // Not a [gs]etter.
-            //
-            continue;
-         }
-         let value = this[name];
-         delete this[name];
-         if (desc.set) {
-            this[name] = value;
-         }
-      }
-      
    }
    
    #setting_attribute = false;
