@@ -2,11 +2,11 @@
 # To-do
 
 * `WMPlayerElement`
+  * Rewinding should mute the video temporarily. Doing this cleanly will require tracking a new `this.#muted` property separately from `this.#media.muted`.
   * Switch from using SVG views to using `background-position`, since the former can still tricker a flicker (as if the browser is actually reloading the SVG?!) when a sprite changes. The flickering isn't common but seems to occur after multitasking for a while on other pages/applications.
     * Be sure to stress-test this change. It's possible (though hopefully unlikely) that the flicker is repaint lag instead and would therefore not be fixed by this change.
   * The "theater" mode (wherein the player controls are overlaid on the video) uses different glyphs from the normal player &mdash; specifically, white glyphs rather than blue.
   * We need "disabled" states for the "previous" and "next" buttons' glassy backing. In the normal player UI, these buttons are never disabled (because WMP will just pick something from your library, same as play/pause), but they can be disabled in the "theater" UI  (wherein the player controls are overlaid on the video). We're mimicking WMP's UI, not the full program design: we won't always have a previous or next media item, so I think we want more visible disable states. (Plus, we need the graphics for "theater" mode either way.)
-  * Timestamp display (to the left of the controls)
   * Clicking and holding on the "prev" button should engage rewind
     * Only when watching a video. Disable the button during audio-only playback.
     * WMP implements this by rewinding at 500% speed but only showing keyframes. Not all browsers support negative `playbackRate`s, so we'll have to do something similar: pause the video for as long as the button is held, and jump back 5 seconds in the video for every 1 second the button is held. Then, auto-resume the video when the rewind button is released.

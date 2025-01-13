@@ -1,6 +1,12 @@
 
 # Features
 
+## Rewind
+
+The intuitively obvious way to implement rewinding &mdash; ignoring all technical considerations and focusing solely on user expectations and the generally accepted definition of the word "rewind" &mdash; would be to just play the video in reverse. However, as of this writing, most web browsers don't actually support doing that, i.e. setting a negative `playbackRate` on an `HTMLMediaElement` throws an error. Fortunately, Windows Media Player doesn't support that either, and the behavior it *does* use is acceptable enough.
+
+When Windows Media Player engages "fast rewind," it jumps backward through the video one keyframe at a time, at 5x speed while muting audio. We can't jump from keyframe to keyframe, but we can still mimic this behavior well enough.
+
 ## Shuffle
 
 The shuffle feature works by maintaining a list of shuffle-eligible playlist indices in parallel to the playlist itself. Every time you start playing a given playlist item, that index is removed from the list of shuffle-eligible playlist indices. When shuffle is enabled, attempting to advance to the next playlist item instead selects a random index from the list of shuffle-eligible playlist indices. We then advance to the playlist item at that index and remove it from the list of shuffle-eligible playlist indices. This approach ensures that no playlist item will ever be surfaced twice by shuffle until after all items in the playlist have been played at least once.
@@ -37,6 +43,12 @@ A video player element that mimics Windows Media Player 11 and 12's UI. The func
 ### Usage notes
 
 * Windows Media Player uses a 500% fast-forward speed ([source](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/wmp/controls-fastforward)), but we default our fast-forward speed to 400% because Gecko will mute media if it has a playback rate outside the range [25%, 400%]. You can set `fastForwardSpeed` to change the speed (the value you specify must be greater than `1` i.e. 100% speed).
+
+* We currently don't support `defaultPlaybackRate` (i.e. we don't expose that property on the underlying `HTMLMediaElement`).
+  
+  The HTML5 spec implies that `defaultPlaybackRate` and `playbackRate` should both influence the current playback rate of a media element. The spec implies that the former value should be "used by the user agent" when it shows built-in player controls, and explicitly recommends that the latter be used for features like fast-forwarding and slow motion. However, the two values don't stack, and setting `defaultPlaybackRate` doesn't change the actual playback rate in Chrome or Firefox (even if `playbackRate` has never been set before). Moreover, even if setting `defaultPlaybackRate` *did initially* alter the current playback rate, it would be broken by design: `playbackRate` only supports a numeric value, so once you have ever set `playbackRate`, there'd be no way to switch back to `defaultPlaybackRate`. (Yes, you could do `m.playbackRate = m.defaultPlaybackRate`, but thereafter, changing `defaultPlaybackRate` itself would have no effect.) In essence, `defaultPlaybackRate` may as well not even exist.
+  
+  Set `playbackRate` to change the baseline playback rate. Use the fast-forward and rewind APIs to perform those tasks.
 
 
 ## `WMPlayerSliderElement`

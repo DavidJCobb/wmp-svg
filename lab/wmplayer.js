@@ -72,6 +72,11 @@ class WMPlaylistItem {
 };
 
 class WMPlayerElement extends HTMLElement {
+   
+   //
+   // Options:
+   //
+   
    #playlist = []; // Array<WMPlaylistItem>
    #autoplay = false;
    #loop     = false;
@@ -79,15 +84,31 @@ class WMPlayerElement extends HTMLElement {
    #speed    = 1; // playbackRate
    //
    #fast_forward_delay = 1; // hold Next down for this many seconds to start fast-forwarding
-   #fast_forward_speed = 4; // WMP uses 5, but Gecko mutes audio for speeds outside [0.25, 4]
+   #fast_forward_speed = 5; // same speed as WMP
+   #fast_rewind_speed  = 5;
+   
+   //
+   // State:
+   //
    
    #current_playlist_index         = 0;
    #current_playlist_index_started = false;
    #playlist_shuffle_indices       = [];
    
-   #hold_to_fast_forward_timeout = null;
-   #is_fast_forwarding = false;
+   #fast_playback_type    = 0; // -1 = rewind, 1 = fast-forward, 0 = neither
+   #fast_playback_timeout = null;
+   #fast_playback_paused  = false; // if we were paused when fast playback began
+   
+   #fast_rewind_interval  = 1; // number of real-time seconds between rewind steps
+   #fast_rewind_timeout   = null;
+   
+   #bound_fast_playback_stop_on_release_handler;
+   
    #is_stopped = true;
+   
+   //
+   // DOM and similar:
+   //
    
    #shadow;
    #internals;
@@ -120,7 +141,7 @@ class WMPlayerElement extends HTMLElement {
       <input type="checkbox" aria-label="Loop" aria-role="switch" class="basic-button loop" />
       <hr />
       <button class="basic-button stop" disabled title="Stop">Stop</button>
-      <button class="prev-rw" disabled>Previous</button>
+      <button class="prev-rw" disabled title="Previous (press and hold to rewind)">Previous</button>
    </div>
    <button class="play-pause">Play</button>
    <div class="right">
@@ -130,6 +151,8 @@ class WMPlayerElement extends HTMLElement {
    </div>
 </div>
    `.trim();
+   
+   // ------------------------------------------------------------------------
    
    // Expose properties and methods of the wrapped media element.
    static {
@@ -175,7 +198,7 @@ class WMPlayerElement extends HTMLElement {
          "audioTracks",
          "crossOrigin",
          "currentTime",
-         "defaultPlaybackRate",
+         //"defaultPlaybackRate",
          "disableRemotePlayback",
          //"muted",
          //"playbackRate",
@@ -281,6 +304,8 @@ class WMPlayerElement extends HTMLElement {
       }
    };
    
+   // ------------------------------------------------------------------------
+   
    constructor() {
       super();
       this.#internals = this.attachInternals();
@@ -339,7 +364,16 @@ class WMPlayerElement extends HTMLElement {
       this.#next_button.addEventListener("keypress", this.#on_next_keypress.bind(this));
       
       this.#prev_button = this.#shadow.querySelector(".prev-rw");
-      this.#prev_button.addEventListener("click", this.#on_prev_click.bind(this));
+      this.#prev_button.addEventListener("mousedown", this.#on_prev_mousedown.bind(this));
+      this.#prev_button.addEventListener("mouseup", this.#on_prev_mouseup.bind(this));
+      this.#prev_button.addEventListener("keypress", this.#on_prev_keypress.bind(this));
+      
+      // If we only listen for `mouseup` on the Previous and Next buttons, then in the 
+      // case where the user presses and holds the mouse on the buttons, but then moves 
+      // the cursor off the buttons before releasing it, we'll get stuck fast-forwarding 
+      // or rewinding. We work around this by registering and unregistering a handler on 
+      // the window.
+      this.#bound_fast_playback_stop_on_release_handler = this.#fast_playback_stop_on_release_handler.bind(this);
    }
    
    //
@@ -400,24 +434,18 @@ class WMPlayerElement extends HTMLElement {
       if (v <= 1)
          throw new Error("fast-forward speed multiplier must be greater than 1");
       this.#fast_forward_speed = v;
-      if (this.#is_fast_forwarding) {
+      if (this.isFastForwarding) {
          this.#media.playbackRate = v;
       }
    }
    
-   get isFastForwarding() { return this.#is_fast_forwarding; }
+   get isFastForwarding() { return this.#fast_playback_type > 0; }
    set isFastForwarding(v) {
       v = !!v;
-      this.#is_fast_forwarding = v;
       if (v) {
-         this.#next_button.classList.add("fast-forward");
-         this.#media.playbackRate = this.#fast_forward_speed;
-         if (this.#media.paused) {
-            this.#media.play();
-         }
-      } else {
-         this.#media.playbackRate = this.#speed;
-         this.#next_button.classList.remove("fast-forward");
+         this.#set_is_fast_playback(1);
+      } else if (this.#fast_playback_type > 0) {
+         this.#set_is_fast_playback(0);
       }
    }
    
@@ -450,14 +478,15 @@ class WMPlayerElement extends HTMLElement {
       if (isNaN(v) || v <= 0)
          throw new Error(`playback rate must be a number greater than zero (seen: ${raw})`);
       this.#speed = v;
-      if (!this.#is_fast_forwarding)
+      if (!this.#fast_playback_type)
          this.#media.playbackRate = v;
       
       // Consistency with WMP internals: halt fast-forwarding if the playback 
-      // rate is adjusted during fast-forwarding.
+      // rate is adjusted during fast-forwarding or fast-rewinding.
       //
       // Ref: https://learn.microsoft.com/en-us/previous-versions/windows/desktop/wmp/controls-fastreverse
-      this.isFastForwarding = false;
+      this.#cancel_queued_fast_playback();
+      this.#set_is_fast_playback(0);
    }
    
    get shuffle() { return this.#shuffle; }
@@ -547,6 +576,111 @@ class WMPlayerElement extends HTMLElement {
       window.setTimeout((function() {
          this.#ready_to_autoplay = false;
       }).bind(this), 500);
+   }
+   
+   //
+   // Fast playback (i.e. fast-rewind or fast-forward)
+   //
+   
+   #queue_fast_playback(direction, delay) {
+      if (this.#fast_playback_timeout !== null) {
+         window.clearTimeout(this.#fast_playback_timeout);
+      }
+      this.#fast_playback_timeout = setTimeout(
+         this.#set_is_fast_playback.bind(this, direction),
+         delay * 1000
+      );
+   }
+   #cancel_queued_fast_playback() {
+      if (this.#fast_playback_timeout !== null) {
+         clearTimeout(this.#fast_playback_timeout);
+         this.#fast_playback_timeout = null;
+      }
+   }
+   #set_is_fast_playback(direction) {
+      if (direction == 0) {
+         if (this.#fast_rewind_timeout) {
+            clearTimeout(this.#fast_rewind_timeout);
+            this.#fast_rewind_timeout = null;
+         }
+         this.#media.playbackRate = this.#speed;
+         this.#fast_playback_type = 0;
+         this.#prev_button.classList.remove("rewind");
+         this.#next_button.classList.remove("fast-forward");
+         if (this.#fast_playback_paused) {
+            //
+            // NOTE: We diverge from Windows Media Player's behavior here: we restore 
+            // the playback state that the player was in before rewinding or fast-
+            // forwarding, i.e. if you fast-forward while paused, you'll be paused 
+            // when you stop fast-forwarding. Windows Media Player's behaviors are as 
+            // follows:
+            //
+            //  - After rewinding, always resume playback.
+            //
+            //  - After fast-forwarding while paused, wait two seconds (identified by 
+            //    Microsoft-employed behavioral scientists as the exact length of time 
+            //    it takes for a user to assume the player will stay paused); then,
+            //    resume playback.
+            //
+            this.#fast_playback_paused = false;
+            this.#media.pause();
+         } else {
+            this.#media.play();
+         }
+         return;
+      }
+      if (this.#fast_playback_type == 0) {
+         this.#fast_playback_paused = this.#media.paused;
+      }
+      if (direction > 0) {
+         this.#fast_playback_type = 1; // fast-forwarding
+         //
+         // Play the media at a fast speed. Simple enough.
+         //
+         this.#next_button.classList.add("fast-forward");
+         this.#media.playbackRate = this.#fast_forward_speed;
+         if (this.#media.paused) {
+            this.#media.play();
+         }
+      } else {
+         this.#fast_playback_type = -1; // rewinding
+         //
+         // As of this writing, most browsers don't support negative playback rates 
+         // for backwards playback. Fortunately, we can design an alternate behavior 
+         // for parity with Windows Media Player: pause the media, and then skip 
+         // backwards through it at 500% speed (e.g. every second, jump the current 
+         // time back by five seconds). WMP skips backwards through keyframes, but I 
+         // don't know that we can do the same. We'll use a fixed timestep.
+         //
+         this.#prev_button.classList.add("rewind");
+         {
+            let duration = this.#media.duration;
+            let interval = 0.5;
+            if (duration) {
+               interval = Math.min(0.5, duration / 10);
+            }
+            this.#fast_rewind_interval = interval;
+         }
+         this.#fast_rewind_timeout = setTimeout(this.#fast_rewind_handler.bind(this), this.#fast_rewind_interval * 1000);
+         this.#media.pause();
+      }
+   }
+   #fast_rewind_handler() {
+      this.#fast_rewind_timeout = null;
+      if (this.#fast_playback_type >= 0)
+         return;
+      
+      let time = this.#media.currentTime;
+      let skip = this.#fast_rewind_interval * 5;
+      if (time > skip) {
+         time -= skip;
+      } else {
+         time = 0;
+      }
+      this.#media.currentTime = time;
+      if (time > 0) {
+         this.#fast_rewind_timeout = setTimeout(this.#fast_rewind_handler.bind(this), this.#fast_rewind_interval * 1000);
+      }
    }
    
    //
@@ -744,8 +878,24 @@ class WMPlayerElement extends HTMLElement {
       // WARNING: The `ended` event doesn't fire if a video has the HTML `loop` attribute, 
       // reaches its end, and loops. It only fires if the video isn't looping.
       //
-      if (this.#to_next_playlist_item())
+      if (this.#to_next_playlist_item()) {
          this.#media.play();
+         //
+         // If you fast-forward past the end of a media item, you should still be fast-
+         // forwarding when the next media item starts, for consistency with WMP.
+         //
+         // Changing the currently playing media can apparently reset `playbackRate`, but 
+         // I don't see this documented anywhere, so I have to code defensively. *sigh*
+         //
+         // NOTE: This behavior will be inconvenient to test on Firefox thanks to a bug: 
+         // https://bugzilla.mozilla.org/show_bug.cgi?id=1807968
+         //
+         if (this.#fast_playback_type > 0) {
+            this.#media.playbackRate = this.#fast_forward_speed;
+         } else {
+            this.#media.playbackRate = this.#speed;
+         }
+      }
       this.#update_play_state();
    }
    
@@ -827,6 +977,22 @@ class WMPlayerElement extends HTMLElement {
    }
    
    //
+   // Helpers for Previous/Rewind and Next/Fast Foward buttons
+   
+   #fast_playback_press_handler() {
+      let handler = this.#bound_fast_playback_stop_on_release_handler;
+      window.addEventListener("blur",    handler);
+      window.addEventListener("mouseup", handler);
+   }
+   #fast_playback_stop_on_release_handler() {
+      this.#set_is_fast_playback(0);
+      let handler = this.#bound_fast_playback_stop_on_release_handler;
+      window.removeEventListener("blur",    handler);
+      window.removeEventListener("mouseup", handler);
+   }
+   //
+   
+   //
    // Previous button
    //
    
@@ -839,25 +1005,41 @@ class WMPlayerElement extends HTMLElement {
       this.toPrevMedia();
    }
    
+   #on_prev_mousedown() {
+      this.#disqualify_autoplay_on_playback_control_by_user();
+      this.#queue_fast_playback(-1, this.#fast_forward_delay);
+      this.#fast_playback_press_handler();
+   }
+   #on_prev_mouseup() {
+      this.#cancel_queued_fast_playback();
+      if (this.#fast_playback_type) {
+         this.#set_is_fast_playback(0);
+      } else {
+         this.#on_prev_click();
+      }
+   }
+   #on_prev_keypress(e) {
+      if (e.altKey)
+         return;
+      if (e.code != "Enter" && e.code != "Space")
+         return;
+      e.preventDefault();
+      this.#on_prev_click();
+   }
+   
    //
    // Next/Fast Forward button
    //
    
    #on_next_mousedown() {
       this.#disqualify_autoplay_on_playback_control_by_user();
-      this.#hold_to_fast_forward_timeout = window.setTimeout(this.#held_to_fast_forward.bind(this), this.#fast_forward_delay * 1000);
-   }
-   #held_to_fast_forward() {
-      this.#hold_to_fast_forward_timeout = null;
-      this.isFastForwarding = true;
+      this.#queue_fast_playback(1, this.#fast_forward_delay);
+      this.#fast_playback_press_handler();
    }
    #on_next_mouseup() {
-      if (this.#hold_to_fast_forward_timeout !== null) {
-         clearTimeout(this.#hold_to_fast_forward_timeout);
-         this.#hold_to_fast_forward_timeout = null;
-      }
-      if (this.#is_fast_forwarding) {
-         this.isFastForwarding = false;
+      this.#cancel_queued_fast_playback();
+      if (this.#fast_playback_type) {
+         this.#set_is_fast_playback(0);
       } else {
          this.toNextMedia();
       }
@@ -887,6 +1069,9 @@ class WMPlayerElement extends HTMLElement {
       this.#set_playlist_index(0); // also pauses the media
       this.#update_play_state();
       this.#stop_button.setAttribute("disabled", "disabled");
+      
+      this.#cancel_queued_fast_playback();
+      this.#set_is_fast_playback(0);
       
       // NOTE: If we're not already on the zeroth playlist item when we 
       // click "Stop," then switching to that playlist item may trigger 
