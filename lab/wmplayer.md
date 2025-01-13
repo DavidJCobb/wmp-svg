@@ -5,7 +5,7 @@
 
 The intuitively obvious way to implement rewinding &mdash; ignoring all technical considerations and focusing solely on user expectations and the generally accepted definition of the word "rewind" &mdash; would be to just play the video in reverse. However, as of this writing, most web browsers don't actually support doing that, i.e. setting a negative `playbackRate` on an `HTMLMediaElement` throws an error. Fortunately, Windows Media Player doesn't support that either, and the behavior it *does* use is acceptable enough.
 
-When Windows Media Player engages "fast rewind," it jumps backward through the video one keyframe at a time, at 5x speed while muting audio. We can't jump from keyframe to keyframe, but we can still mimic this behavior well enough.
+When Windows Media Player engages "fast rewind," it jumps backward through the video one keyframe at a time, at 5x speed while muting audio. We can't jump from keyframe to keyframe, but we can still mimic this behavior well enough. Both we and Windows Media Player pause the video while doing this, which solves the muting without us having to shim `this.#media.muted`; the user can see the play/pause button visibly change, but that's the case in WMP, too.
 
 ## Shuffle
 

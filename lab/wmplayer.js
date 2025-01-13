@@ -87,6 +87,11 @@ class WMPlayerElement extends HTMLElement {
    #fast_forward_speed = 5; // same speed as WMP
    #fast_rewind_speed  = 5;
    
+   // If the current time is past this number of seconds, then clicking "Previous" 
+   // jumps to the start of the current media item, rather than to the previous 
+   // media item in the playlist.
+   #previous_button_time_threshold = 3;
+   
    //
    // State:
    //
@@ -617,7 +622,7 @@ class WMPlayerElement extends HTMLElement {
             //
             //  - After rewinding, always resume playback.
             //
-            //  - After fast-forwarding while paused, wait two seconds (identified by 
+            //  - After fast-forwarding while paused, wait three seconds (identified by 
             //    Microsoft-employed behavioral scientists as the exact length of time 
             //    it takes for a user to assume the player will stay paused); then,
             //    resume playback.
@@ -844,6 +849,8 @@ class WMPlayerElement extends HTMLElement {
    // Media events
    //
    
+   #_last_prev_enable_state_check = 0;
+   
    #on_loaded_metadata(e) {
       this.#media.width  = this.#media.videoWidth  || 0;
       this.#media.height = this.#media.videoHeight || 0;
@@ -859,6 +866,13 @@ class WMPlayerElement extends HTMLElement {
       let time = this.#media.currentTime;
       this.#seek_slider.value = time;
       this.#update_current_time_readout(time);
+      {  // Update the state of the "Previous" button (with debouncing)
+         let now = Date.now();
+         if (now - this.#_last_prev_enable_state_check > 100) {
+            this.#_last_prev_enable_state_check = now;
+            this.#update_prev_next_state(time);
+         }
+      }
    }
    #on_volume_change(e) {
       if (this.#volume_slider.is_being_edited())
@@ -998,7 +1012,7 @@ class WMPlayerElement extends HTMLElement {
    
    #on_prev_click() {
       this.#disqualify_autoplay_on_playback_control_by_user();
-      if (this.#media.currentTime > 3) {
+      if (this.#media.currentTime >= this.#previous_button_time_threshold) {
          this.#media.currentTime = 0;
          return;
       }
@@ -1153,7 +1167,7 @@ class WMPlayerElement extends HTMLElement {
       node.setAttribute("data-glyph", glyph);
    }
    
-   #update_prev_next_state() {
+   #update_prev_next_state(current_time) {
       let no_prev = false;
       let no_next = false;
       {
@@ -1164,6 +1178,20 @@ class WMPlayerElement extends HTMLElement {
             let current = this.#current_playlist_index;
             no_prev = current == 0;
             no_next = current == count - 1;
+         }
+         if (no_prev) {
+            //
+            // If we're a little ways into the current media, then clicking 
+            // "Previous" jumps to the start of the current media, rather 
+            // than trying to move to the previous media. We should make 
+            // sure that the button's enable state reflects that.
+            //
+            if (!current_time && current_time !== 0) {
+               current_time = this.#media.currentTime;
+            }
+            if (current_time >= this.#previous_button_time_threshold) {
+               no_prev = false;
+            }
          }
       }
       this.#prev_button.disabled = no_prev;
