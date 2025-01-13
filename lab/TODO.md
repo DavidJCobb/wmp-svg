@@ -2,7 +2,7 @@
 # To-do
 
 * `WMPlayerElement`
-  * Don't allow rewinding audio-only playlist items.
+  * Don't allow rewinding audio-only playlist items. For an audio-only item, the button tooltip should just be "Previous," and clicking and holding should have no effect.
     * Most browsers don't support negative playback rates, so we have to pause and step through media to rewind it. If we didn't pause, then you'd get little slices of audio playing as we jump back in time, which could *almost* work except that those brief slices of audio would advance the current time forward, breaking our rewinding.
     * Plus, even for browsers that support negative playback rates, playing audio *backwards* isn't likely to be helpful. Most users will struggle to tell from backwards audio when they've rewound to the correct area. There just isn't a good UX to offer here.
     * Once we make this change, we should document our reasons in `wmplayer.md`.
@@ -14,14 +14,6 @@
     * Be sure to stress-test this change. It's possible (though hopefully unlikely) that the flicker is repaint lag instead and would therefore not be fixed by this change.
   * The "theater" mode (wherein the player controls are overlaid on the video) uses different glyphs from the normal player &mdash; specifically, white glyphs rather than blue.
   * We need "disabled" states for the "previous" and "next" buttons' glassy backing. In the normal player UI, these buttons are never disabled (because WMP will just pick something from your library, same as play/pause), but they can be disabled in the "theater" UI  (wherein the player controls are overlaid on the video). We're mimicking WMP's UI, not the full program design: we won't always have a previous or next media item, so I think we want more visible disable states. (Plus, we need the graphics for "theater" mode either way.)
-  * Clicking and holding on the "prev" button should engage rewind
-    * Only when watching a video. Disable the button during audio-only playback.
-    * WMP implements this by rewinding at 500% speed but only showing keyframes. Not all browsers support negative `playbackRate`s, so we'll have to do something similar: pause the video for as long as the button is held, and jump back 5 seconds in the video for every 1 second the button is held. Then, auto-resume the video when the rewind button is released.
-      * Windows Media Player updates the state of the play/pause button while rewinding, as if the video is paused.
-      * Windows Media Player resumes playback of the video even if the rewind operation began while the video was paused. I don't think we should mimic this behavior.
-  * Tooltips for prev/rewind
-    * "Previous"
-    * "Press and hold to rewind"
   * Make it possible to scale the player UI based on a scaling factor relative to the vanilla size *or* maximum main- and cross-axis sizes.
   * Look into a better way to handle the "tray" borders
   * Look into replicating the WMP dark theme for the "tray"
