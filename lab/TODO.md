@@ -15,6 +15,10 @@
       * Windows Media Player updates the state of the play/pause button while rewinding, as if the video is paused.
       * Windows Media Player resumes playback of the video even if the rewind operation began while the video was paused. I don't think we should mimic this behavior.
   * Tooltips for prev/rewind
+    * "Previous"
+    * "Press and hold to rewind"
+  * If the current playlist only contains a single video, then make the Previous and Next buttons always show the Rewind and Fast Forward glyphs and display as enabled, but make them still require being pressed and held to perform those functions. This will be consistent with Windows Media Player's behavior when playing a single video file (even when you back out to Now Playing such that the video itself isn't visible but its audio is still playing).
+    * The Fast Forward button should use the tooltip "Press and hold to fast-forward" in that case, rather than "Next (press and hold to fast-forward)".
   * Look into a better way to handle the "tray" borders
   * Look into replicating the WMP dark theme for the "tray"
   * Look into offering differing arrangements of buttons
