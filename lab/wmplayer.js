@@ -106,8 +106,8 @@ class WMPlayerElement extends HTMLElement {
 <wm-slider class="seek"></wm-slider>
 <div class="controls">
    <div class="left">
-      <input type="checkbox" class="basic-button shuffle" />
-      <input type="checkbox" class="basic-button loop" />
+      <input type="checkbox" aria-label="Shuffle" aria-role="switch" class="basic-button shuffle" />
+      <input type="checkbox" aria-label="Loop" aria-role="switch" class="basic-button loop" />
       <hr />
       <button class="basic-button stop" disabled title="Stop">Stop</button>
       <button class="prev-rw" disabled>Previous</button>
@@ -115,8 +115,8 @@ class WMPlayerElement extends HTMLElement {
    <button class="play-pause">Play</button>
    <div class="right">
       <button class="next-ff" disabled>Next</button>
-      <input type="checkbox" class="basic-button mute" />
-      <wm-slider class="volume constant-thumb circular-thumb" min="0" max="1" value="1" step="0.01" title="Volume"></wm-slider>
+      <input type="checkbox" aria-label="Mute" aria-role="switch" class="basic-button mute" />
+      <wm-slider aria-label="Volume" class="volume constant-thumb circular-thumb" min="0" max="100" value="100" step="1" title="Volume"></wm-slider>
    </div>
 </div>
    `.trim();
@@ -292,6 +292,9 @@ class WMPlayerElement extends HTMLElement {
       }
       
       this.#seek_slider = this.#shadow.querySelector(".seek");
+      this.#seek_slider.keyStepShift = 1;
+      this.#seek_slider.keyStep      = 10;
+      this.#seek_slider.keyStepCtrl  = 10;
       this.#seek_slider.addEventListener("change", this.#on_seek_slider_change.bind(this));
       
       this.#shuffle_button = this.#shadow.querySelector(".shuffle");
@@ -310,12 +313,47 @@ class WMPlayerElement extends HTMLElement {
       this.#mute_button.addEventListener("click", this.#on_mute_ui_toggled.bind(this));
       
       this.#volume_slider = this.#shadow.querySelector(".volume");
+      this.#volume_slider.keyStep      = 5;
+      this.#volume_slider.keyStepShift = 1;
+      this.#volume_slider.keyStepCtrl  = 20; // 1/5 the slider length
       this.#volume_slider.addEventListener("change", this.#on_volume_slider_change.bind(this));
       
       this.#next_button = this.#shadow.querySelector(".next-ff");
       this.#next_button.addEventListener("click", this.#on_next_click.bind(this));
       this.#prev_button = this.#shadow.querySelector(".prev-rw");
       this.#prev_button.addEventListener("click", this.#on_prev_click.bind(this));
+      
+      //
+      // JavaScript code can in some cases create a custom element instance 
+      // and set properties on it before the element is upgraded (i.e. before 
+      // the custom element constructor runs), even when the custom element 
+      // has already been defined. This means that clients can inadvertently 
+      // bypass any class-level [gs]etters, setting values as instance-level 
+      // expando properties instead. We'll need to fix these up here.
+      //
+      for(let name of Object.getOwnPropertyNames(this)) {
+         if (name[0] == '#')
+            continue;
+         let desc = Object.getOwnPropertyDescriptor(this.constructor.prototype, name);
+         if (!desc) {
+            //
+            // Expando. (NOTE: This logic wouldn't be enough were we concerned 
+            // with any [gs]etters on our base/ancestor classes.)
+            //
+            continue;
+         }
+         if (!desc.get && !desc.set) {
+            //
+            // Not a [gs]etter.
+            //
+            continue;
+         }
+         let value = this[name];
+         delete this[name];
+         if (desc.set) {
+            this[name] = value;
+         }
+      }
    }
    
    //
@@ -627,7 +665,9 @@ class WMPlayerElement extends HTMLElement {
       this.#media.height = this.#media.videoHeight || 0;
    }
    #on_duration_change(e) {
-      this.#seek_slider.maximum = this.#media.duration;
+      let duration = this.#media.duration;
+      this.#seek_slider.maximum = duration;
+      this.#seek_slider.keyStep = duration / 5;
    }
    #on_current_time_change(e) {
       if (this.#seek_slider.is_being_edited())
@@ -637,7 +677,7 @@ class WMPlayerElement extends HTMLElement {
    #on_volume_change(e) {
       if (this.#volume_slider.is_being_edited())
          return;
-      this.#volume_slider.value = this.#media.volume;
+      this.#volume_slider.value = Math.floor(this.#media.volume * 100);
    }
    
    #on_media_play(e) {
@@ -780,7 +820,7 @@ class WMPlayerElement extends HTMLElement {
       this.#disqualify_autoplay_on_playback_control_by_user();
    }
    #on_volume_slider_change(e) {
-      this.#media.volume = this.#seek_slider.value;
+      this.#media.volume = this.#volume_slider.value / 100;
    }
    
    //
