@@ -2,9 +2,11 @@
 :host {
    display: grid;
    grid-template:
-      "content" 1fr
-      "seek"
-      "controls"
+      "content     content content  content      content" 1fr
+      "seek        seek    seek     seek         seek"
+      "left-gutter time    controls right-gutter right-gutter"
+      /
+      1fr 10ch auto 10ch 1fr
    ;
    
    /* Guide the aspect ratio of the video player. */
@@ -38,6 +40,30 @@
    }
 }
 
+/*
+   General element styles:
+*/
+
+wm-slider {
+   position: relative;
+   &:focus-visible {
+      outline: none;
+      &::before {
+         position: absolute;
+         content: " ";
+         inset:   0;
+         z-index: 20;
+         border-image: var(--focus-border-image, none);
+         border-image-outset: 3px;
+         outline:      var(--focus-outline);
+      }
+   }
+}
+
+/*
+   Layout
+*/
+
 .content {
    grid-area:  content;
    max-width:  100%;
@@ -64,22 +90,6 @@ video {
    height: 100%;
 }
 
-wm-slider {
-   position: relative;
-   &:focus-visible {
-      outline: none;
-      &::before {
-         position: absolute;
-         content: " ";
-         inset:   0;
-         z-index: 20;
-         border-image: var(--focus-border-image, none);
-         border-image-outset: 3px;
-         outline:      var(--focus-outline);
-      }
-   }
-}
-
 .seek {
    grid-area: seek;
    margin: calc(2px * var(--scale,1)) 0;
@@ -89,6 +99,25 @@ wm-slider {
 }
 :host(:state(stalled)) .seek {
    --fill-gradient: linear-gradient(to bottom, #e2adad, #933434, #d28080);
+}
+
+.current-time {
+   grid-area:  time;
+   align-self: center;
+   padding-right: .3em;
+   
+   text-align: right;
+   
+   font-family: "Segoe UI", Arial, sans-serif;
+   color: #000;
+   -webkit-text-stroke: 4px #FFF; /* TODO: this is for a light background only */
+   paint-order: stroke fill;
+   
+   user-select: none;
+}
+:host(.theater) .current-time {
+   color: #FFF;
+   -webkit-text-stroke: 4px #000A;
 }
 
 .controls {

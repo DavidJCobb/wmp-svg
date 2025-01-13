@@ -86,12 +86,14 @@ class WMPlayerElement extends HTMLElement {
    
    #hold_to_fast_forward_timeout = null;
    #is_fast_forwarding = false;
+   #is_stopped = true;
    
    #shadow;
    #internals;
    
    #media;
    
+   #current_time_readout;
    #loop_button;
    #mute_button;
    #next_button;
@@ -109,7 +111,8 @@ class WMPlayerElement extends HTMLElement {
 <div class="content">
    <video></video>
 </div>
-<wm-slider class="seek"></wm-slider>
+<wm-slider class="seek" title="Seek" aria-label="Seek"></wm-slider>
+<time class="current-time" aria-label="Current time"></time>
 <div class="controls">
    <div class="left">
       <input type="checkbox" aria-label="Shuffle" aria-role="switch" class="basic-button shuffle" />
@@ -297,6 +300,8 @@ class WMPlayerElement extends HTMLElement {
          this.#media.addEventListener("canplaythrough", bound);
       }
       
+      this.#current_time_readout = this.#shadow.querySelector("time");
+      
       this.#seek_slider = this.#shadow.querySelector(".seek");
       this.#seek_slider.keyStepShift = 1;
       this.#seek_slider.keyStep      = 10;
@@ -325,10 +330,9 @@ class WMPlayerElement extends HTMLElement {
       this.#volume_slider.addEventListener("change", this.#on_volume_slider_change.bind(this));
       
       this.#next_button = this.#shadow.querySelector(".next-ff");
-      //this.#next_button.addEventListener("click", this.#on_next_click.bind(this));
       this.#next_button.addEventListener("mousedown", this.#on_next_mousedown.bind(this));
       this.#next_button.addEventListener("mouseup", this.#on_next_mouseup.bind(this));
-      
+      this.#next_button.addEventListener("keypress", this.#on_next_keypress.bind(this));
       
       this.#prev_button = this.#shadow.querySelector(".prev-rw");
       this.#prev_button.addEventListener("click", this.#on_prev_click.bind(this));
@@ -399,6 +403,7 @@ class WMPlayerElement extends HTMLElement {
       if (this.#media.currentTime != 0)
          return;
       this.#ready_to_autoplay = false;
+      this.#is_stopped        = false;
       this.#media.play();
    }
    
@@ -554,8 +559,10 @@ class WMPlayerElement extends HTMLElement {
       let no_media = this.#playlist.length == 0;
       
       this.#play_pause_button.disabled = no_media;
-      if (no_media)
+      if (no_media) {
          this.#stop_button.disabled = true;
+         this.#hide_current_time_readout();
+      }
       
       this.#update_prev_next_state();
       
@@ -662,6 +669,7 @@ class WMPlayerElement extends HTMLElement {
       this.#on_playlist_modified();
    }
    clearPlaylist() {
+      this.#is_stopped = true;
       this.#media.pause();
       this.#media.src = "";
       this.#playlist = [];
@@ -675,6 +683,8 @@ class WMPlayerElement extends HTMLElement {
       let playing = !this.#media.paused;
       if (!this.#set_playlist_index(this.#current_playlist_index - 1))
          return;
+      this.#is_stopped = false;
+      this.#update_current_time_readout(0);
       if (playing)
          this.#media.play();
    }
@@ -682,6 +692,8 @@ class WMPlayerElement extends HTMLElement {
       let playing = !this.#media.paused;
       if (!this.#to_next_playlist_item(ignore_shuffle))
          return;
+      this.#is_stopped = false;
+      this.#update_current_time_readout(0);
       if (playing)
          this.#media.play();
    }
@@ -702,7 +714,9 @@ class WMPlayerElement extends HTMLElement {
    #on_current_time_change(e) {
       if (this.#seek_slider.is_being_edited())
          return;
-      this.#seek_slider.value = this.#media.currentTime;
+      let time = this.#media.currentTime;
+      this.#seek_slider.value = time;
+      this.#update_current_time_readout(time);
    }
    #on_volume_change(e) {
       if (this.#volume_slider.is_being_edited())
@@ -714,6 +728,7 @@ class WMPlayerElement extends HTMLElement {
    
    #on_media_play(e) {
       this.#mark_current_playlist_item_for_no_shuffle();
+      this.#is_stopped = false;
       this.#update_play_state();
    }
    #on_media_ended(e) {
@@ -783,6 +798,7 @@ class WMPlayerElement extends HTMLElement {
    
    #on_play_pause_click(e) {
       this.#disqualify_autoplay_on_playback_control_by_user();
+      this.#is_stopped = false;
       if (this.#media.paused) {
          this.#media.play();
          this.#stop_button.removeAttribute("disabled");
@@ -803,13 +819,9 @@ class WMPlayerElement extends HTMLElement {
    }
    
    //
-   // Previous/Next buttons
+   // Previous button
    //
    
-   /*#on_next_click() {
-      this.#disqualify_autoplay_on_playback_control_by_user();
-      this.toNextMedia();
-   }*/
    #on_prev_click() {
       this.#disqualify_autoplay_on_playback_control_by_user();
       if (this.#media.currentTime > 3) {
@@ -818,6 +830,10 @@ class WMPlayerElement extends HTMLElement {
       }
       this.toPrevMedia();
    }
+   
+   //
+   // Next/Fast Forward button
+   //
    
    #on_next_mousedown() {
       this.#disqualify_autoplay_on_playback_control_by_user();
@@ -845,22 +861,19 @@ class WMPlayerElement extends HTMLElement {
          this.toNextMedia();
       }
    }
-   
-   #update_prev_next_state() {
-      let no_prev = false;
-      let no_next = false;
-      {
-         let count = this.#playlist.length;
-         if (!count) {
-            no_prev = no_next = true;
-         } else if (!this.#loop) {
-            let current = this.#current_playlist_index;
-            no_prev = current == 0;
-            no_next = current == count - 1;
-         }
-      }
-      this.#prev_button.disabled = no_prev;
-      this.#next_button.disabled = no_next;
+   #on_next_keypress(e) {
+      if (e.altKey)
+         return;
+      if (e.code != "Enter" && e.code != "Space")
+         return;
+      //
+      // NOTE: Windows Media Player exposes fast-forwarding via the keyboard 
+      // shortcut Ctrl + Shift + F, not via keyboard interactions with the 
+      // button itself. This differs from the mouse interactions.
+      //
+      e.preventDefault();
+      this.#disqualify_autoplay_on_playback_control_by_user();
+      this.toNextMedia();
    }
    
    //
@@ -869,14 +882,24 @@ class WMPlayerElement extends HTMLElement {
    
    #on_stop_click(e) {
       this.#disqualify_autoplay_on_playback_control_by_user();
+      this.#is_stopped = true;
       this.#set_playlist_index(0); // also pauses the media
       this.#update_play_state();
       this.#stop_button.setAttribute("disabled", "disabled");
+      
+      // NOTE: If we're not already on the zeroth playlist item when we 
+      // click "Stop," then switching to that playlist item may trigger 
+      // a `durationchange` event and updating of the current timestamp. 
+      // This is why we set `#is_stopped` before we change the playlist 
+      // index.
+      this.#hide_current_time_readout();
    }
    
    #on_seek_slider_change(e) {
-      this.#media.currentTime = this.#seek_slider.value;
       this.#disqualify_autoplay_on_playback_control_by_user();
+      let time = this.#seek_slider.value;
+      this.#media.currentTime = time;
+      this.#update_current_time_readout(time);
    }
    #on_volume_slider_change(e) {
       let value = this.#volume_slider.value;
@@ -901,6 +924,30 @@ class WMPlayerElement extends HTMLElement {
       }
    }
    
+   #hide_current_time_readout() {
+      this.#current_time_readout.textContent = "";
+      this.#current_time_readout.removeAttribute("datetime");
+   }
+   #update_current_time_readout(time) {
+      if (this.#is_stopped) {
+         this.#hide_current_time_readout();
+         return;
+      }
+      time = +time || 0;
+      let show_hours = (time >= 3600 || this.#media.duration >= 3600);
+      let h     = 0;
+      let m     = Math.floor((time % 3600) / 60);
+      let s_sub = time % 60;
+      let s     = Math.floor(s_sub);
+      let text = (m+"").padStart(2, '0') + ':' + (s+"").padStart(2, '0');
+      if (show_hours) {
+         h = Math.floor(time / 3600);
+         text = (h+"").padStart(2, '0') + ':' + text;
+      }
+      this.#current_time_readout.textContent = text;
+      this.#current_time_readout.setAttribute("datetime", `P${h}H${m}M${s_sub}S`);
+   }
+   
    #update_mute_glyph(volume) {
       let node  = this.#mute_button;
       let glyph = "high";
@@ -918,6 +965,23 @@ class WMPlayerElement extends HTMLElement {
          }
       }
       node.setAttribute("data-glyph", glyph);
+   }
+   
+   #update_prev_next_state() {
+      let no_prev = false;
+      let no_next = false;
+      {
+         let count = this.#playlist.length;
+         if (!count) {
+            no_prev = no_next = true;
+         } else if (!this.#loop) {
+            let current = this.#current_playlist_index;
+            no_prev = current == 0;
+            no_next = current == count - 1;
+         }
+      }
+      this.#prev_button.disabled = no_prev;
+      this.#next_button.disabled = no_next;
    }
    
 };

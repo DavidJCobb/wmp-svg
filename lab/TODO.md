@@ -5,9 +5,10 @@
   * Shim programmatic access to the `playbackRate` property on the wrapped media element.
     * Track the `playbackRate` privately, so we can restore it when fast-forwarding stops.
     * If the playback rate is modified while fast-forwarding, halt the fast-forwarding operation ([consistent with WMP](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/wmp/controls-fastreverse)).
-  * Switch from using SVG views to using `background-position`, since the former can still tricker a flicker (as if the browser is actually reloading the SVG?!) when a sprite changes.
+  * Switch from using SVG views to using `background-position`, since the former can still tricker a flicker (as if the browser is actually reloading the SVG?!) when a sprite changes. The flickering isn't common but seems to occur after multitasking for a while on other pages/applications.
+    * Be sure to stress-test this change. It's possible (though hopefully unlikely) that the flicker is repaint lag instead and would therefore not be fixed by this change.
   * The "theater" mode (wherein the player controls are overlaid on the video) uses different glyphs from the normal player &mdash; specifically, white glyphs rather than blue.
-  * We need "disabled" states for the "previous" and "next" buttons' glassy backing. In the normal player UI, these buttons are never disabled (because WMP will just pick something from your library, same as play/pause), but they can be disabled in the "theater" UI  (wherein the player controls are overlaid on the video). We're mimicking WMP's UI, not the full program design: we won't always have a previous or next media item, so I think we want more visible disable states. (Plus, we just need the graphics for "theater" mode anyway.)
+  * We need "disabled" states for the "previous" and "next" buttons' glassy backing. In the normal player UI, these buttons are never disabled (because WMP will just pick something from your library, same as play/pause), but they can be disabled in the "theater" UI  (wherein the player controls are overlaid on the video). We're mimicking WMP's UI, not the full program design: we won't always have a previous or next media item, so I think we want more visible disable states. (Plus, we need the graphics for "theater" mode either way.)
   * Timestamp display (to the left of the controls)
   * Clicking and holding on the "prev" button should engage rewind
     * Only when watching a video. Disable the button during audio-only playback.
@@ -17,6 +18,7 @@
   * Tooltips for prev/rewind
     * "Previous"
     * "Press and hold to rewind"
+  * Make it possible to scale the player UI based on a scaling factor relative to the vanilla size *or* maximum main- and cross-axis sizes.
   * If the current playlist only contains a single video, then make the Previous and Next buttons always show the Rewind and Fast Forward glyphs and display as enabled, but make them still require being pressed and held to perform those functions. This will be consistent with Windows Media Player's behavior when playing a single video file (even when you back out to Now Playing such that the video itself isn't visible but its audio is still playing).
     * The Fast Forward button should use the tooltip "Press and hold to fast-forward" in that case, rather than "Next (press and hold to fast-forward)".
   * Look into a better way to handle the "tray" borders
@@ -40,6 +42,21 @@
     * I don't like that there's no API for removing a playlist item.
       * Ideally it should be possible to do `playerElement.playlist[3]` and `playerElement.playlist.remove(3)` and whatnot.
   * Optional: currently-playing media title offset to the left edge (WMP: seen in music UI, not in video UI).
+  * Clean up how we manage the state of the Stop button and `#is_stopped`, and how that influences visibility of the current timestamp.
+  * Investigate implementing keyboard shortcuts (they're listed [here](https://www.instructables.com/Keyboard-Shortcuts-for-Windows-Media-Player/)).
+    * It's worth noting that in Windows Media Player, some functions, like Fast Forward, are only accessible via these accelerator keys and not via keyboard interactions with their actual on-screen buttons.
+    * Implementation
+      * Condition this on a JavaScript property that reflects `data-enable-keyboard-shortcuts`, which should be treated as a Boolean attribute *and* which should default to false.
+      * When keyboard shortcuts are enabled, install a key event listener on the `window` using a cached bound (`bind`) event handler. Why cached? So we can remove it should keyboard shortcuts be disabled later.
+      * Consider exposing a JavaScript property that allows us to scope keyboard shortcuts to a particular container element. Default it to the `window` whenever it's not set. Throw if the user tries to set it to something that isn't a container DOM node (but do not require the user to set it to a container that actually contains the player element).
+  * Investigate adding support for displaying an audio file's album art (or at least displaying some accessory image that can be specified when adding the audio file to the current playlist) when in `theater` view.
+  * Document the fact that our baseline styles line up with the "Library" view in WMP, while the `theater` class lines up with the "Now Playing" view.
+  * Investigate adding support for displaying subtitles, lyrics, et cetera.
+  * Add APIs/accessors for the following features.
+    * Zoom video
+      * Present in WMP's context menu
+      * Allow zooming to a percentage size. If the percentage is too large, crop.
+      * Allow fitting the video to the player or vice versa.
 * The thumbs for the seek slider and volume slider have outlines that are too thin, because we're taking the 86x86px jewel from the play/pause graphic and reusing it at a smaller size.
   * The bare minimum fix for this would be to guarantee a minimum outline thickness of 1px using a `non-scaling-stroke`. We already had to split the slider thumb into a separate graphic so we could get rid of the alpha mask and drop shadow that were built into the play/pause button, so we *can* make this fix.
     * But the graphics still end up looking bad at larger sizes (e.g. 2x scale, 3x scale) because the outlines should be thicker for the scrollbar thumbs, basically.
