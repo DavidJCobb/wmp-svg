@@ -302,7 +302,11 @@ video {
       ;
    }
    
-   &:focus-visible {
+   /* focus border; use a pseudo-element to get it in front of the sprite */
+   &:focus-visible::after {
+      content: " ";
+      position: absolute;
+      inset:   0;
       border-image: var(--focus-border-image, none);
       outline:      var(--focus-outline);
    }
