@@ -2,8 +2,7 @@
 # To-do
 
 * `WMPlayerElement`
-  * Never disable the "Next" button if it's possible to fast-forward (i.e. we have at least one playlist item and `this.#is_stopped == false`). It still needs to be possible to click and hold these buttons to rewind or fast-forward, and disabling them gets in the way of that.
-    * Instead of disabling it, just have it always show the Fast Forward glyph (and adjust the tool-tip appropriately as well). It should still need to be clicked and held, though, consistent with WMP controls in its Now Playing view.
+  * Clean up how we manage the state of the Stop button and `#is_stopped`, and how that influences visibility of the current timestamp.
   * Switch from using SVG views to using `background-position`, since the former can still tricker a flicker (as if the browser is actually reloading the SVG?!) when a sprite changes. The flickering isn't common but seems to occur after multitasking for a while on other pages/applications.
     * Be sure to stress-test this change. It's possible (though hopefully unlikely) that the flicker is repaint lag instead and would therefore not be fixed by this change.
   * The "theater" mode (wherein the player controls are overlaid on the video) uses different glyphs from the normal player &mdash; specifically, white glyphs rather than blue.
@@ -15,9 +14,6 @@
     * Current arrangement
     * Play/pause, seek slider, timestamp, and volume
   * Full-screen toggle button in lower-right corner
-  * Test on audio files
-    * Can we add support for album art somehow?
-    * Investigate automatically switching in and out of "theater" mode depending on whether we hit an audio file or a video file
   * Test programmatic manipulation of the player widget from outside
     * Playing and pausing
     * Manipulating the playlist
@@ -30,7 +26,6 @@
     * I don't like that there's no API for removing a playlist item.
       * Ideally it should be possible to do `playerElement.playlist[3]` and `playerElement.playlist.remove(3)` and whatnot.
   * Optional: currently-playing media title offset to the left edge (WMP: seen in music UI, not in video UI).
-  * Clean up how we manage the state of the Stop button and `#is_stopped`, and how that influences visibility of the current timestamp.
   * Investigate implementing keyboard shortcuts (they're listed [here](https://www.instructables.com/Keyboard-Shortcuts-for-Windows-Media-Player/)).
     * It's worth noting that in Windows Media Player, some functions, like Fast Forward, are only accessible via these accelerator keys and not via keyboard interactions with their actual on-screen buttons.
     * Implementation
@@ -38,6 +33,7 @@
       * When keyboard shortcuts are enabled, install a key event listener on the `window` using a cached bound (`bind`) event handler. Why cached? So we can remove it should keyboard shortcuts be disabled later.
       * Consider exposing a JavaScript property that allows us to scope keyboard shortcuts to a particular container element. Default it to the `window` whenever it's not set. Throw if the user tries to set it to something that isn't a container DOM node (but do not require the user to set it to a container that actually contains the player element).
   * Investigate adding support for displaying an audio file's album art (or at least displaying some accessory image that can be specified when adding the audio file to the current playlist) when in `theater` view.
+    * Investigate automatically switching in and out of "theater" mode depending on whether we hit an audio file or a video file
   * Document the fact that our baseline styles line up with the "Library" view in WMP, while the `theater` class lines up with the "Now Playing" view.
   * Investigate adding support for displaying subtitles, lyrics, et cetera.
   * Add APIs/accessors for the following features.

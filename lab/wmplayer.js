@@ -733,12 +733,11 @@ class WMPlayerElement extends HTMLElement {
       this.#seek_slider.value = time;
       this.#update_current_time_readout(time);
       {  // Update the state of the "Previous" button (with debouncing)
-         /*let now = Date.now();
+         let now = Date.now();
          if (now - this.#_last_prev_enable_state_check > 100) {
             this.#_last_prev_enable_state_check = now;
             this.#update_prev_next_state(time);
-         }*/
-            this.#update_prev_next_state(time);
+         }
       }
    }
    #on_volume_change(e) {
@@ -1086,12 +1085,29 @@ class WMPlayerElement extends HTMLElement {
       }
    }
    #update_next_state() {
+      const TEXT_FOR_FAST_FWD_ONLY = "Press and hold to fast-forward";
+      const TEXT_FOR_ALL_BEHAVIORS = "Next (press and hold to fast-forward)";
+      
       let node = this.#next_button;
-      if (this.#playlist.empty()) {
+      if (this.#playlist.size == 0) {
+         node.classList.remove("can-only-fast-forward");
          node.disabled = true;
+         node.title    = TEXT_FOR_ALL_BEHAVIORS;
          return;
       }
-      node.disabled = !this.#playlist.hasNextItem();
+      //
+      // It's always possible to fast-forward, so the button will always be enabled 
+      // if we have any media in our playlist. The only real question is whether we 
+      // can move to the next media item (i.e. whether there is one).
+      //
+      node.disabled = false;
+      if (this.#playlist.hasNextItem()) {
+         node.classList.remove("can-only-fast-forward");
+         node.title = TEXT_FOR_ALL_BEHAVIORS;
+      } else {
+         node.classList.add("can-only-fast-forward");
+         node.title = TEXT_FOR_FAST_FWD_ONLY;
+      }
    }
    #update_prev_next_state(current_time) {
       this.#update_prev_state(current_time);

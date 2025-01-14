@@ -78,7 +78,7 @@ wm-slider {
 }
 video {
    min-width:  var(--min-video-width, 0);
-   max-height: var(--min-video-height, 0);
+   min-height: var(--min-video-height, 0);
    max-width:  var(--max-video-width, 100%);
    max-height: var(--max-video-height, none);
    
@@ -433,6 +433,7 @@ button.stop {
    }
    
    &.fast-forward,
+   &.can-only-fast-forward,
    &.rewind,
    &.can-only-rewind {
       --glyph: url(spritesheet-glyphs-next.svg#fast-forward-enabled);
