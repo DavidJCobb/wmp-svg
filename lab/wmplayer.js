@@ -419,7 +419,7 @@ class WMPlayerElement extends HTMLElement {
          this.#media[v ? "setAttribute" : "removeAttribute"]("loop", "loop");
       }
       this.#update_loop_tooltip();
-      this.#update_prev_next_state();
+      this.#update_prev_next_state(this.#media.currentTime);
    }
    
    get muted() { return this.#media.muted; }
@@ -457,6 +457,7 @@ class WMPlayerElement extends HTMLElement {
       this.#playlist.shuffle = v;
       this.#shuffle_button.checked = v;
       this.#update_shuffle_tooltip();
+      this.#update_next_state();
    }
    
    //
@@ -486,7 +487,7 @@ class WMPlayerElement extends HTMLElement {
          this.#loop = state;
          this.#loop_button.checked = state;
          this.#update_loop_tooltip(state);
-         this.#update_prev_next_state();
+         this.#update_prev_next_state(this.#media.currentTime);
       }
       if (name == "src") {
          //
@@ -624,8 +625,8 @@ class WMPlayerElement extends HTMLElement {
             }
             this.#fast_rewind_interval = interval;
          }
-         this.#fast_rewind_timeout = setTimeout(this.#fast_rewind_handler.bind(this), this.#fast_rewind_interval * 1000);
          this.#media.pause();
+         this.#fast_rewind_handler();
       }
    }
    #fast_rewind_handler() {
@@ -657,7 +658,7 @@ class WMPlayerElement extends HTMLElement {
       this.#media.pause();
       item.populateMediaElement(this.#media);
       this.#update_current_time_readout(0);
-      this.#update_prev_next_state();
+      this.#update_prev_next_state(0);
       if (index > 0) {
          this.#is_stopped = false;
          this.#stop_button.disabled = false;
@@ -681,7 +682,7 @@ class WMPlayerElement extends HTMLElement {
          this.#hide_current_time_readout();
       }
       
-      this.#update_prev_next_state();
+      this.#update_prev_next_state(no_media ? 0 : this.#media.currentTime);
       
       if (this.#playlist.size == 1) {
          this.#media[this.#loop ? "setAttribute" : "removeAttribute"]("loop", "loop");
@@ -732,11 +733,12 @@ class WMPlayerElement extends HTMLElement {
       this.#seek_slider.value = time;
       this.#update_current_time_readout(time);
       {  // Update the state of the "Previous" button (with debouncing)
-         let now = Date.now();
+         /*let now = Date.now();
          if (now - this.#_last_prev_enable_state_check > 100) {
             this.#_last_prev_enable_state_check = now;
             this.#update_prev_next_state(time);
-         }
+         }*/
+            this.#update_prev_next_state(time);
       }
    }
    #on_volume_change(e) {
@@ -949,7 +951,7 @@ class WMPlayerElement extends HTMLElement {
       this.#playlist.index = 0;
       this.#media.pause();
       this.#update_play_state();
-      this.#stop_button.setAttribute("disabled", "disabled");
+      this.#stop_button.disabled = true;
       
       this.#cancel_queued_fast_playback();
       this.#set_is_fast_playback(0);
@@ -966,7 +968,10 @@ class WMPlayerElement extends HTMLElement {
       this.#disqualify_autoplay_on_playback_control_by_user();
       let time = this.#seek_slider.value;
       this.#media.currentTime = time;
+      this.#is_stopped = false;
       this.#update_current_time_readout(time);
+      this.#update_prev_state(time);
+      this.#stop_button.disabled = false;
    }
    #on_volume_slider_change(e) {
       let value = this.#volume_slider.value;
@@ -1034,42 +1039,63 @@ class WMPlayerElement extends HTMLElement {
       node.setAttribute("data-glyph", glyph);
    }
    
+   #update_prev_state(current_time) {
+      const TEXT_FOR_PREVIOUS_ONLY = "Previous";
+      const TEXT_FOR_REWIND_ONLY   = "Press and hold to rewind";
+      const TEXT_FOR_ALL_BEHAVIORS = "Previous (press and hold to rewind)";
+      
+      let node = this.#prev_button;
+      if (this.#is_stopped || this.#playlist.size == 0) {
+         //
+         // Nothing playing.
+         //
+         node.classList.remove("can-only-rewind");
+         node.disabled = true;
+         node.title    = TEXT_FOR_ALL_BEHAVIORS;
+         return;
+      }
+      let can_rewind = this.#can_rewind();
+      if (current_time < this.#previous_button_time_threshold) {
+         //
+         // Too early in the media for the "pressing 'Previous' jumps to the 
+         // start of the media" case. If we were in that case, we could skip 
+         // all of these extra checks.
+         //
+         if (!this.#loop && this.#playlist.index == 0) {
+            //
+            // Can't go back.
+            //
+            if (can_rewind) {
+               node.classList.add("can-only-rewind");
+               node.disabled = false;
+               node.title    = TEXT_FOR_REWIND_ONLY;
+            } else {
+               node.classList.remove("can-only-rewind");
+               node.disabled = true;
+               node.title    = TEXT_FOR_ALL_BEHAVIORS;
+            }
+            return;
+         }
+      }
+      node.disabled = false;
+      node.classList.remove("can-only-rewind");
+      if (can_rewind) {
+         node.title = TEXT_FOR_ALL_BEHAVIORS;
+      } else {
+         node.title = TEXT_FOR_PREVIOUS_ONLY;
+      }
+   }
+   #update_next_state() {
+      let node = this.#next_button;
+      if (this.#playlist.empty()) {
+         node.disabled = true;
+         return;
+      }
+      node.disabled = !this.#playlist.hasNextItem();
+   }
    #update_prev_next_state(current_time) {
-      let no_prev   = false;
-      let no_rewind = !this.#can_rewind();
-      let no_next   = false;
-      {
-         let count = this.#playlist.size;
-         if (!count) {
-            no_prev = no_next = true;
-         } else if (!this.#loop) {
-            let current = this.#playlist.index;
-            no_prev = current == 0;
-            no_next = current == count - 1;
-         }
-         if (no_prev) {
-            //
-            // If we're a little ways into the current media, then clicking 
-            // "Previous" jumps to the start of the current media, rather 
-            // than trying to move to the previous media. We should make 
-            // sure that the button's enable state reflects that.
-            //
-            if (!current_time && current_time !== 0) {
-               current_time = this.#media.currentTime;
-            }
-            if (current_time >= this.#previous_button_time_threshold) {
-               no_prev = false;
-            }
-         }
-      }
-      this.#prev_button.disabled = no_prev && no_rewind;
-      this.#next_button.disabled = no_next;
-      {
-         let text = "Previous (press and hold to rewind)";
-         if (no_rewind)
-            text = "Previous";
-         this.#prev_button.title = text;
-      }
+      this.#update_prev_state(current_time);
+      this.#update_next_state();
    }
    
 };

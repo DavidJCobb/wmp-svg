@@ -7,6 +7,8 @@ The intuitively obvious way to implement rewinding &mdash; ignoring all technica
 
 When Windows Media Player engages "fast rewind," it jumps backward through the video one keyframe at a time, at 5x speed while muting audio. We can't jump from keyframe to keyframe, but we can still mimic this behavior well enough. Both we and Windows Media Player pause the video while doing this, which solves the muting without us having to shim `this.#media.muted`; the user can see the play/pause button visibly change, but that's the case in WMP, too.
 
+Rewinding is disabled for audio-only media, in part due to the above implementation and in part because continuous rewinding wouldn't be useful for audio (and we'd want to mute videos while doing it). Most users will not be able to tell how far they are into an audio track just by listening to the reversed audio. The seek slider is better for jumping back through audio.
+
 ## Shuffle
 
 The shuffle feature works by maintaining a list of shuffle-eligible playlist indices in parallel to the playlist itself. Every time you start playing a given playlist item, that index is removed from the list of shuffle-eligible playlist indices. When shuffle is enabled, attempting to advance to the next playlist item instead selects a random index from the list of shuffle-eligible playlist indices. We then advance to the playlist item at that index and remove it from the list of shuffle-eligible playlist indices. This approach ensures that no playlist item will ever be surfaced twice by shuffle until after all items in the playlist have been played at least once.

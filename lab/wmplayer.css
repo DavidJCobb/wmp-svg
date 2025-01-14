@@ -433,7 +433,8 @@ button.stop {
    }
    
    &.fast-forward,
-   &.rewind {
+   &.rewind,
+   &.can-only-rewind {
       --glyph: url(spritesheet-glyphs-next.svg#fast-forward-enabled);
       &:disabled {
          --glyph: url(spritesheet-glyphs-next.svg#fast-forward-disabled);

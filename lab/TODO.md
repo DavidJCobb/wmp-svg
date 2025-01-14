@@ -2,13 +2,6 @@
 # To-do
 
 * `WMPlayerElement`
-  * Don't allow rewinding audio-only playlist items. For an audio-only item, the button tooltip should just be "Previous," and clicking and holding should have no effect.
-    * Most browsers don't support negative playback rates, so we have to pause and step through media to rewind it. If we didn't pause, then you'd get little slices of audio playing as we jump back in time, which could *almost* work except that those brief slices of audio would advance the current time forward, breaking our rewinding.
-    * Plus, even for browsers that support negative playback rates, playing audio *backwards* isn't likely to be helpful. Most users will struggle to tell from backwards audio when they've rewound to the correct area. There just isn't a good UX to offer here.
-    * Recommendation: add member functions like `#can_rewind()`, `#can_go_to_prev()`, `#can_fast_forward()`, etc., and use these to guide handling the UI updates.
-    * Once we make this change, we should document our reasons in `wmplayer.md`.
-  * Never disable the "Previous" button if it is currently possible to rewind (i.e. we have at least one playlist item, the current playlist item isn't audio-only, and `this.#is_stopped == false`). It still needs to be possible to click and hold this button in order to rewind, and disabling it gets in the way of that.
-    * Instead of disabling it, just have it always show the Rewind glyph (and adjust the tool-tip appropriately as well). It should still need to be clicked and held, though, consistent with WMP controls in its Now Playing view.
   * Never disable the "Next" button if it's possible to fast-forward (i.e. we have at least one playlist item and `this.#is_stopped == false`). It still needs to be possible to click and hold these buttons to rewind or fast-forward, and disabling them gets in the way of that.
     * Instead of disabling it, just have it always show the Fast Forward glyph (and adjust the tool-tip appropriately as well). It should still need to be clicked and held, though, consistent with WMP controls in its Now Playing view.
   * Switch from using SVG views to using `background-position`, since the former can still tricker a flicker (as if the browser is actually reloading the SVG?!) when a sprite changes. The flickering isn't common but seems to occur after multitasking for a while on other pages/applications.

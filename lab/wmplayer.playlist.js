@@ -145,7 +145,7 @@ class WMPlaylist extends EventTarget {
       if (this.#loop == v)
          return;
       this.#loop = v;
-      this.dispatchEvent(new CustomEvent("loop-flag-changed", v));
+      this.dispatchEvent(new CustomEvent("loop-flag-changed", { detail: v }));
    }
    
    get shuffle() { return this.#shuffle; }
@@ -154,7 +154,7 @@ class WMPlaylist extends EventTarget {
       if (this.#shuffle == v)
          return;
       this.#shuffle = v;
-      this.dispatchEvent(new CustomEvent("shuffle-flag-changed", v));
+      this.dispatchEvent(new CustomEvent("shuffle-flag-changed", { detail: v }));
    }
    
    get size() { return this.#items.length; }
@@ -212,6 +212,16 @@ class WMPlaylist extends EventTarget {
          list.splice(i, 1);
    }
    
+   hasNextItem(ignore_shuffle) {
+      if (this.#loop) {
+         return true;
+      }
+      if (ignore_shuffle || !this.#shuffle) {
+         return (this.#index < this.#items.length - 1);
+      }
+      return this.#indices_for_shuffle.length > 0;
+   }
+   
    // Returns `true` if we successfully navigated to another playlist 
    // item, or `false` if there was nothing to navigate to. Applies 
    // all relevant "shuffle" logic.
@@ -244,6 +254,8 @@ class WMPlaylist extends EventTarget {
                next = list[i];
             } while (next == this.#index);
          } else {
+            if (!this.#loop)
+               return;
             i    = Math.floor(Math.random() * this.#items.length);
             next = i;
             this.#indices_for_shuffle = Object.keys(this.#items);
