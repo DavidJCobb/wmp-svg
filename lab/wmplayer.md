@@ -66,7 +66,19 @@ There are two reasons why `<input type="range" />` isn't sufficient for our use 
 There is a small advantage to rolling our own slider element, beyond working around those two limitations: we could potentially add the ability to highlight arbitrary ranges on the slider. This could be a good way to show what portions of the seek slider have currently buffered, for large or streaming video files as opposed to locally-hosted ones. (Not sure how I'll test that, yet, though.)
 
 
-# Notes
+# Implementation notes
+
+## Specific features
+
+### Fast-forward and rewind
+
+In Windows Media Player, these are tied to the Next and Previous buttons: click and hold the button for one second to start engaging the feature; then release to stop. There are a few considerations here:
+
+* Traditionally, web APIs define a "click" as a mousedown and mouseup occurring on the same element. Within Windows Media Player, however, once you mousedown on these buttons long enough to activate their secondary functions, you can mouseup anywhere to disengage that function. We need the same behavior, to avoid getting "stuck" fast-forwarding or rewinding, so we temporarily register window-level event listeners for anything that would end a mousedown (e.g. mouseup, blur).
+
+* In Windows Media Player, there are situations where it is impossible to move to the previous or next media item (i.e. because there isn't one), but still possible to rewind and fast-forward. In these scenarios, the buttons show the rewind and fast-forward glyphs, but still only perform these functions when clicked and held for a second, consistent with their tooltips. We mimic these ergonomics.
+
+* In Windows Media Player, the Rewind and Fast-Forward features *only* trigger when the buttons are *clicked* and held; pressing and holding Space or Enter is not sufficient. Keyboard users instead have to use keyboard shortcuts (specifically, accelerator keys) to toggle the features on and off.
 
 ## Custom element lifecycle
 

@@ -2,7 +2,6 @@
 # To-do
 
 * `WMPlayerElement`
-  * Clean up how we manage the state of the Stop button and `#is_stopped`, and how that influences visibility of the current timestamp.
   * Switch from using SVG views to using `background-position`, since the former can still tricker a flicker (as if the browser is actually reloading the SVG?!) when a sprite changes. The flickering isn't common but seems to occur after multitasking for a while on other pages/applications.
     * Be sure to stress-test this change. It's possible (though hopefully unlikely) that the flicker is repaint lag instead and would therefore not be fixed by this change.
   * The "theater" mode (wherein the player controls are overlaid on the video) uses different glyphs from the normal player &mdash; specifically, white glyphs rather than blue.
@@ -26,6 +25,16 @@
     * I don't like that there's no API for removing a playlist item.
       * Ideally it should be possible to do `playerElement.playlist[3]` and `playerElement.playlist.remove(3)` and whatnot.
   * Optional: currently-playing media title offset to the left edge (WMP: seen in music UI, not in video UI).
+  * Investigate implementing custom context menus for certain player buttons, because WMP does.
+    * Play/Pause
+      * *WMP offers context menu items, with accelerator keys, for controlling playback speed. If you change the playback speed and then use any other functions that change playback speed, like Fast Forward and Rewind, those functions will reset the speed back to normal when they deactivate.*
+      * Slow playback
+      * Normal playback
+      * Fast playback
+    * Next
+      * Fast Forward
+    * Previous
+      * Rewind
   * Investigate implementing keyboard shortcuts (they're listed [here](https://www.instructables.com/Keyboard-Shortcuts-for-Windows-Media-Player/)).
     * It's worth noting that in Windows Media Player, some functions, like Fast Forward, are only accessible via these accelerator keys and not via keyboard interactions with their actual on-screen buttons.
     * Implementation

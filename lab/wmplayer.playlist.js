@@ -232,7 +232,7 @@ class WMPlaylist extends EventTarget {
             return;
          let i;
          let list = this.#indices_for_shuffle;
-         if (list.length) {
+         if (list.length > 1 || (this.#current_index_started && list.length > 0)) {
             //
             // EDGE-CASE: Suppose you enable shuffle, pause the player, 
             // and click "next" five times. None of the media that you 
@@ -248,6 +248,14 @@ class WMPlaylist extends EventTarget {
             //
             // This will only happen if the player pauses the player and 
             // then clicks the "next" button.
+            //
+            // EDGE-CASE: The condition is formatted the way it is for a 
+            // good reason: if you've shuffled through three of the four 
+            // items in the playlist, paused on the third, advanced to 
+            // the fourth, and click Next, then the current (fourth) item 
+            // will be the sole item in the list (since it hasn't started 
+            // playing yet). If we enter the retry loop below in that 
+            // scenario, it will loop forever.
             //
             do {
                i    = Math.floor(Math.random() * list.length);

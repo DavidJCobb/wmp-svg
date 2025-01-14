@@ -312,6 +312,28 @@ class WMPlayerElement extends HTMLElement {
       // or rewinding. We work around this by registering and unregistering a handler on 
       // the window.
       this.#bound_fast_playback_stop_on_release_handler = this.#fast_playback_stop_on_release_handler.bind(this);
+      
+      {
+         let bound = this.#disqualify_autoplay_on_playback_control_by_user.bind(this);
+         for(let node of [
+            this.#next_button,
+            this.#play_pause_button,
+            this.#prev_button,
+            this.#stop_button,
+         ]) {
+            //
+            // If these buttons are activated, then disqualify any autoplay that may be 
+            // about to occur.
+            //
+            // For mouse activations, we have to register for `mousedown` to account for 
+            // the user fast-forwarding or rewinding via the alternate functions of the 
+            // Next and Previous buttons.
+            //
+            node.addEventListener("mousedown", bound);
+            node.addEventListener("keypress", bound);
+         }
+         this.#seek_slider.addEventListener("change", bound);
+      }
    }
    
    //
@@ -367,8 +389,8 @@ class WMPlayerElement extends HTMLElement {
       if (this.#media.currentTime != 0)
          return;
       this.#ready_to_autoplay = false;
-      this.#is_stopped        = false;
       this.#media.play();
+      this.#set_is_stopped(false);
    }
    
    // Get the current playback rate, accounting for both the desired 
@@ -461,19 +483,40 @@ class WMPlayerElement extends HTMLElement {
    }
    
    //
+   // Public methods (not related to any specific feature)
+   //
+   
+   play() {
+      if (this.#playlist.size == 0)
+         return;
+      this.#media.play();
+   }
+   pause() { this.#media.pause(); }
+   stop() { this.#set_is_stopped(true); }
+   
+   //
    // Custom element lifecycle
    //
    
    #has_ever_been_connected = false;
    #ready_to_autoplay       = true;
    
-   #disqualify_autoplay_on_playback_control_by_user() {
+   #disqualify_autoplay_on_playback_control_by_user(e) {
       //
       // If the user interacts with any part of the player that actually influences 
       // playback, e.g. the seek slider or play/pause button, then disqualify any 
       // pending autoplay. (We don't care about interactions with widgets that don't 
       // alter the flow of playback, e.g. the Shuffle button or the Volume slider.)
       //
+      if (e) {
+         if (e instanceof KeyboardEvent) {
+            if (e.code != "Enter" && e.code != "Space")
+               return;
+         } else if (e instanceof MouseEvent) {
+            if (e.button != 0)
+               return;
+         }
+      }
       this.#ready_to_autoplay = false;
    }
    
@@ -660,14 +703,13 @@ class WMPlayerElement extends HTMLElement {
       this.#update_current_time_readout(0);
       this.#update_prev_next_state(0);
       if (index > 0) {
-         this.#is_stopped = false;
-         this.#stop_button.disabled = false;
+         this.#set_is_stopped(false);
       }
    }
    #on_playlist_cleared() {
-      this.#is_stopped = true;
       this.#media.pause();
       this.#media.src = "";
+      this.#set_is_stopped(true);
    }
    #on_playlist_replaced() {
       this.#media.pause();
@@ -698,7 +740,7 @@ class WMPlayerElement extends HTMLElement {
       let playing = !this.#media.paused;
       if (!this.#playlist.toPrev())
          return;
-      this.#is_stopped = false;
+      this.#set_is_stopped(false);
       if (playing)
          this.#media.play();
    }
@@ -706,7 +748,7 @@ class WMPlayerElement extends HTMLElement {
       let playing = !this.#media.paused;
       if (!this.#playlist.toNext(ignore_shuffle))
          return;
-      this.#is_stopped = false;
+      this.#set_is_stopped(false);
       if (playing)
          this.#media.play();
    }
@@ -750,7 +792,7 @@ class WMPlayerElement extends HTMLElement {
    
    #on_media_play(e) {
       this.#playlist.markAsPlayed();
-      this.#is_stopped = false;
+      this.#set_is_stopped(false);
       this.#update_play_state();
    }
    #on_media_ended(e) {
@@ -812,7 +854,41 @@ class WMPlayerElement extends HTMLElement {
    }
    
    //
-   // Volume button
+   // Stop
+   //
+   
+   #set_is_stopped(v) {
+      this.#is_stopped = v;
+      if (v) {
+         this.#playlist.index = 0;
+         this.#media.pause();
+         this.#update_play_state();
+         this.#stop_button.disabled = true;
+         
+         this.#cancel_queued_fast_playback();
+         this.#set_is_fast_playback(0);
+         
+         // NOTE: If we're not already on the zeroth playlist item when we 
+         // click "Stop," then switching to that playlist item may trigger 
+         // a `durationchange` event and updating of the current timestamp. 
+         // This is why we set `#is_stopped` before we change the playlist 
+         // index.
+         //
+         // If we *are* on the zeroth playlist item, then we shouldn't get 
+         // any playlist item change or `durationchange` event, so we need 
+         // to hide the current time here as well.
+         this.#hide_current_time_readout();
+      } else {
+         this.#stop_button.disabled = false;
+      }
+   }
+   
+   #on_stop_click(e) {
+      this.#set_is_stopped(true);
+   }
+   
+   //
+   // Mute/Volume button
    //
    
    #on_mute_ui_toggled() {
@@ -834,14 +910,12 @@ class WMPlayerElement extends HTMLElement {
    //
    
    #on_play_pause_click(e) {
-      this.#disqualify_autoplay_on_playback_control_by_user();
-      this.#is_stopped = false;
       if (this.#media.paused) {
          this.#media.play();
-         this.#stop_button.removeAttribute("disabled");
       } else {
          this.#media.pause();
       }
+      this.#set_is_stopped(false);
    }
    #update_play_state() {
       if (this.#media.paused) {
@@ -876,7 +950,6 @@ class WMPlayerElement extends HTMLElement {
    //
    
    #on_prev_click() {
-      this.#disqualify_autoplay_on_playback_control_by_user();
       if (this.#media.currentTime >= this.#previous_button_time_threshold) {
          this.#media.currentTime = 0;
          return;
@@ -884,14 +957,17 @@ class WMPlayerElement extends HTMLElement {
       this.toPrevMedia();
    }
    
-   #on_prev_mousedown() {
-      this.#disqualify_autoplay_on_playback_control_by_user();
+   #on_prev_mousedown(e) {
+      if (e.button != 0)
+         return;
       if (this.#can_rewind()) {
          this.#queue_fast_playback(-1, this.#fast_forward_delay);
          this.#fast_playback_press_handler();
       }
    }
-   #on_prev_mouseup() {
+   #on_prev_mouseup(e) {
+      if (e.button != 0)
+         return;
       this.#cancel_queued_fast_playback();
       if (this.#fast_playback_type) {
          this.#set_is_fast_playback(0);
@@ -912,12 +988,15 @@ class WMPlayerElement extends HTMLElement {
    // Next/Fast Forward button
    //
    
-   #on_next_mousedown() {
-      this.#disqualify_autoplay_on_playback_control_by_user();
+   #on_next_mousedown(e) {
+      if (e.button != 0)
+         return;
       this.#queue_fast_playback(1, this.#fast_forward_delay);
       this.#fast_playback_press_handler();
    }
-   #on_next_mouseup() {
+   #on_next_mouseup(e) {
+      if (e.button != 0)
+         return;
       this.#cancel_queued_fast_playback();
       if (this.#fast_playback_type) {
          this.#set_is_fast_playback(0);
@@ -936,7 +1015,6 @@ class WMPlayerElement extends HTMLElement {
       // button itself. This differs from the mouse interactions.
       //
       e.preventDefault();
-      this.#disqualify_autoplay_on_playback_control_by_user();
       this.toNextMedia();
    }
    
@@ -944,33 +1022,12 @@ class WMPlayerElement extends HTMLElement {
    // Simple UI interactions
    //
    
-   #on_stop_click(e) {
-      this.#disqualify_autoplay_on_playback_control_by_user();
-      this.#is_stopped = true;
-      this.#playlist.index = 0;
-      this.#media.pause();
-      this.#update_play_state();
-      this.#stop_button.disabled = true;
-      
-      this.#cancel_queued_fast_playback();
-      this.#set_is_fast_playback(0);
-      
-      // NOTE: If we're not already on the zeroth playlist item when we 
-      // click "Stop," then switching to that playlist item may trigger 
-      // a `durationchange` event and updating of the current timestamp. 
-      // This is why we set `#is_stopped` before we change the playlist 
-      // index.
-      this.#hide_current_time_readout();
-   }
-   
    #on_seek_slider_change(e) {
-      this.#disqualify_autoplay_on_playback_control_by_user();
       let time = this.#seek_slider.value;
       this.#media.currentTime = time;
-      this.#is_stopped = false;
       this.#update_current_time_readout(time);
       this.#update_prev_state(time);
-      this.#stop_button.disabled = false;
+      this.#set_is_stopped(false);
    }
    #on_volume_slider_change(e) {
       let value = this.#volume_slider.value;
