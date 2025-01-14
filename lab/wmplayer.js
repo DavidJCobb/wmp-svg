@@ -413,6 +413,7 @@ class WMPlayerElement extends HTMLElement {
       if (v == this.#loop)
          return;
       this.#loop = v;
+      this.#playlist.loop = v;
       this.#loop_button.checked = v;
       if (this.#playlist.size == 1) {
          this.#media[v ? "setAttribute" : "removeAttribute"]("loop", "loop");
@@ -453,6 +454,7 @@ class WMPlayerElement extends HTMLElement {
       if (v == this.#shuffle)
          return;
       this.#shuffle = v;
+      this.#playlist.shuffle = v;
       this.#shuffle_button.checked = v;
       this.#update_shuffle_tooltip();
    }
@@ -797,8 +799,7 @@ class WMPlayerElement extends HTMLElement {
    //
    
    #on_shuffle_ui_toggled() {
-      this.#shuffle = this.#shuffle_button.checked;
-      this.#update_shuffle_tooltip();
+      this.shuffle = this.#shuffle_button.checked;
    }
    #update_shuffle_tooltip() {
       let node = this.#shuffle_button;
