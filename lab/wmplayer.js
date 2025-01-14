@@ -358,9 +358,9 @@ class WMPlayerElement extends HTMLElement {
          return;
       if (!this.#autoplay)
          return;
-      if (!this.#playlist.length)
+      if (!this.#playlist.size)
          return;
-      if (this.#current_playlist_index != 0)
+      if (this.#playlist.index != 0)
          return;
       if (!this.#media.paused)
          return;
@@ -414,7 +414,7 @@ class WMPlayerElement extends HTMLElement {
          return;
       this.#loop = v;
       this.#loop_button.checked = v;
-      if (this.#playlist.length == 1) {
+      if (this.#playlist.size == 1) {
          this.#media[v ? "setAttribute" : "removeAttribute"]("loop", "loop");
       }
       this.#update_loop_tooltip();
@@ -671,7 +671,7 @@ class WMPlayerElement extends HTMLElement {
    }
    
    #on_playlist_modified() {
-      let no_media = this.#playlist.length == 0;
+      let no_media = this.#playlist.empty();
       
       this.#play_pause_button.disabled = no_media;
       if (no_media) {
@@ -681,7 +681,7 @@ class WMPlayerElement extends HTMLElement {
       
       this.#update_prev_next_state();
       
-      if (this.#playlist.length == 1) {
+      if (this.#playlist.size == 1) {
          this.#media[this.#loop ? "setAttribute" : "removeAttribute"]("loop", "loop");
       } else {
          this.#media.removeAttribute("loop");
