@@ -4,6 +4,7 @@
       <title>Custom element test</title>
    </head>
    <body>
+      <script src="wmplayer.playlist.js"></script>
       <script src="wmplayer.slider.js"></script>
       <script src="wmplayer.js"></script>
       <wm-player src="test-video.mp4" class="theater" />
@@ -16,6 +17,7 @@ wm-player {
       <script>
 document.getElementsByTagName("wm-player")[0].addToPlaylist("test-video-2.m4v");
 document.getElementsByTagName("wm-player")[0].addToPlaylist("test-video-3.mp4");
+document.getElementsByTagName("wm-player")[0].addToPlaylist("test-audio.wav");
       </script>
    </body>
 </html>

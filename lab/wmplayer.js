@@ -1,83 +1,11 @@
 
-class WMPlaylistItem {
-   #audio_only = false;
-   #src        = null;
-   #sources    = []; // Array<HTMLSourceElement>
-   #tracks     = []; // Array<HTMLTrackElement>
-   
-   constructor(o) {
-      this.#audio_only = o?.audio_only || false; // force audio-only even if a video file
-      this.#src        = o?.src || null;
-      this.#realize(o?.tracks, o?.sources);
-   }
-   
-   get empty() {
-      if (this.#src)
-         return false;
-      if (this.#sources.length == 0)
-         return true;
-      for(let source of this.#sources) {
-         if (source.src || source.srcset)
-            return false;
-      }
-      return true;
-   }
-   
-   populateMediaElement(media) {
-      media.src = this.#src || "";
-      media.append(this.#sources.concat(this.#tracks));
-      media.currentTime = 0;
-   }
-   
-   #realize(tracks, sources) {
-      if (sources) {
-         let list = sources;
-         let size = list.length;
-         for(let i = 0; i < size; ++i) {
-            let item = list[i];
-            if (item instanceof HTMLSourceElement) {
-               this.#sources.push(item);
-               continue;
-            }
-            let node = document.createElement("source");
-            for(let attr of ["height", "media", "sizes", "src", "srcset", "type", "width"]) {
-               let data = item[attr];
-               if (data)
-                  node[attr] = data;
-            }
-            this.#sources.push(node);
-         }
-      }
-      if (tracks) {
-         let list = tracks;
-         let size = list.length;
-         for(let i = 0; i < size; ++i) {
-            let item = list[i];
-            if (item instanceof HTMLTrackElement) {
-               this.#tracks.push(item);
-               continue;
-            }
-            let node = document.createElement("track");
-            for(let attr of ["kind", "label", "src", "srclang"]) {
-               let data = item[attr];
-               if (data)
-                  node[attr] = data;
-            }
-            if (item.default)
-               node.setAttribute("default", "default");
-            this.#tracks.push(node);
-         }
-      }
-   }
-};
-
 class WMPlayerElement extends HTMLElement {
    
    //
    // Options:
    //
    
-   #playlist = []; // Array<WMPlaylistItem>
+   #playlist = new WMPlaylist();
    #autoplay = false;
    #loop     = false;
    #shuffle  = false;
@@ -318,6 +246,11 @@ class WMPlayerElement extends HTMLElement {
       
       this.#shadow.innerHTML = WMPlayerElement.#HTML;
       
+      this.#playlist.addEventListener("cleared", this.#on_playlist_cleared.bind(this));
+      this.#playlist.addEventListener("replaced", this.#on_playlist_replaced.bind(this));
+      this.#playlist.addEventListener("modified", this.#on_playlist_modified.bind(this));
+      this.#playlist.addEventListener("current-item-changed", this.#on_playlist_current_item_changed.bind(this));
+      
       this.#media = this.#shadow.querySelector("video");
       this.#media.addEventListener("loadedmetadata", this.#on_loaded_metadata.bind(this));
       this.#media.addEventListener("timeupdate", this.#on_current_time_change.bind(this));
@@ -382,6 +315,26 @@ class WMPlayerElement extends HTMLElement {
    }
    
    //
+   // State
+   //
+   
+   #can_rewind() {
+      if (!this.#has_current_playlist_item())
+         return false;
+      let item = this.#playlist.currentItem;
+      if (item.audio_only)
+         return false;
+      return true;
+   }
+   #has_current_playlist_item() {
+      if (this.#is_stopped)
+         return false;
+      if (this.#playlist.length == 0)
+         return false;
+      return true;
+   }
+   
+   //
    // Accessors
    //
    
@@ -422,8 +375,8 @@ class WMPlayerElement extends HTMLElement {
    // base rate (`playbackRate`) and for whether we're fast-forwarding.
    get currentPlaybackRate() { return this.#media.playbackRate; }
    
-   get currentPlaylistIndex() { return this.#current_playlist_index; }
-   set currentPlaylistIndex(v) { this.#set_playlist_index(v); }
+   get currentPlaylistIndex() { return this.#playlist.index; }
+   set currentPlaylistIndex(v) { this.#playlist.index = v; }
    
    get fastForwardDelay() { return this.#fast_forward_delay; }
    set fastForwardDelay(v) {
@@ -547,7 +500,7 @@ class WMPlayerElement extends HTMLElement {
          //
          if (after !== null && after) {
             let item = new WMPlaylistItem({ src: after });
-            this.#replace_playlist([ item ]);
+            this.#playlist.replace([ item ]);
             this.#try_autoplay();
          }
       }
@@ -604,6 +557,7 @@ class WMPlayerElement extends HTMLElement {
    }
    #set_is_fast_playback(direction) {
       if (direction == 0) {
+         let changing = this.#fast_playback_type != 0;
          if (this.#fast_rewind_timeout) {
             clearTimeout(this.#fast_rewind_timeout);
             this.#fast_rewind_timeout = null;
@@ -612,26 +566,28 @@ class WMPlayerElement extends HTMLElement {
          this.#fast_playback_type = 0;
          this.#prev_button.classList.remove("rewind");
          this.#next_button.classList.remove("fast-forward");
-         if (this.#fast_playback_paused) {
-            //
-            // NOTE: We diverge from Windows Media Player's behavior here: we restore 
-            // the playback state that the player was in before rewinding or fast-
-            // forwarding, i.e. if you fast-forward while paused, you'll be paused 
-            // when you stop fast-forwarding. Windows Media Player's behaviors are as 
-            // follows:
-            //
-            //  - After rewinding, always resume playback.
-            //
-            //  - After fast-forwarding while paused, wait three seconds (identified by 
-            //    Microsoft-employed behavioral scientists as the exact length of time 
-            //    it takes for a user to assume the player will stay paused); then,
-            //    resume playback.
-            //
-            this.#fast_playback_paused = false;
-            this.#media.pause();
-         } else {
-            this.#media.play();
+         if (changing) {
+            if (this.#fast_playback_paused) {
+               //
+               // NOTE: We diverge from Windows Media Player's behavior here: we restore 
+               // the playback state that the player was in before rewinding or fast-
+               // forwarding, i.e. if you fast-forward while paused, you'll be paused 
+               // when you stop fast-forwarding. Windows Media Player's behaviors are as 
+               // follows:
+               //
+               //  - After rewinding, always resume playback.
+               //
+               //  - After fast-forwarding while paused, wait three seconds (identified by 
+               //    Microsoft-employed behavioral scientists as the exact length of time 
+               //    it takes for a user to assume the player will stay paused); then,
+               //    resume playback.
+               //
+               this.#media.pause();
+            } else {
+               this.#media.play();
+            }
          }
+         this.#fast_playback_paused = false;
          return;
       }
       if (this.#fast_playback_type == 0) {
@@ -692,16 +648,28 @@ class WMPlayerElement extends HTMLElement {
    // Playlist
    //
    
-   #mark_current_playlist_item_for_no_shuffle() {
-      if (!this.#current_playlist_index_started) {
-         this.#current_playlist_index_started = true;
-         
-         let list = this.#playlist_shuffle_indices;
-         let i    = list.indexOf(this.#current_playlist_index);
-         if (i >= 0)
-            list.splice(i, 1);
+   #on_playlist_current_item_changed(e) {
+      let index = e.detail.index;
+      let item  = e.detail.item;
+      
+      this.#media.pause();
+      item.populateMediaElement(this.#media);
+      this.#update_current_time_readout(0);
+      this.#update_prev_next_state();
+      if (index > 0) {
+         this.#is_stopped = false;
+         this.#stop_button.disabled = false;
       }
    }
+   #on_playlist_cleared() {
+      this.#is_stopped = true;
+      this.#media.pause();
+      this.#media.src = "";
+   }
+   #on_playlist_replaced() {
+      this.#media.pause();
+   }
+   
    #on_playlist_modified() {
       let no_media = this.#playlist.length == 0;
       
@@ -719,128 +687,23 @@ class WMPlayerElement extends HTMLElement {
          this.#media.removeAttribute("loop");
       }
    }
-   #replace_playlist(items) {
-      this.#playlist = items;
-      this.#playlist_shuffle_indices = Object.keys(items);
-      this.#media.pause();
-      this.#on_playlist_modified();
-      this.#set_playlist_index(0);
-   }
    
-   // Returns `true` if we successfully navigated to another playlist 
-   // item, or `false` if there was nothing to navigate to.
-   #set_playlist_index(v) {
-      v = +v;
-      if (v < 0 || v >= this.#playlist.length) {
-         if (!this.#loop || !this.#playlist.length)
-            return false;
-         
-         if (v < 0)
-            v = this.#playlist.length - 1;
-         else
-            v = 0;
-      }
-      this.#current_playlist_index = v;
-      this.#current_playlist_index_started = false;
-      
-      let item = this.#playlist[v];
-      let next = this.#playlist[v + 1];
-      this.#media.pause();
-      item.populateMediaElement(this.#media);
-      this.#update_prev_next_state();
-      if (v > 0) {
-         this.#stop_button.disabled = false;
-      }
-      if (next) {
-         // TODO: (optionally?) preload
-      }
-      return true;
-   }
-   
-   // Returns `true` if we successfully navigated to another playlist 
-   // item, or `false` if there was nothing to navigate to. Applies 
-   // all relevant "shuffle" logic.
-   #to_next_playlist_item(ignore_shuffle) {
-      let next = this.#current_playlist_index + 1;
-      if (this.#shuffle && !ignore_shuffle) {
-         if (this.#playlist.length == 1) {
-            return false;
-         }
-         let i;
-         let list = this.#playlist_shuffle_indices;
-         if (list.length) {
-            //
-            // EDGE-CASE: Suppose you enable shuffle, pause the player, 
-            // and click "next" five times. None of the media that you 
-            // skip should be disqualified from shuffling in the future: 
-            // we should only disqualify media once it actually starts 
-            // to play...
-            //
-            // BUT (and this is the edge-case) because we don't prevent 
-            // media from being shuffled to unless it's started playing, 
-            // if we only roll for a random playlist item one time, then 
-            // we may actually navigate from the current playlist item 
-            // to itself. We need to re-roll in those cases.
-            //
-            // This will only happen if the player pauses the player and 
-            // then clicks the "next" button.
-            //
-            do {
-               i    = Math.floor(Math.random() * list.length);
-               next = list[i];
-            } while (next == this.#current_playlist_index);
-         } else {
-            i    = Math.floor(Math.random() * this.#playlist.length);
-            next = i;
-            this.#playlist_shuffle_indices = Object.keys(this.#playlist);
-            this.#playlist_shuffle_indices.splice(i, 1);
-         }
-      }
-      return this.#set_playlist_index(next);
-   }
-   
-   addToPlaylist(item) {
-      if (!(item instanceof WMPlaylistItem)) {
-         if (item + "" === item) {
-            if (!item)
-               return;
-            item = new WMPlaylistItem({ src: item });
-         } else {
-            item = new WMPlaylistItem(item);
-            if (item.empty)
-               return;
-         }
-      }
-      this.#playlist.push(item);
-      this.#playlist_shuffle_indices.push(this.#playlist.length - 1);
-      this.#on_playlist_modified();
-   }
-   clearPlaylist() {
-      this.#is_stopped = true;
-      this.#media.pause();
-      this.#media.src = "";
-      this.#playlist = [];
-      this.#current_playlist_index = 0;
-      this.#current_playlist_index_started = false;
-      this.#playlist_shuffle_indices = [];
-      this.#on_playlist_modified();
-   }
+   addToPlaylist(item) { this.#playlist.add(item); }
+   clearPlaylist() { this.#playlist.clear(); }
    
    toPrevMedia() {
       let playing = !this.#media.paused;
-      if (!this.#set_playlist_index(this.#current_playlist_index - 1))
+      if (!this.#playlist.toPrev())
          return;
       this.#is_stopped = false;
-      this.#update_current_time_readout(0);
       if (playing)
          this.#media.play();
    }
    toNextMedia(ignore_shuffle) {
       let playing = !this.#media.paused;
-      if (!this.#to_next_playlist_item(ignore_shuffle))
+      if (!this.#playlist.toNext(ignore_shuffle))
          return;
       this.#is_stopped = false;
-      this.#update_current_time_readout(0);
       if (playing)
          this.#media.play();
    }
@@ -883,7 +746,7 @@ class WMPlayerElement extends HTMLElement {
    }
    
    #on_media_play(e) {
-      this.#mark_current_playlist_item_for_no_shuffle();
+      this.#playlist.markAsPlayed();
       this.#is_stopped = false;
       this.#update_play_state();
    }
@@ -892,7 +755,7 @@ class WMPlayerElement extends HTMLElement {
       // WARNING: The `ended` event doesn't fire if a video has the HTML `loop` attribute, 
       // reaches its end, and loops. It only fires if the video isn't looping.
       //
-      if (this.#to_next_playlist_item()) {
+      if (this.#playlist.toNext()) {
          this.#media.play();
          //
          // If you fast-forward past the end of a media item, you should still be fast-
@@ -992,6 +855,7 @@ class WMPlayerElement extends HTMLElement {
    
    //
    // Helpers for Previous/Rewind and Next/Fast Foward buttons
+   //
    
    #fast_playback_press_handler() {
       let handler = this.#bound_fast_playback_stop_on_release_handler;
@@ -1004,7 +868,6 @@ class WMPlayerElement extends HTMLElement {
       window.removeEventListener("blur",    handler);
       window.removeEventListener("mouseup", handler);
    }
-   //
    
    //
    // Previous button
@@ -1021,8 +884,10 @@ class WMPlayerElement extends HTMLElement {
    
    #on_prev_mousedown() {
       this.#disqualify_autoplay_on_playback_control_by_user();
-      this.#queue_fast_playback(-1, this.#fast_forward_delay);
-      this.#fast_playback_press_handler();
+      if (this.#can_rewind()) {
+         this.#queue_fast_playback(-1, this.#fast_forward_delay);
+         this.#fast_playback_press_handler();
+      }
    }
    #on_prev_mouseup() {
       this.#cancel_queued_fast_playback();
@@ -1080,7 +945,8 @@ class WMPlayerElement extends HTMLElement {
    #on_stop_click(e) {
       this.#disqualify_autoplay_on_playback_control_by_user();
       this.#is_stopped = true;
-      this.#set_playlist_index(0); // also pauses the media
+      this.#playlist.index = 0;
+      this.#media.pause();
       this.#update_play_state();
       this.#stop_button.setAttribute("disabled", "disabled");
       
@@ -1168,14 +1034,15 @@ class WMPlayerElement extends HTMLElement {
    }
    
    #update_prev_next_state(current_time) {
-      let no_prev = false;
-      let no_next = false;
+      let no_prev   = false;
+      let no_rewind = !this.#can_rewind();
+      let no_next   = false;
       {
-         let count = this.#playlist.length;
+         let count = this.#playlist.size;
          if (!count) {
             no_prev = no_next = true;
          } else if (!this.#loop) {
-            let current = this.#current_playlist_index;
+            let current = this.#playlist.index;
             no_prev = current == 0;
             no_next = current == count - 1;
          }
@@ -1194,8 +1061,14 @@ class WMPlayerElement extends HTMLElement {
             }
          }
       }
-      this.#prev_button.disabled = no_prev;
+      this.#prev_button.disabled = no_prev && no_rewind;
       this.#next_button.disabled = no_next;
+      {
+         let text = "Previous (press and hold to rewind)";
+         if (no_rewind)
+            text = "Previous";
+         this.#prev_button.title = text;
+      }
    }
    
 };
