@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" color-interpolation="linearrgb" width="55" height="55">
+   <!--
+      Assume:
+      
+       - Play/pause button is 43x43px, not including shadows and glows
+       
+       - Button height is 35px, not including shadows and glows
+       
+       - Tray padding is 5px
+   -->
+   <defs>
+      <clipPath id="tray-pp-both-clip">
+         <!--
+            This path should be equivalent to these overlapping shapes:
+            
+               <circle cx="27.5" cy="27.5" r="27.5" />
+               <rect x="-5" y="10" width="65" height="35" />
+         -->
+         <path
+            id="tray-pp-both-path"
+            d="M -5 10 L 6.295 10 A 27.5 27.5 0 0 1 48.705 10 L 60 10 L 60 45 L 48.705 45 A 27.5 27.5 0 0 1 6.295 45 L -5 45 z"
+         />
+      </clipPath>
+   </defs>
+   <g clip-path="view-box xywh(0 0 55 55)">
+      <use href="#tray-pp-both-path"
+         fill="#888"
+         stroke="#000"
+         stroke-width="2"
+         clip-path="url(#tray-pp-both-clip)"
+      />
+   </g>
+</svg>

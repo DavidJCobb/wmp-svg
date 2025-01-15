@@ -231,14 +231,22 @@ video {
             to bottom,
             #FFF 0%,
             #FFF 100%
-         ) luminance calc(6px*var(--scale,1)) calc(5px*var(--scale,1))/var(--play-pause-button-hitbox) calc(39px*var(--scale,1)) no-repeat
+         ) luminance calc((var(--padding) + 1px)*var(--scale,1)) calc(5px*var(--scale,1))/var(--play-pause-button-hitbox) calc(39px*var(--scale,1)) no-repeat
       ;
    }
 }
 
+.controls hr {
+   width:  0;
+   height: 100%;
+   margin: 0 .25em;
+   border: 0 solid #CECDCF;
+   border-left-width: 1px;
+   border-right-width: 1px;
+}
+
+/* Set up helper variables/expressions for the button and glyph sprites. */
 :where(.controls :is(button, .basic-button)) {
-   /* Set up helper variables/expressions for the button and glyph sprites. */
-   
    /*
       BUTTON SPRITE CONFIGURATION
       
@@ -284,8 +292,12 @@ video {
       no-repeat
    ;
    
-   /* override as appropriate for each element state. */
+   /* INPUTS */
+   
+   /* override as appropriate. */
    --use-button-sprite: var(--button-sprite-normal);
+   
+   /* defaults for element states */
    &:hover {
       --use-button-sprite: var(--button-sprite-hover);
    }
@@ -339,15 +351,6 @@ video {
       /*height*/ calc(var(--glyph-spritesheet-rows) * var(--use-glyph-h))
       no-repeat
    ;
-}
-
-.controls hr {
-   width:  0;
-   height: 100%;
-   margin: 0 .25em;
-   border: 0 solid #CECDCF;
-   border-left-width: 1px;
-   border-right-width: 1px;
 }
 
 /*
@@ -423,10 +426,7 @@ video {
       left:     var(--sprite-x);
       top:      var(--sprite-y);
       
-      background:
-         var(--glyph-background),
-         var(--button-background)
-      ;
+      background: var(--glyph-background), var(--button-background);
    }
    
    /* focus border; use a pseudo-element to get it in front of the sprite */
@@ -571,10 +571,7 @@ button.stop {
       
       top: calc(-6px * var(--scale,1));
       
-      background:
-         var(--glyph-background),
-         var(--button-background)
-      ;
+      background: var(--glyph-background), var(--button-background);
    }
    &::after { /* hitbox */
       /* can't use CSS variables in a path(), so scale the whole hitbox instead. */
@@ -675,10 +672,7 @@ button.stop {
       width:  var(--play-pause-button-region);
       height: var(--play-pause-button-region);
       
-      background:
-         var(--glyph-background),
-         var(--button-background)
-      ;
+      background: var(--glyph-background), var(--button-background);
    }
    &::after { /* hitbox */
       --radius: calc(var(--play-pause-button-hitbox) / 2);

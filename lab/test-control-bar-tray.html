@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+   <head>
+      <style>
+.controls {
+   position: relative;
+   display: grid;
+   grid-template: "l c r" / 1fr min-content 1fr;
+   align-items: center;
+   
+   .left {
+      grid-area: l;
+   }
+   .play-pause {
+      grid-area: c;
+      justify-self: center;
+      border-radius: 50%;
+      width: 43px;
+      height: 43px;
+   }
+   .right {
+      grid-area: r;
+   }
+   
+   &::after {
+      content: " ";
+      position: relative;
+      z-index: -1;
+      grid-area: c;
+      width: 55px;
+      height: 55px;
+      background: url(spritesheet-tray.svg) top left/100% 100% no-repeat;
+   }
+}
+      </style>
+   </head>
+   <body>
+      <p>
+         want to find a better way to handle the tray border and background
+      </p>
+      <p>
+         maybe border-image on the center portion?
+      </p>
+   
+      <div class="controls">
+         <div class="left">
+         </div>
+         <button class="play-pause"></button>
+         <div class="right">
+         </div>
+      </div>
+   </body>
+</html>
