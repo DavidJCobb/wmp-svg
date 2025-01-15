@@ -1,18 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" color-interpolation="linearrgb">
-   <view id="loop-off" viewBox="0 0 50 50" />
-   <view id="loop-on" viewBox="50 0 50 50" />
-   <view id="shuffle-off" viewBox="0 50 50 50" />
-   <view id="shuffle-on" viewBox="50 50 50 50" />
-   <view id="stop-enabled" viewBox="0 100 50 50" />
-   <view id="stop-disabled" viewBox="50 100 50 50" />
-   <view id="volume-empty" viewBox="0 150 50 50" />
-   <view id="volume-low" viewBox="50 150 50 50" />
-   <view id="volume-medium" viewBox="100 150 50 50" />
-   <view id="volume-high" viewBox="150 150 50 50" />
-   <view id="volume-muted" viewBox="200 150 50 50" />
+<svg xmlns="http://www.w3.org/2000/svg" color-interpolation="linearrgb" width="250" height="200">
+   <view id="theater" />
+   <defs>
+      <style><![CDATA[
+:root {
+   --icon-line-color: #FFFFFF;
+   --icon-fill-color: #0064CC;
+}
+
+.line { color: var(--icon-line-color); }
+.fill { color: var(--icon-fill-color); }
+
+:root:has(#theater:target) {
+   --icon-line-color: #000;
+   --icon-fill-color: #FFF;
+   
+   #stop-fill-enabled {
+      stop:first-child { stop-color: #FFF; }
+      stop:last-child  { stop-color: #EEE; }
+   }
+}
+      ]]></style>
+   </defs>
    <!--
       Glyphs are, formally, 50x50px graphics, but in general they don't 
       extend very far beyond a 26x26px AABB.
+      
+      SPRITE │ COL 0   │ COL 1    │ COL 2 │ COL 3 │ COL 4 │
+      ───────┼─────────┼──────────┼───────┴───────┴───────┤
+      Loop   │ Off     │ On       │                       │
+      ───────┼─────────┼──────────┼───────────────────────┤
+      Shuffle│ Off     │ On       │                       │
+      ───────┼─────────┼──────────┼───────────────────────┤
+      Stop   │ Enabled │ Disabled │                       │
+      ───────┼─────────┼──────────┼───────┬───────┬───────┤
+      Volume │ 0       │ 33%      │ 66%   │ 100%  │ Muted │
+      ───────┴─────────┴──────────┴───────┴───────┴───────┘
    -->
    
    <!-- Loop -->
@@ -52,13 +74,13 @@
       </defs>
       
       <g mask="url(#loop-mask-off)">
-         <use href="#loop-shape" color="#FFFFFF" stroke-width="6" />
-         <use href="#loop-shape" color="#0064cc" stroke-width="4" />
+         <use class="line" href="#loop-shape" color="#FFFFFF" stroke-width="6" />
+         <use class="fill" href="#loop-shape" color="#0064cc" stroke-width="4" />
       </g>
       <g transform="translate(50 0)" mask="url(#loop-mask-on)">
          <rect x="0" y="0" width="50" height="50" fill="#63cefd" />
-         <use href="#loop-shape" color="#FFFFFF" stroke-width="6" />
-         <use href="#loop-shape" color="#0064cc" stroke-width="4" />
+         <use class="line" href="#loop-shape" color="#FFFFFF" stroke-width="6" />
+         <use class="fill" href="#loop-shape" color="#0064cc" stroke-width="4" />
       </g>
    </g>
    
@@ -89,10 +111,10 @@
          </g>
          
          <g id="shuffle-shape">
-            <use href="#shuffle-shape-ltr" color="#FFFFFF" stroke-width="6" />
-            <use href="#shuffle-shape-ltr" color="#0064cc" stroke-width="4" />
-            <use href="#shuffle-shape-rtl" color="#FFFFFF" stroke-width="6" />
-            <use href="#shuffle-shape-rtl" color="#0064cc" stroke-width="4" />
+            <use class="line" href="#shuffle-shape-ltr" color="#FFFFFF" stroke-width="6" />
+            <use class="fill" href="#shuffle-shape-ltr" color="#0064cc" stroke-width="4" />
+            <use class="line" href="#shuffle-shape-rtl" color="#FFFFFF" stroke-width="6" />
+            <use class="fill" href="#shuffle-shape-rtl" color="#0064cc" stroke-width="4" />
          </g>
          
          <mask id="shuffle-mask-off" x="-40%" y="-40%" width="180%" height="180%">
@@ -163,7 +185,7 @@
          </linearGradient>
          <linearGradient id="stop-fill-disabled" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0" stop-color="#888888" />
-            <stop offset="1" stop-color="#333" />
+            <stop offset="1" stop-color="#333333" />
          </linearGradient>
          <mask id="stop-mask-enabled" shape-rendering="crispedges">
             <defs>
@@ -207,7 +229,7 @@
          <rect
             x="13" y="13" width="24" height="24" rx="4"
             fill="url(#stop-fill-enabled)"
-            stroke="#FFF"
+            stroke="var(--icon-line-color)"
             stroke-width="4"
          />
          <rect
@@ -218,12 +240,12 @@
          />
       </g>
       
-      <!-- disbled -->
+      <!-- disabled -->
       <g transform="translate(50 0)" mask="url(#stop-mask-disabled)">
          <rect
             x="13" y="13" width="25" height="25" rx="4"
             fill="url(#stop-fill-disabled)"
-            stroke="#FFF"
+            stroke="var(--icon-line-color)"
             stroke-width="2"
          />
          <rect
@@ -260,20 +282,20 @@
          />
          
          <g id="volume-speaker-shape">
-            <use href="#volume-speaker-shape-layer" color="#FFFFFF" stroke-width="2" />
-            <use href="#volume-speaker-shape-layer" color="#0064cc" stroke-width="0" />
+            <use class="line" href="#volume-speaker-shape-layer" color="#FFFFFF" stroke-width="2" />
+            <use class="fill" href="#volume-speaker-shape-layer" color="#0064cc" stroke-width="0" />
          </g>
          <g id="volume-wave-1-shape">
-            <use href="#volume-wave-1" color="#FFFFFF" stroke-width="2" />
-            <use href="#volume-wave-1" color="#0064cc" stroke-width="0" />
+            <use class="line" href="#volume-wave-1" color="#FFFFFF" stroke-width="2" />
+            <use class="fill" href="#volume-wave-1" color="#0064cc" stroke-width="0" />
          </g>
          <g id="volume-wave-2-shape">
-            <use href="#volume-wave-2" color="#FFFFFF" stroke-width="2" />
-            <use href="#volume-wave-2" color="#0064cc" stroke-width="0" />
+            <use class="line" href="#volume-wave-2" color="#FFFFFF" stroke-width="2" />
+            <use class="fill" href="#volume-wave-2" color="#0064cc" stroke-width="0" />
          </g>
          <g id="volume-wave-3-shape">
-            <use href="#volume-wave-3" color="#FFFFFF" stroke-width="2" />
-            <use href="#volume-wave-3" color="#0064cc" stroke-width="0" />
+            <use class="line" href="#volume-wave-3" color="#FFFFFF" stroke-width="2" />
+            <use class="fill" href="#volume-wave-3" color="#0064cc" stroke-width="0" />
          </g>
       </defs>
       

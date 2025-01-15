@@ -1101,7 +1101,7 @@ class WMPlayerElement extends HTMLElement {
       const TEXT_FOR_ALL_BEHAVIORS = "Previous (press and hold to rewind)";
       
       let node = this.#prev_button;
-      if (this.#is_stopped || this.#playlist.size == 0) {
+      if ((this.#is_stopped && this.#playlist.index == 0) || this.#playlist.size == 0) {
          //
          // Nothing playing.
          //

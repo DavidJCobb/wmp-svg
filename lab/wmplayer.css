@@ -236,6 +236,111 @@ video {
    }
 }
 
+:where(.controls :is(button, .basic-button)) {
+   /* Set up helper variables/expressions for the button and glyph sprites. */
+   
+   /*
+      BUTTON SPRITE CONFIGURATION
+      
+      The assumption is that buttons will be designed in a horizontal spritesheet, 
+      where the first four sprites are Normal, Hover, Active, and Disabled. You can 
+      optionally define additional sprites and override `--button-sprite-count`.
+      
+      You must define the following variables:
+      
+         --button-spritesheet
+         
+            A CSS URL (i.e. `url(...)`) for the spritesheet.
+      
+         --button-original-width
+         --button-original-height
+         
+            The in-SVG size of an individual button sprite. Use the px unit.
+            
+         --button-original-scale
+         
+            The scaling factor at which the buttons were designed. For example, if 
+            WMP at 1x scale uses a 50px button but your button sprites are 100px, 
+            then this variable would be 2.
+   */
+   
+   --button-sprite-count: 4;
+   
+   --use-button-scale: calc(var(--scale,1) / var(--button-original-scale));
+   --use-button-w:     calc(var(--button-original-width)  * var(--use-button-scale));
+   
+   --button-sprite-normal:   0;
+   --button-sprite-hover:    1;
+   --button-sprite-active:   2;
+   --button-sprite-disabled: 3;
+   
+   --button-background:
+      var(--button-spritesheet)
+      /*pos-x*/  calc(-1 * var(--use-button-sprite) * var(--use-button-w))
+      /*pos-y*/  0
+      /
+      /*width*/  calc(var(--button-sprite-count) * var(--use-button-w))
+      /*height*/ calc(var(--button-original-height) * var(--use-button-scale))
+      no-repeat
+   ;
+   
+   /* override as appropriate for each element state. */
+   --use-button-sprite: var(--button-sprite-normal);
+   &:hover {
+      --use-button-sprite: var(--button-sprite-hover);
+   }
+   &:active {
+      --use-button-sprite: var(--button-sprite-active);
+   }
+   &:disabled {
+      --use-button-sprite: var(--button-sprite-disabled);
+   }
+   
+   /*
+      BUTTON LABEL GLYPH CONFIGURATION
+      
+      You must define the following variables:
+      
+         --glyph-original-width
+         --glyph-original-height
+         
+            The in-SVG size of an individual glyph sprite. Use the px unit.
+            
+         --glyph-original-scale
+         
+            The scaling factor at which the glyphs were designed. For example, if 
+            WMP at 1x scale uses a 50px glyph but your glyph sprites are 100px, 
+            then this variable would be 2.
+            
+         --glyph-spritesheet-rows
+         --glyph-spritesheet-cols
+         
+            The number of rows and columns in the spritesheet.
+   */
+   
+   /* offset of the glyph from the button sprite */
+   --glyph-x: 0px;
+   --glyph-y: 0px;
+   
+   --use-glyph-scale: calc(var(--scale,1) / var(--glyph-original-scale));
+   --use-glyph-w:     calc(var(--glyph-original-width)  * var(--use-glyph-scale));
+   --use-glyph-h:     calc(var(--glyph-original-height) * var(--use-glyph-scale));
+   
+   /* override as appropriate for each element state. */
+   --use-glyph-row: 0;
+   --use-glyph-col: 0;
+   
+   --glyph-background:
+      var(--glyph-spritesheet)
+      /*pos-x*/  calc(var(--glyph-x) - var(--use-glyph-col) * var(--use-glyph-w))
+      /*pos-y*/  calc(var(--glyph-y) - var(--use-glyph-row) * var(--use-glyph-h))
+      /
+      /*width*/  calc(var(--glyph-spritesheet-cols) * var(--use-glyph-w))
+      /*height*/ calc(var(--glyph-spritesheet-rows) * var(--use-glyph-h))
+      no-repeat
+   ;
+}
+
 .controls hr {
    width:  0;
    height: 100%;
@@ -267,22 +372,44 @@ video {
    --sprite-x: calc(-4px * var(--scale,1));
    --sprite-y: calc(-2px * var(--scale,1));
    
-   --glyph-size: calc(25px * var(--scale,1));
-   --glyph-x:    calc(3px  * var(--scale,1));
-   --glyph-y:    calc(1px  * var(--scale,1));
+   /*
+      BUTTON SPRITE CONFIGURATION
+   */
    
-   --sprite: url(spritesheet-generic.svg#normal);
-   --glyph:  linear-gradient(to bottom, transparent, transparent); /* dummy "no glyph" value */
+   --button-spritesheet:     url(spritesheet-generic.svg);
+   --button-original-width:  58px;
+   --button-original-height: 60px;
+   --button-original-scale:  2; /* the button sprites were designed at 2x scale */
    
-   &:hover {
-      --sprite: url(spritesheet-generic.svg#hover);
-   }
-   &:active {
-      --sprite: url(spritesheet-generic.svg#active);
-   }
-   &:disabled {
-      --sprite: url(spritesheet-generic.svg#disabled);
-   }
+   /*
+      BUTTON LABEL GLYPH CONFIGURATION
+   */
+   
+   --glyph-x: calc(3px  * var(--scale,1));
+   --glyph-y: calc(1px  * var(--scale,1));
+   
+   --glyph-spritesheet:      url(spritesheet-glyphs-general.svg);
+   --glyph-original-width:   50px;
+   --glyph-original-height:  50px;
+   --glyph-original-scale:   2; /* the glyph sprites were designed at 2x scale */
+   --glyph-spritesheet-rows: 4;
+   --glyph-spritesheet-cols: 5;
+   
+   /* what rows represent what glyphs */
+   --glyph-row-loop:    0;
+   --glyph-row-shuffle: 1;
+   --glyph-row-stop:    2;
+   --glyph-row-volume:  3;
+   
+   /* what columns represent what variants */
+   --glyph-col-off:      0;
+   --glyph-col-on:       1;
+   --glyph-col-enabled:  0;
+   --glyph-col-disabled: 1;
+   
+   /* settings for specific buttons */
+   --use-glyph-row: -1;
+   --use-glyph-col: -1;
    
    position: relative;
    
@@ -297,8 +424,8 @@ video {
       top:      var(--sprite-y);
       
       background:
-         var(--glyph)  var(--glyph-x) var(--glyph-y)/var(--glyph-size) var(--glyph-size) no-repeat,
-         var(--sprite) left top/var(--sprite-w) var(--sprite-h) no-repeat
+         var(--glyph-background),
+         var(--button-background)
       ;
    }
    
@@ -311,40 +438,47 @@ video {
       outline:      var(--focus-outline);
    }
 }
+:host(.theater) .basic-button {
+   --glyph-spritesheet: url(spritesheet-glyphs-general.svg#theater);
+}
 .basic-button.shuffle {
-   --glyph: url(spritesheet-glyphs-general.svg#shuffle-off);
+   --use-glyph-row: var(--glyph-row-shuffle);
+   --use-glyph-col: var(--glyph-col-off);
    &:checked {
-      --glyph: url(spritesheet-glyphs-general.svg#shuffle-on);
+      --use-glyph-col: var(--glyph-col-on);
    }
 }
 .basic-button.loop {
-   --glyph: url(spritesheet-glyphs-general.svg#loop-off);
+   --use-glyph-row: var(--glyph-row-loop);
+   --use-glyph-col: var(--glyph-col-off);
    &:checked {
-      --glyph: url(spritesheet-glyphs-general.svg#loop-on);
+      --use-glyph-col: var(--glyph-col-on);
    }
 }
 button.stop {
-   --glyph: url(spritesheet-glyphs-general.svg#stop-enabled);
+   --use-glyph-row: var(--glyph-row-stop);
+   --use-glyph-col: var(--glyph-col-enabled);
    &:disabled {
-      --glyph: url(spritesheet-glyphs-general.svg#stop-disabled);
+      --use-glyph-col: var(--glyph-col-disabled);
    }
 }
 .basic-button.mute {
-   --glyph: url(spritesheet-glyphs-general.svg#volume-high);
+   --use-glyph-row: var(--glyph-row-volume);
+   --use-glyph-col: 3;
    &[data-glyph="empty"] {
-      --glyph: url(spritesheet-glyphs-general.svg#volume-empty);
+      --use-glyph-col: 0;
    }
    &[data-glyph="low"] {
-      --glyph: url(spritesheet-glyphs-general.svg#volume-low);
+      --use-glyph-col: 1;
    }
    &[data-glyph="medium"] {
-      --glyph: url(spritesheet-glyphs-general.svg#volume-medium);
+      --use-glyph-col: 2;
    }
    &[data-glyph="high"] {
-      --glyph: url(spritesheet-glyphs-general.svg#volume-high);
+      --use-glyph-col: 3;
    }
    &:checked {
-      --glyph: url(spritesheet-glyphs-general.svg#volume-muted);
+      --use-glyph-col: 4;
    }
 }
 
@@ -394,18 +528,40 @@ button.stop {
       top:      0;
    }
    
-   --sprite: url(spritesheet-next.svg#normal);
-   --glyph:  url(spritesheet-glyphs-next.svg#next-enabled);
+   /*
+      BUTTON SPRITE CONFIGURATION
+   */
    
-   &:hover {
-      --sprite: url(spritesheet-next.svg#hover);
-   }
-   &:active {
-      --sprite: url(spritesheet-next.svg#active);
-   }
+   --button-spritesheet:     url(spritesheet-next.svg);
+   --button-original-width:  112px;
+   --button-original-height: 70px;
+   --button-original-scale:  2; /* the button sprites were designed at 2x scale */
+   
+   /*
+      BUTTON LABEL GLYPH CONFIGURATION
+   */
+   
+   --glyph-spritesheet:      url(spritesheet-glyphs-next.svg);
+   --glyph-original-width:   112px;
+   --glyph-original-height:  70px;
+   --glyph-original-scale:   2; /* the glyph sprites were designed at 2x scale */
+   --glyph-spritesheet-rows: 2;
+   --glyph-spritesheet-cols: 2;
+   
+   /* what rows represent what glyphs */
+   --glyph-row-primary:   1;
+   --glyph-row-secondary: 0;
+   
+   /* what columns represent what variants */
+   --glyph-col-enabled:  0;
+   --glyph-col-disabled: 1;
+   
+   /* settings for specific buttons */
+   --use-glyph-row: var(--glyph-row-primary);
+   --use-glyph-col: var(--glyph-col-enabled);
+   
    &:disabled {
-      --sprite: url(spritesheet-next.svg#disabled);
-      --glyph:  url(spritesheet-glyphs-next.svg#next-disabled);
+      --use-glyph-col: var(--glyph-col-disabled);
    }
    
    &::before { /* visuals */
@@ -416,8 +572,8 @@ button.stop {
       top: calc(-6px * var(--scale,1));
       
       background:
-         var(--glyph)  left top/var(--sprite-w) var(--sprite-h) no-repeat,
-         var(--sprite) left top/var(--sprite-w) var(--sprite-h) no-repeat
+         var(--glyph-background),
+         var(--button-background)
       ;
    }
    &::after { /* hitbox */
@@ -436,16 +592,16 @@ button.stop {
    &.can-only-fast-forward,
    &.rewind,
    &.can-only-rewind {
-      --glyph: url(spritesheet-glyphs-next.svg#fast-forward-enabled);
-      &:disabled {
-         --glyph: url(spritesheet-glyphs-next.svg#fast-forward-disabled);
-      }
+      --use-glyph-row: var(--glyph-row-secondary);
    }
    
    &:focus-visible::before {
       border-image: var(--focus-border-image, none);
       outline:      var(--focus-outline);
    }
+}
+:host(.theater) :is(.next-ff, .prev-rw) {
+   --glyph-spritesheet: url(spritesheet-glyphs-next.svg#theater);
 }
 .next-ff {
    margin-right: calc(3px * var(--scale,1));
@@ -489,18 +645,30 @@ button.stop {
       top:      0;
    }
    
-   --sprite: url(spritesheet-jewel.svg#normal);
-   --glyph:  url(spritesheet-play-pause-labels.svg#play);
+   /*
+      BUTTON SPRITE CONFIGURATION
+   */
    
-   &:hover {
-      --sprite: url(spritesheet-jewel.svg#hover);
-   }
-   &:active {
-      --sprite: url(spritesheet-jewel.svg#active);
-   }
-   &:disabled {
-      --sprite: url(spritesheet-jewel.svg#disabled);
-   }
+   --button-spritesheet:     url(spritesheet-jewel.svg);
+   --button-original-width:  100px;
+   --button-original-height: 100px;
+   --button-original-scale:  2; /* the button sprites were designed at 2x scale */
+   
+   --use-button-sprite: var(--button-sprite-normal);
+   
+   /*
+      BUTTON LABEL GLYPH CONFIGURATION
+   */
+   
+   --glyph-spritesheet:      url(spritesheet-glyphs-play-pause.svg);
+   --glyph-original-width:   100px;
+   --glyph-original-height:  100px;
+   --glyph-original-scale:   2; /* the glyph sprites were designed at 2x scale */
+   --glyph-spritesheet-rows: 1;
+   --glyph-spritesheet-cols: 2;
+   
+   --use-glyph-row: 0;
+   --use-glyph-col: 0;
    
    &::before { /* visuals */
       pointer-events: none;
@@ -508,8 +676,8 @@ button.stop {
       height: var(--play-pause-button-region);
       
       background:
-         var(--glyph)  left top/var(--play-pause-button-region) var(--play-pause-button-region) no-repeat,
-         var(--sprite) left top/var(--play-pause-button-region) var(--play-pause-button-region) no-repeat
+         var(--glyph-background),
+         var(--button-background)
       ;
    }
    &::after { /* hitbox */
@@ -523,11 +691,10 @@ button.stop {
    &:focus-visible::before {
       border-image: var(--focus-border-image, none);
       outline:      var(--focus-outline);
-      
    }
 }
 :host(:state(playing)) .play-pause {
-   --glyph: url(spritesheet-play-pause-labels.svg#pause) !important;
+   --use-glyph-col: 1;
 }
 
 .volume {
