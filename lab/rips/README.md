@@ -72,7 +72,7 @@ Opening `wmploc.DLL.mun` in Resource Hacker, you'll find some basic assets in th
 | 257/2114 |  | Volume slider thumb, active |
 | 257/2174 |  | Taskbar mini-player, background, horizontal, grey |
 | 257/2175 |  | Taskbar mini-player, background, vertical, grey |
-| 257/3164 |  | Highest-resolution groove for stop/prev/play/pause/next/etc. buttons to sit in |
+| 257/3164 |  | (Now Playing) Highest-resolution groove for stop/prev/play/pause/next/etc. buttons to sit in |
 | 257/3881 |  | Seek slider track (filled) |
 | 257/3882 |  | Seek slider thumb (non-mouseover) |
 | 257/4059 |  | Seek slider thumb (non-mouseover, when time is at 0) |
@@ -80,9 +80,19 @@ Opening `wmploc.DLL.mun` in Resource Hacker, you'll find some basic assets in th
 | 257/4175 |  | Shuffle glyph, off |
 | 257/4176 |  | Repeat glyph, on |
 | 257/4177 |  | Repeat glyph, off |
-| 257/4253 | main-normal.png | Highest-resolution stop/prev/play/pause/next buttons, normal state |
-| 257/4254 | main-active.png | Highest-resolution stop/prev/play/pause/next buttons, pressed state |
-| 257/4255 | main-hover.png | Highest-resolution stop/prev/play/pause/next buttons, hover state |
+| 257/4190 |  | "Switch to Library" glyph |
+| 257/4191 |  | "Switch to Now Playing" glyph |
+| 257/4192 |  | "Switch to Now Playing" glyph, HD |
+| 257/4200 |  | "Now Playing" stop/prev/play/next, HD, normal |
+| 257/4201 |  | "Now Playing" stop/prev/play/next, HD, active |
+| 257/4202 |  | "Now Playing" stop/prev/play/next, HD, hover |
+| 257/4205 |  | "Now Playing" HD next glyph |
+| 257/4207 |  | "Now Playing" HD previous glyph |
+| 257/4209 |  | "Now Playing" HD rewind glyph |
+| 257/4211 |  | "Now Playing" HD fast-forward glyph |
+| 257/4253 | main-normal.png | "Library" HD stop/prev/play/pause/next buttons, normal state |
+| 257/4254 | main-active.png | "Library" HD stop/prev/play/pause/next buttons, pressed state |
+| 257/4255 | main-hover.png | "Library" HD stop/prev/play/pause/next buttons, hover state |
 | 257/4263 |  | Highest-resolution play icon |
 | 257/4264 |  | Highest-resolution pause icon |
 | 257/4266 |  | Highest-resolution next icon, enabled |
@@ -97,6 +107,8 @@ Opening `wmploc.DLL.mun` in Resource Hacker, you'll find some basic assets in th
 | 257/4277 |  | Highest-resolution loop icon, hover |
 | 257/4279 |  | Highest-resolution stop icon, enabled |
 | 257/4280 |  | Highest-resolution stop icon, disabled |
+| 257/4601 |  | "Now Playing" HD enter fullscreen glyph |
+| 257/4603 |  | "Now Playing" HD exit fullscreen glyph |
 | 257/4626 |  | Button with menu, normal |
 | 257/4627 |  | Button with menu, active |
 | 257/4628 |  | Button with menu, hover |
