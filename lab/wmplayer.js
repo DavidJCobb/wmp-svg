@@ -432,8 +432,6 @@ class WMPlayerElement extends HTMLElement {
    get loop() { return this.#loop; }
    set loop(v) {
       v = !!v;
-      if (v == this.#loop)
-         return;
       this.#loop = v;
       this.#playlist.loop = v;
       this.#loop_button.checked = v;
