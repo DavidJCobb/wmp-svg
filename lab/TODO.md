@@ -13,6 +13,10 @@
     * Current arrangement
     * Play/pause, seek slider, timestamp, and volume
   * Full-screen toggle button in lower-right corner
+  * Tests
+    * Support for subtitle tracks, etc.
+  * Player APIs in JavaScript
+    * We should forward `HTMLMediaElement` events and the events of their subclasses
   * Test programmatic manipulation of the player widget from outside
     * Playing and pausing
     * Manipulating the playlist
@@ -29,6 +33,7 @@
     * Investigate automatically switching in and out of "theater" mode depending on whether we hit an audio file or a video file
   * Document the fact that our baseline styles line up with the "Library" view in WMP, while the `theater` class lines up with the "Now Playing" view.
   * Investigate adding support for displaying subtitles, lyrics, et cetera.
+  * Consider switching this all to TypeScript.
   * Add APIs/accessors for the following features.
     * Zoom video
       * Present in WMP's context menu
