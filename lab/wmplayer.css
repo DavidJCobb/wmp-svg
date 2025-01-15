@@ -604,7 +604,7 @@ button.stop {
    margin-right: calc(3px * var(--scale,1));
 }
 .prev-rw {
-   margin-left: calc(3px * var(--scale,1));
+   margin-left:  calc(3px * var(--scale,1));
 }
 .prev-rw {
    transform-box:    content-box;
