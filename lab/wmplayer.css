@@ -622,14 +622,12 @@ button.stop {
    user-select: none;
    color: transparent;
    
-   --pull-adjacent-buttons-inward: -10px;
-   
    grid-area: play;
    justify-self: center;
    
    width:     var(--play-pause-button-region);
    height:    0;
-   margin:    0 var(--pull-adjacent-buttons-inward, 0px) calc(51px * var(--scale,1)) var(--pull-adjacent-buttons-inward, 0px);
+   margin:    0 0 calc(51px * var(--scale,1)) 0;
    font-size: 0;
    position:  relative;
    
