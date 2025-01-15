@@ -1,6 +1,22 @@
 
 # To-do
 
+Overview:
+
+* Graphics work
+  * Previous/Next
+  * Controls tray
+  * Slider thumb refinements
+* API
+  * Support different controls layouts
+  * Redesign playlist API
+* General coding
+  * Subtitle support
+  * Album art?
+  * Switch to TypeScript?
+
+## Specifics
+
 * `WMPlayerElement`
   * We need "disabled" states for the "previous" and "next" buttons' glassy backing. In the normal player UI, these buttons are never disabled (because WMP will just pick something from your library, same as play/pause), but they can be disabled in the "theater" UI  (wherein the player controls are overlaid on the video). We're mimicking WMP's UI, not the full program design: we won't always have a previous or next media item, so I think we want more visible disable states. (Plus, we need the graphics for "theater" mode either way.)
   * Theater: "previous" and "next" don't have a glassy shine on their "normal" state when in this view. We should implement this as a fifth "button sprite" in their spritesheet, setting `--button-sprite-count: 5` and then using `--use-button-sprite: 4` for the "normal" state in the theater view.
@@ -39,6 +55,7 @@
       * Present in WMP's context menu
       * Allow zooming to a percentage size. If the percentage is too large, crop.
       * Allow fitting the video to the player or vice versa.
+  * Investigate features for streaming video, e.g. highlighting the currently buffered time range on the seek slider.
 * The thumbs for the seek slider and volume slider have outlines that are too thin, because we're taking the 86x86px jewel from the play/pause graphic and reusing it at a smaller size.
   * The bare minimum fix for this would be to guarantee a minimum outline thickness of 1px using a `non-scaling-stroke`. We already had to split the slider thumb into a separate graphic so we could get rid of the alpha mask and drop shadow that were built into the play/pause button, so we *can* make this fix.
     * But the graphics still end up looking bad at larger sizes (e.g. 2x scale, 3x scale) because the outlines should be thicker for the scrollbar thumbs, basically.

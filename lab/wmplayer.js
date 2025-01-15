@@ -724,8 +724,8 @@ class WMPlayerElement extends HTMLElement {
       
       this.#update_prev_next_state(no_media ? 0 : this.#media.currentTime);
       
-      if (this.#playlist.size == 1) {
-         this.#media[this.#loop ? "setAttribute" : "removeAttribute"]("loop", "loop");
+      if (this.#loop && this.#playlist.size == 1) {
+         this.#media.setAttribute("loop", "loop");
       } else {
          this.#media.removeAttribute("loop");
       }
