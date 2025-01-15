@@ -74,13 +74,13 @@
       </defs>
       
       <g mask="url(#loop-mask-off)">
-         <use class="line" href="#loop-shape" color="#FFFFFF" stroke-width="6" />
-         <use class="fill" href="#loop-shape" color="#0064cc" stroke-width="4" />
+         <use class="line" href="#loop-shape" stroke-width="6" />
+         <use class="fill" href="#loop-shape" stroke-width="4" />
       </g>
       <g transform="translate(50 0)" mask="url(#loop-mask-on)">
          <rect x="0" y="0" width="50" height="50" fill="#63cefd" />
-         <use class="line" href="#loop-shape" color="#FFFFFF" stroke-width="6" />
-         <use class="fill" href="#loop-shape" color="#0064cc" stroke-width="4" />
+         <use class="line" href="#loop-shape" stroke-width="6" />
+         <use class="fill" href="#loop-shape" stroke-width="4" />
       </g>
    </g>
    
@@ -111,10 +111,10 @@
          </g>
          
          <g id="shuffle-shape">
-            <use class="line" href="#shuffle-shape-ltr" color="#FFFFFF" stroke-width="6" />
-            <use class="fill" href="#shuffle-shape-ltr" color="#0064cc" stroke-width="4" />
-            <use class="line" href="#shuffle-shape-rtl" color="#FFFFFF" stroke-width="6" />
-            <use class="fill" href="#shuffle-shape-rtl" color="#0064cc" stroke-width="4" />
+            <use class="line" href="#shuffle-shape-ltr" stroke-width="6" />
+            <use class="fill" href="#shuffle-shape-ltr" stroke-width="4" />
+            <use class="line" href="#shuffle-shape-rtl" stroke-width="6" />
+            <use class="fill" href="#shuffle-shape-rtl" stroke-width="4" />
          </g>
          
          <mask id="shuffle-mask-off" x="-40%" y="-40%" width="180%" height="180%">
@@ -282,20 +282,20 @@
          />
          
          <g id="volume-speaker-shape">
-            <use class="line" href="#volume-speaker-shape-layer" color="#FFFFFF" stroke-width="2" />
-            <use class="fill" href="#volume-speaker-shape-layer" color="#0064cc" stroke-width="0" />
+            <use class="line" href="#volume-speaker-shape-layer" stroke-width="2" />
+            <use class="fill" href="#volume-speaker-shape-layer" stroke-width="0" />
          </g>
          <g id="volume-wave-1-shape">
-            <use class="line" href="#volume-wave-1" color="#FFFFFF" stroke-width="2" />
-            <use class="fill" href="#volume-wave-1" color="#0064cc" stroke-width="0" />
+            <use class="line" href="#volume-wave-1" stroke-width="2" />
+            <use class="fill" href="#volume-wave-1" stroke-width="0" />
          </g>
          <g id="volume-wave-2-shape">
-            <use class="line" href="#volume-wave-2" color="#FFFFFF" stroke-width="2" />
-            <use class="fill" href="#volume-wave-2" color="#0064cc" stroke-width="0" />
+            <use class="line" href="#volume-wave-2" stroke-width="2" />
+            <use class="fill" href="#volume-wave-2" stroke-width="0" />
          </g>
          <g id="volume-wave-3-shape">
-            <use class="line" href="#volume-wave-3" color="#FFFFFF" stroke-width="2" />
-            <use class="fill" href="#volume-wave-3" color="#0064cc" stroke-width="0" />
+            <use class="line" href="#volume-wave-3" stroke-width="2" />
+            <use class="fill" href="#volume-wave-3" stroke-width="0" />
          </g>
       </defs>
       
