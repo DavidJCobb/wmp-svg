@@ -515,9 +515,9 @@ button.stop {
    --hitbox-y: calc(6px * var(--scale,1));
    
    width:    var(--hitbox-w);
-   height:   0;
-   margin:   0 0 var(--hitbox-h);
+   height:   var(--hitbox-h);
    position: relative;
+   pointer-events: none;
    
    &::before,
    &::after {
@@ -574,6 +574,8 @@ button.stop {
       background: var(--glyph-background), var(--button-background);
    }
    &::after { /* hitbox */
+      pointer-events: auto;
+      
       /* can't use CSS variables in a path(), so scale the whole hitbox instead. */
       
       left:   var(--hitbox-x);
@@ -625,9 +627,10 @@ button.stop {
    grid-area: play;
    justify-self: center;
    
+   pointer-events: none;
+   
    width:     var(--play-pause-button-region);
-   height:    0;
-   margin:    0 0 calc(51px * var(--scale,1)) 0;
+   height:    var(--play-pause-button-region);
    font-size: 0;
    position:  relative;
    
@@ -667,10 +670,13 @@ button.stop {
       pointer-events: none;
       width:  var(--play-pause-button-region);
       height: var(--play-pause-button-region);
+      top: calc(-1px * var(--scale, 1));
       
       background: var(--glyph-background), var(--button-background);
    }
    &::after { /* hitbox */
+      pointer-events: auto;
+      
       --radius: calc(var(--play-pause-button-hitbox) / 2);
    
       width:     var(--play-pause-button-region);
