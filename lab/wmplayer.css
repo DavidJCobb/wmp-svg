@@ -649,8 +649,6 @@ button.stop {
    --button-original-height: 100px;
    --button-original-scale:  2; /* the button sprites were designed at 2x scale */
    
-   --use-button-sprite: var(--button-sprite-normal);
-   
    /*
       BUTTON LABEL GLYPH CONFIGURATION
    */
