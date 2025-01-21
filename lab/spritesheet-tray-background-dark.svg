@@ -60,9 +60,6 @@
       <path id="tray-boundary-path"
          d="M -10 12.5 L 0 12.5 Q 32 12.5 55 40 C 71 61 73 69 95 69 L 463 69 C 485 69 487 61 503 40 Q 526 12.5 556 12.5 L 566 12.5 l 0 -12.5 L -10 0 z"
       />
-      <clipPath id="tray-boundary-inner-stroke-clip">
-         <use href="#tray-boundary-path" />
-      </clipPath>
       <clipPath id="no-borders">
          <rect y="1" width="100%" height="67" />
       </clipPath>

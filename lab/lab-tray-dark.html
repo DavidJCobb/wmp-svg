@@ -3,8 +3,53 @@
    <head>
       <title>WMPSVG Lab (tray, dark)</title>
       <script src="diff-view.js"></script>
+      <style>
+svg[hidden] {
+   display: none;
+   
+   &:has(defs filter) {
+      display: initial;
+      width:    0px;
+      height:   0px;
+      position: absolute;
+   }
+}
+      </style>
    </head>
    <body>
+      
+      <!--
+         Helper filters for our various tests and viewing options.
+         These have to be inside of this file because referencing 
+         SVG filters in separate files is broken (probably because 
+         I'm running all of this locally and browsers cripple the 
+         file:/// origin on purpose).
+      -->
+      <svg hidden>
+         <defs>
+            <filter id="filter-disable-alpha">
+               <feColorMatrix
+                  in="SourceGraphic"
+                  type="matrix"
+                  values="1 0 0 0 0
+                          0 1 0 0 0
+                          0 0 1 0 0
+                          0 0 0 0 1"
+               />
+            </filter>
+            <filter id="filter-show-alpha">
+               <feColorMatrix
+                  in="SourceGraphic"
+                  type="matrix"
+                  values="0 0 0 1 0
+                          0 0 0 1 0
+                          0 0 0 1 0
+                          0 0 0 0 1"
+               />
+            </filter>
+         </defs>
+      </svg>
+      
       <diff-view width="558" height="69">
          <img slot="raster" src="rips/tray-dark.bmp" width="558" height="69" />
          <svg slot="vector" width="558" height="69" color-interpolation="linearrgb">
@@ -48,8 +93,8 @@
                <path id="tray-boundary-path"
                   d="M -10 12.5 L 0 12.5 Q 32 12.5 55 40 C 71 61 73 69 95 69 L 463 69 C 485 69 487 61 503 40 Q 526 12.5 556 12.5 L 566 12.5 l 0 -12.5 L -10 0 z"
                />
-               <clipPath id="tray-boundary-inner-stroke-clip">
-                  <use href="#tray-boundary-path" />
+               <clipPath id="no-borders">
+                  <rect y="1" width="100%" height="67" />
                </clipPath>
                
                <mask id="tray-area">
@@ -75,11 +120,19 @@
             
             <use href="#tray-boundary-path"
                fill="none" stroke="url(#tray-edge-o)" stroke-width="3"
+               clip-path="url(#no-borders)"
                mask="url(#non-tray-area)"
             />
             <use href="#tray-boundary-path"
                fill="none" stroke="url(#tray-edge-i)" stroke-width="1"
+               clip-path="url(#no-borders)"
             />
+   
+            <g stroke-width="2">
+               <line x1="-5%" x2="100%" y1="0" y2="0" stroke="#212224" />
+               <line x1="-5%" x2="100%" y1="69" y2="69" stroke="#161a20" />
+               <line x1="95" x2="463" y1="69" y2="69" stroke="#191d25" />
+            </g>
          </svg>
       </diff-view>
    </body>
