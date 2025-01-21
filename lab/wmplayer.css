@@ -4,7 +4,7 @@
    grid-template:
       "content     content content  content      content" 1fr
       "seek        seek    seek     seek         seek"
-      "left-gutter time    controls right-gutter right-gutter"
+      "left-gutter time    controls right-gutter right-gutter" var(--tray-height, auto)
       /
       1fr 10ch auto 10ch 1fr
    ;
@@ -24,7 +24,7 @@
    --scale: 1;
 }
 
-:host(.theater) {
+:host([data-overlay-controls]) {
    .content {
       grid-row: 1 / span 100;
    }
@@ -40,13 +40,67 @@
    }
 }
 
+/* WMP11-on-XP dark theme */
+:host([data-theme="dark" i]:not([data-overlay-controls])) {
+   --tray-background-height: calc(69px*var(--scale,1));
+   --tray-height: calc((69px - 11px) * var(--scale,1));
+   
+   /* background */
+   &::after {
+      content: " ";
+      grid-row: 2 / span 2;
+      grid-column: 1 / span 5;
+      order: -2;
+      z-index: -2;
+      
+      background:
+         url(spritesheet-tray-background-dark.svg#middle) left top/1px var(--tray-background-height) repeat-x
+      ;
+   }
+   
+   .seek {
+      padding-top:  calc(5px*var(--scale,1));
+      margin-left:  calc(5px*var(--scale,1));
+      margin-right: calc(5px*var(--scale,1));
+      
+      --track-border-color-upper: #444b5e;
+      --track-border-color-lower: #656e86;
+   }
+   .current-time {
+      color: #FFF;
+      -webkit-text-stroke: 0px;
+      margin-top: -.25em; /* fixes vertical align (TODO: find a cleaner way) */
+   }
+   
+   .controls {
+      position: relative;
+   }
+   .controls::after {
+      --endcap-outset: calc(-99px * var(--scale,1));
+      --endcap-border-width: calc(110px * var(--scale,1));
+      
+      content: " ";
+      position: absolute;
+      z-index:  -1;
+      top:   calc(-29px*var(--scale,1));
+      left:  var(--endcap-outset);
+      right: var(--endcap-outset);
+      height: var(--tray-background-height);
+      border-image:
+         url(spritesheet-tray-background-dark.svg)
+         69 110 0 110 / var(--tray-background-height) var(--endcap-border-width) 0 var(--endcap-border-width)
+         stretch space
+      ;
+   }
+}
+
 /*
    General element styles:
 */
 
 wm-slider {
    position: relative;
-   &:focus-visible {
+   /*&:focus-visible {
       outline: none;
       &::before {
          position: absolute;
@@ -57,7 +111,7 @@ wm-slider {
          border-image-outset: 3px;
          outline:      var(--focus-outline);
       }
-   }
+   }*/
 }
 
 /*
@@ -115,7 +169,7 @@ video {
    
    user-select: none;
 }
-:host(.theater) .current-time {
+:host([data-overlay-controls]) .current-time {
    color: #FFF;
    -webkit-text-stroke: 4px #000A;
 }

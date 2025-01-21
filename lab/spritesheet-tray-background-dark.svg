@@ -21,6 +21,7 @@
          for a seek slider. The seek slider would be 5px thick including 
          its engraved 1px border (so, a 3px fill).
    -->
+   <view id="middle" viewBox="0 0 1 69" preserveAspectRatio="none" />
    <defs>
       <linearGradient id="outer-fill" x1="0" x2="0" y1="0" y2="1">
          <stop offset="0" stop-color="#636c87" />

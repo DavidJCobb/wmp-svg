@@ -233,7 +233,7 @@
       }
    }
 }
-:host(.theater) .basic-button {
+:host(:is([data-overlay-controls], [data-theme="dark" i])) .basic-button {
    --glyph-spritesheet: url(spritesheet-glyphs-general.svg#theater);
 }
 
@@ -346,7 +346,7 @@
       --glyph-current-col: var(--glyph-col-disabled);
    }
    
-   :host(.theater) & {
+   :host(:is([data-overlay-controls], [data-theme="dark" i])) & {
       --glyph-spritesheet: url(spritesheet-glyphs-next.svg#theater);
    }
    
