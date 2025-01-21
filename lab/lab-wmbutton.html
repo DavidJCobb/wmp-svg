@@ -1,0 +1,168 @@
+<!doctype html>
+<html>
+   <head>
+      <title>WMPSVG Lab (custom buttons)</title>
+      <script src="wmplayer.button.js"></script>
+      <style>
+html {
+   background: #888;
+}
+body {
+   background: #FFF;
+   max-width: 960px;
+   margin:    0 auto;
+   padding:   1em;
+}
+
+li { margin: 1em 0; }
+mark { background: #FFA040; }
+
+*:first-child { margin-top: 0 }
+*:last-child { margin-bottom: 0 }
+      </style>
+   </head>
+   <body>
+      <p>
+         This is the test page for <code>WMPlayerButtonElement</code>.
+      </p>
+      <p>
+         Prior to this custom element's creation, <code>WMPlayerElement</code> would spawn 
+         ordinary <code>&lt;button&gt;</code> and <code>&lt;input&gt;</code> elements and 
+         style them with pseudo-elements. This had its benefits and its downsides, compared 
+         to these custom elements.
+      </p>
+      
+      <details>
+         <summary>Details</summary>
+      
+         <h2>Advantages of native elements</h2>
+         <ul>
+            <li>
+               <p><mark>Significantly less JavaScript</mark> needed to achieve the same behaviors, for basic widgets like buttons. (This 
+               would be far, far, <em>far</em> less of an issue if Safari weren't <a href="https://github.com/WebKit/standards-positions/issues/97" target="_blank">refusing to support customized built-in elements</a> in favor of <a href="https://github.com/WICG/webcomponents/issues/1029" target="_blank">custom attributes</a>, a thing which (though cool) doesn't actually accomplish all the use cases of customizing built-ins.)</p>
+            </li>
+            <li><mark>Less fiddling with ARIA</mark> needed to achieve basic accessibility, and less custom element jank in general.</li>
+         </ul>
+         
+         <h2>Disadvantages of native elements</h2>
+         <ul>
+            <li>
+               <p>I'd like to make it possible to configure the player's controls and layout using slots. However, selectors like <code>::slotted(foo)::before</code> don't work: you can't access pseudo-elements of a <mark>slotted</mark> object. This means that if you place a bare <code>&lt;button&gt;</code> inside of a pseudo-element, <mark>we can't re-skin that button with CSS alone</mark>.</p>
+               <p>If the button is a custom element, then we can re-skin it however we like "from inside," allowing us to slot it into the player. Of course, since Firefox and Safari are both refusing to implement <code>:host-context()</code>, styling the buttons "from inside" is more limited than styling them "from outside," which is particularly painful for things like recoloring their label glyphs based on whether player controls are being overlaid on the played media.</p>
+            </li>
+            <li>
+               <p>Some of our buttons have non-rectangular shapes. In order to give them non-rectangular hitboxes, we have to make them zero-size along at least one axis, and then use pseudo-elements to split their hitbox apart from their visuals; we can then apply a <code>clip-path</code> to the hitbox. This, however, leads to an ever-growing tower of hacks.</p>
+               <p>Making the button zero-size means that it doesn't position itself properly within flex layouts (with respect to things like centering). We can remedy this by giving the button margins. Unfortunately, a zero-size button also has a zero-size focus ring, and the focus ring doesn't encompass the button's margins, so we have to replace the focus ring. Focus rings are also subject to clip-paths, however, so we can't always move the focus ring to the hitbox; we have to settle for moving it to the graphics.</p>
+               <p>(It would be possible to solve this problem if we could set <code>pointer-events: none</code> on the button and then set <code>pointer-events: auto</code> on the hitbox; the button then wouldn't need to be zero-size. I need to look into this.)</p>
+               <p>By contrast, a custom-element button can define separate child elements for the hitbox, the button frame, and the button's label glyph. We can make the hitbox the actual interactive element, rather than the button itself, suppressing click events that hit the button but not the hitbox.</p>
+            </li>
+         </ul>
+         
+         <h2>Improvements possible with both custom and native elements</h2>
+         <p>These should be looked into, and I should try implementing them with the current native-element-based styles, before we commit to custom elements.</p>
+         <ul>
+            <li>
+               <p>Better compartmentalization of button styles. In general it'd be really nice if we could move the button re-skin styles out of the main stylesheet for the player, to make the latter easier to maintain.</p>
+            </li>
+            <li>
+               <p>We should try the <code>pointer-events: auto</code> trick mentioned above in order to avoid zero-size buttons and the associated jank. If it works there, then that's one less advantage of a custom-element button.</p>
+            </li>
+         </ul>
+      </details>
+      
+      <hr />
+   
+      <table>
+         <thead>
+            <tr>
+               <th>Function</th>
+               <th>Button</th>
+            </tr>
+         </thead>
+         <tbody>
+            <tr>
+               <td>Loop</td>
+               <td><wm-button data-command="loop" type="toggle"></wm-button></td>
+            </tr>
+            <tr>
+               <td>Mute (empty)</td>
+               <td><wm-button data-command="mute" type="toggle" data-glyph-variant="empty"></wm-button></td>
+            </tr>
+            <tr>
+               <td>Mute (low)</td>
+               <td><wm-button data-command="mute" type="toggle" data-glyph-variant="low"></wm-button></td>
+            </tr>
+            <tr>
+               <td>Mute (medium)</td>
+               <td><wm-button data-command="mute" type="toggle" data-glyph-variant="medium"></wm-button></td>
+            </tr>
+            <tr>
+               <td>Mute (high)</td>
+               <td><wm-button data-command="mute" type="toggle" data-glyph-variant="high"></wm-button></td>
+            </tr>
+            <tr>
+               <td>Shuffle</td>
+               <td><wm-button data-command="shuffle" type="toggle"></wm-button></td>
+            </tr>
+            <tr>
+               <td>Stop</td>
+               <td><wm-button data-command="stop" type="action"></wm-button></td>
+            </tr>
+            <tr>
+               <td>Play</td>
+               <td><wm-button data-command="play" type="action"></wm-button></td>
+            </tr>
+            <tr>
+               <td>Pause</td>
+               <td><wm-button data-command="pause" type="action"></wm-button></td>
+            </tr>
+            <tr>
+               <td>Next</td>
+               <td><wm-button data-command="next" type="action"></wm-button></td>
+            </tr>
+            <tr>
+               <td>Fast Forward</td>
+               <td><wm-button data-command="fast-forward" type="action"></wm-button></td>
+            </tr>
+            <tr>
+               <td>Prev</td>
+               <td><wm-button data-command="prev" type="action"></wm-button></td>
+            </tr>
+            <tr>
+               <td>Rewind</td>
+               <td><wm-button data-command="rewind" type="action"></wm-button></td>
+            </tr>
+         </tbody>
+      </table>
+      
+      <label><input type="checkbox" id="kill-all-events" /> Prevent default for all events</label>
+      <label><input type="checkbox" id="disable-all" /> Disable all buttons</label>
+      <script>
+{
+   let node = document.getElementById("kill-all-events");
+   document.body.addEventListener("click", function(e) {
+      if (!node.checked)
+         return;
+      if (!e.target.closest("wm-button"))
+         return;
+      e.preventDefault();
+   });
+}
+{
+   let node = document.getElementById("disable-all");
+   node.checked = false;
+   node.addEventListener("change", function(e) {
+      document.querySelectorAll("wm-button").forEach(function(button) {
+         button.disabled = node.checked;
+      });
+   });
+}
+document.body.addEventListener("click", function(e) {
+   let btn = e.target.closest("wm-button");
+   if (!btn)
+      return;
+   console.log(`Click on button [data-command=${btn.getAttribute("data-command")}] (default prevented? ${e.defaultPrevented})`);
+});
+      </script>
+   </body>
+</html>
