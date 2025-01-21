@@ -1,0 +1,60 @@
+
+:host([hidden]) {
+   display: none !important;
+}
+
+:host>div {
+   display: flex;
+   flex-flow: column nowrap;
+}
+
+.view {
+   display: grid;
+   grid-template:
+      "view"
+      "controls"
+      "slider"
+   ;
+   
+   width: var(--width, auto);
+   
+   --checkerboard-color-a: #888;
+   --checkerboard-color-b: #444;
+
+   background-image: conic-gradient(
+      var(--checkerboard-color-a) 0deg,
+      var(--checkerboard-color-a) 90deg,
+      var(--checkerboard-color-b) 90deg,
+      var(--checkerboard-color-b) 180deg,
+      var(--checkerboard-color-a) 180deg,
+      var(--checkerboard-color-a) 270deg,
+      var(--checkerboard-color-b) 270deg
+   ) !important;
+   background-size: 16px 16px;
+}
+
+/*
+   Slots basically don't exist at render time; CSS and rendering 
+   act as though the slotted nodes replace the slots entirely.
+*/
+slot[name="vector"]::slotted(*),
+slot[name="raster"]::slotted(*) {
+   grid-area: view;
+   filter: var(--filter, none);
+}
+
+slot[name="vector"]::slotted(*) {
+   clip-path: xywh(var(--threshold, 0px) 0 100% 100%);
+}
+slot[name="raster"]::slotted(*) {
+   clip-path: xywh(0 0 var(--threshold, 0px) 100%);
+}
+slot[name="raster"]::slotted(img) {
+   image-rendering: pixelated;
+}
+
+.built-in-controls {
+   label {
+      display: block;
+   }
+}

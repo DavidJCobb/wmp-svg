@@ -3,7 +3,7 @@
    <head>
       <title>WMP SVG lab</title>
       <link rel="stylesheet" href="index.css" />
-      <link rel="stylesheet" href="gradient-editor.css" />
+      <script src="diff-view.js"></script>
       <style>
 body {
    display: grid;
@@ -170,5 +170,10 @@ body {
          -->
          <input type="range" id="seek-slider" min="0" max="100" />
       </div>
+      
+      <diff-view width="558" height="69">
+         <img slot="raster" src="rips/tray-dark.bmp" width="558" height="69" />
+         <img slot="vector" width="558" height="69" style="background: green" />
+      </diff-view>
    </body>
 </html>
