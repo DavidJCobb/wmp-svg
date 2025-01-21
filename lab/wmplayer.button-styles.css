@@ -1,0 +1,364 @@
+/*
+   DECLARATIVE SPRITESHEETS
+*/
+:where(.controls :is(button, .basic-button)) {
+   /**************************************************************\
+      BASELINE STYLES
+   \**************************************************************/
+   
+   all:            unset;
+   appearance:     none;
+   display:        inline-block;
+   user-select:    none;
+   color:          transparent;
+   pointer-events: none;
+   position:       relative;
+   
+   &::before,
+   &::after {
+      content:  " ";
+      position: absolute;
+      display:  block;
+   }
+   &::before {
+      --pos-x: calc(var(--glass-x) * var(--glass-sprite-effective-scale));
+      --pos-y: calc(var(--glass-y) * var(--glass-sprite-effective-scale));
+      
+      left: var(--pos-x);
+      top:  var(--pos-y);
+      
+      /*
+         Fix for sub-pixel rounding errors: have the sub-pixel positioning 
+         be done on the GPU so that there isn't actually any rounding.
+      */
+         --pos-x-ipart: round(var(--pos-x), 1px);
+         --pos-x-fpart: calc(var(--pos-x) - var(--pos-x-ipart));
+         
+         left: var(--pos-x-ipart);
+         transform: translate3d(var(--pos-x-fpart), 0, 0);
+      
+      width:  var(--glass-sprite-effective-width);
+      height: var(--glass-sprite-effective-height);
+      background: var(--glyph-background), var(--glass-background);
+   }
+   &::after {
+      pointer-events: auto;
+      inset: 0;
+   }
+   
+   /*
+      FOCUS HELPER STYLES
+      
+      The `all: unset` property blew away the element's default outlines; we 
+      need to restore the focus ring. Luckily, Firefox and Chrome/WebKit all 
+      offer non-standard ways to force native focus ring styles.
+   */
+   &:focus-visible {
+      outline: medium auto #000;
+      outline: medium auto highlight; /* Firefox */
+      outline: medium auto -webkit-focus-ring-color; /* Chromium, WebKit */
+   }
+   
+   /**************************************************************\
+      BUTTON GLASS
+   \**************************************************************/
+   
+   /* REQUIRED INPUTS:
+   
+      --glass-spritesheet
+         The url() of the spritesheet.
+   
+      --glass-sprite-width
+      --glass-sprite-height
+         The size of the sprite, in its native SVG units, as a 
+         CSS px quantity.
+   */
+   --glass-sprite-scale: 1; /* scale at which the sprite was authored */
+   --glass-sprite-count: 4;
+   --glass-x: 0px; /* offset, relative to the hitbox, in the sprite's SVG units */
+   --glass-y: 0px; /* offset, relative to the hitbox, in the sprite's SVG units */
+   
+   /* STATE */
+   --glass-current-sprite: 0;
+   &:hover {
+      --glass-current-sprite: 1;
+   }
+   &:active {
+      --glass-current-sprite: 2;
+   }
+   &:disabled {
+      --glass-current-sprite: 3;
+   }
+   
+   /* COMPUTED */
+   --glass-sprite-effective-scale:  calc(var(--scale,1) / var(--glass-sprite-scale));
+   --glass-sprite-effective-width:  calc(var(--glass-sprite-width) * var(--glass-sprite-effective-scale));
+   --glass-sprite-effective-height: calc(var(--glass-sprite-height) * var(--glass-sprite-effective-scale));
+   
+   --glass-computed-x: calc(var(--glass-x) * var(--glass-sprite-effective-scale));
+   --glass-rounded-x:  round(to-zero, var(--glass-computed-x), 1px);
+   --glass-x-error:    round(up, calc(var(--glass-rounded-x) - var(--glass-computed-x))) - round(down, calc(var(--glass-rounded-x) - var(--glass-computed-x)));
+   margin-right: var(--glass-x-error);
+   
+   --glass-background:
+      var(--glass-spritesheet)
+      /*pos-x*/  calc(-1 * var(--glass-current-sprite) * var(--glass-sprite-effective-width))
+      /*pos-y*/  0
+      /
+      /*width*/  calc(var(--glass-sprite-count) * var(--glass-sprite-effective-width))
+      /*height*/ calc(var(--glass-sprite-effective-height))
+      no-repeat
+   ;
+   
+   /**************************************************************\
+      BUTTON GLYPHS
+   \**************************************************************/
+   
+   /* REQUIRED INPUTS:
+   
+      --glyph-spritesheet
+         As above.
+      
+      --glyph-spritesheet-rows
+      --glyph-spritesheet-cols
+         The number of rows and columns in the spritesheet.
+      
+      --glyph-sprite-width
+      --glyph-sprite-height
+         As above.
+   */
+   --glyph-sprite-scale: 1;
+   --glyph-x: 0px; /* offset, relative to the hitbox */
+   --glyph-y: 0px; /* offset, relative to the hitbox */
+   
+   /* STATE */
+   --glyph-current-row: 0;
+   --glyph-current-col: 0;
+   
+   /* COMPUTED */
+   --glyph-sprite-effective-scale:  calc(var(--scale,1) / var(--glyph-sprite-scale));
+   --glyph-sprite-effective-width:  calc(var(--glyph-sprite-width) * var(--glyph-sprite-effective-scale));
+   --glyph-sprite-effective-height: calc(var(--glyph-sprite-height) * var(--glyph-sprite-effective-scale));
+   
+   --glyph-sprite-effective-x: calc(var(--glyph-x) * var(--glyph-sprite-effective-scale) - var(--glass-x) * var(--glass-sprite-effective-scale));
+   --glyph-sprite-effective-y: calc(var(--glyph-y) * var(--glyph-sprite-effective-scale) - var(--glass-y) * var(--glass-sprite-effective-scale));
+   
+   --glyph-background:
+      var(--glyph-spritesheet)
+      /*pos-x*/  calc(var(--glyph-sprite-effective-x) - var(--glyph-current-col) * var(--glyph-sprite-effective-width))
+      /*pos-y*/  calc(var(--glyph-sprite-effective-y) - var(--glyph-current-row) * var(--glyph-sprite-effective-height))
+      /
+      /*width*/  calc(var(--glyph-spritesheet-cols) * var(--glyph-sprite-effective-width))
+      /*height*/ calc(var(--glyph-spritesheet-rows) * var(--glyph-sprite-effective-height))
+      no-repeat
+   ;
+}
+
+/*
+   STYLES FOR SPECIFIC BUTTONS
+*/
+.basic-button {
+   width:  calc(23px * var(--scale,1));
+   height: calc(23px * var(--scale,1));
+   
+   --glass-spritesheet:   url(spritesheet-generic.svg);
+   --glass-sprite-width:  58px;
+   --glass-sprite-height: 60px;
+   --glass-sprite-scale:  2;
+   --glass-x: -8px;
+   --glass-y: -4px;
+   
+   --glyph-spritesheet:      url(spritesheet-glyphs-general.svg);
+   --glyph-spritesheet-rows: 4;
+   --glyph-spritesheet-cols: 5;
+   --glyph-x: -1.5px;
+   --glyph-y: -2px;
+   --glyph-sprite-width:  50px;
+   --glyph-sprite-height: 50px;
+   --glyph-sprite-scale:  2;
+   
+   /* what rows represent what glyphs */
+   --glyph-row-loop:    0;
+   --glyph-row-shuffle: 1;
+   --glyph-row-stop:    2;
+   --glyph-row-volume:  3;
+   
+   /* what columns represent what variants */
+   --glyph-col-off:      0;
+   --glyph-col-on:       1;
+   --glyph-col-enabled:  0;
+   --glyph-col-disabled: 1;
+   
+   /* Icons: */
+   
+   &.loop {
+      --glyph-current-row: var(--glyph-row-loop);
+   }
+   &.shuffle {
+      --glyph-current-row: var(--glyph-row-shuffle);
+   }
+   &.loop,
+   &.shuffle {
+      --glyph-current-col: var(--glyph-col-off);
+      &:checked {
+         --glyph-current-col: var(--glyph-col-on);
+      }
+   }
+   
+   &.stop {
+      --glyph-current-row: var(--glyph-row-stop);
+      --glyph-current-col: var(--glyph-col-enabled);
+      &:disabled {
+         --glyph-current-col: var(--glyph-col-disabled);
+      }
+   }
+   
+   &.mute {
+      --glyph-current-row: var(--glyph-row-volume);
+      --glyph-current-col: 3;
+      &[data-glyph="empty"] {
+         --glyph-current-col: 0;
+      }
+      &[data-glyph="low"] {
+         --glyph-current-col: 1;
+      }
+      &[data-glyph="medium"] {
+         --glyph-current-col: 2;
+      }
+      &[data-glyph="high"] {
+         --glyph-current-col: 3;
+      }
+      &:checked {
+         --glyph-current-col: 4;
+      }
+   }
+}
+:host(.theater) .basic-button {
+   --glyph-spritesheet: url(spritesheet-glyphs-general.svg#theater);
+}
+
+/*
+   PLAY/PAUSE BUTTON
+*/
+.play-pause {
+   --diameter: calc(43px * var(--scale,1));
+   --radius:   calc(var(--diameter) / 2);
+   
+   width:     var(--diameter);
+   height:    var(--diameter);
+   
+   &::after {
+      clip-path: ellipse(var(--radius) var(--radius) at center center);
+   }
+   
+   --glass-spritesheet:   url(spritesheet-jewel.svg);;
+   --glass-sprite-width:  100px;
+   --glass-sprite-height: 100px;
+   --glass-sprite-scale:  2;
+   
+   --glass-x: -7px;
+   --glass-y: -8px;
+   
+   --glyph-spritesheet:      url(spritesheet-glyphs-play-pause.svg);
+   --glyph-spritesheet-rows: 1;
+   --glyph-spritesheet-cols: 2;
+   
+   --glyph-sprite-width:  100px;
+   --glyph-sprite-height: 100px;
+   --glyph-sprite-scale:  2;
+   
+   --glyph-x: -7px;
+   --glyph-y: -7px;
+   
+   --current-sprite-col: 0;
+}
+:host(:state(playing)) .play-pause {
+   --current-sprite-col: 1;
+}
+
+/*
+   PREV/NEXT BUTTONS
+*/
+.prev-rw,
+.next-ff {
+   width:  calc(48px * var(--scale, 1));
+   height: calc(23px * var(--scale, 1));
+   
+   &::after {
+      /* so we don't need a million calc()s in the clip-path, set 
+         the font-size */
+      font-size: calc(1px * var(--scale, 1));
+      clip-path: polygon(
+          1em    0em,
+         40.5em  0em,
+         44.2em  1em,
+         46.2em  3em,
+         47.1em  5em,
+         47.5em  7em,
+         48em   11.5em,
+         47.5em 16em,
+         47.1em 18em,
+         46.2em 20em,
+         44.2em 22em,
+         40.5em 23em,
+          1em   23em,
+          0em   22em,
+          1em   19em,
+          2em   14em,
+          2em   11.5em,
+          2em    9em,
+          1em    4em,
+          0em    1em
+      );
+   }
+   
+   --glass-spritesheet:   url(spritesheet-next.svg);
+   --glass-sprite-width:  112px;
+   --glass-sprite-height:  70px;
+   --glass-sprite-scale:      2;
+   
+   --glass-x:  -5px;
+   --glass-y: -12px;
+   
+   --glyph-spritesheet:      url(spritesheet-glyphs-next.svg);
+   --glyph-spritesheet-rows: 2;
+   --glyph-spritesheet-cols: 2;
+   
+   --glyph-sprite-width:  112px;
+   --glyph-sprite-height:  70px;
+   --glyph-sprite-scale:      2;
+   
+   --glyph-x:  -3px;
+   --glyph-y: -12px;
+   
+   --glyph-current-row: var(--glyph-row-primary);
+   --glyph-current-col: var(--glyph-col-enabled);
+   
+   /* what rows represent what glyphs */
+   --glyph-row-primary:   1;
+   --glyph-row-secondary: 0;
+   
+   /* what columns represent what variants */
+   --glyph-col-enabled:  0;
+   --glyph-col-disabled: 1;
+   
+   &:disabled {
+      --glyph-current-col: var(--glyph-col-disabled);
+   }
+   
+   :host(.theater) & {
+      --glyph-spritesheet: url(spritesheet-glyphs-next.svg#theater);
+   }
+   
+   &.fast-forward,
+   &.can-only-fast-forward,
+   &.rewind,
+   &.can-only-rewind {
+      --current-sprite-row: var(--glyph-row-secondary);
+   }
+}
+.prev-rw {
+   transform-box:    content-box;
+   transform-origin: center center;
+   transform:        scale(-100%, 100%);
+}

@@ -62,6 +62,7 @@ class WMPlayerElement extends HTMLElement {
    #setting_attribute = false;
    
    static #HTML = `
+<link rel="stylesheet" href="wmplayer.button-styles.css" />
 <link rel="stylesheet" href="wmplayer.css" />
 <div class="content">
    <video></video>
