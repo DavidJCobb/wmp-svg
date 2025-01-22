@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1116" height="134">
+   <defs>
+      <!--
+         Path is the combined stroke of...
+         
+            <circle name="endcap-l" r="29" cx="201" cy="67" />
+            <circle name="endcap-r" r="29" cx="853" cy="67" />
+            <rect x="201" y="38" width="652" height="58" />
+            <circle name="play-pause-bulge" r="45" cx="556" cy="67" />
+            
+         ...such that the inner stroke of the diffuse is shadow and the 
+         outer stroke is a highlight. The alpha mask is... similar, but 
+         blurred.
+         
+         This graphic represents the tray background in Now Playing view, 
+         wherein the controls tray is overlaid on the media being played 
+         (the video, or an audio file's album art). At 1x scale in WMP, 
+         the inner height of the tray "wings" is 23px in Now Playing view 
+         and 25px in Library view. This graphic is designed based on the 
+         2x scale graphics, so the inner-height of the tray wings within 
+         this graphic is 46px.
+         
+         Now Playing view, then, displays buttons at 92% size, but displays 
+         their glyphs at 100% size.
+      -->
+      <path id="shape"
+         d="M 201 38 L 521.591 38 A 45 45 0 0 1 590.409 38 L 853 38 A 29 29 0 0 1 853 96 L 590.409 96 A 45 45 0 0 1 521.591 96 L 201 96 A 29 29 0 0 1 201 38 z"
+      />
+      
+      <!-- used when we need an inner stroke only -->
+      <clipPath id="shape-clip">
+         <use href="#shape" />
+      </clipPath>
+      
+      <linearGradient id="shape-stroke" x1="0" x2="0" y1="0" y2="1">
+         <stop offset=".20" stop-color="#292951" />
+         <stop offset=".5" stop-color="#7d7fa0" />
+         <stop offset=".795" stop-color="#9c9db8" />
+         <stop offset=".9" stop-color="#4b4b74" />
+      </linearGradient>
+      
+      <mask id="mask" color-interpolation="linearrgb">
+         <use href="#shape"
+            fill="#8b8b8b"
+            stroke="#7d7d7d"
+            stroke-width="8"
+            clip-path="url(#shape-clip)"
+         />
+         <use href="#shape"
+            fill="none"
+            stroke="#b7b7b7"
+            stroke-width="4"
+            filter="blur(1)"
+         />
+         
+         <!--
+            darken the stroke, but not the fill, on the bottom of the 
+            play/pause bulge's alpha mask.
+         -->
+         <circle fill="#00000020" r="41" cx="556" cy="120" />
+         <circle fill="#8b8b8b" r="41" cx="556" cy="67" />
+      </mask>
+   </defs>
+   
+   <g mask="url(#mask)">
+      <use href="#shape"
+         fill="none"
+         stroke="#FFF"
+         stroke-width="5"
+      />
+      <use href="#shape"
+         fill="#eff7fb"
+         stroke="url(#shape-stroke)"
+         stroke-width="5"
+         clip-path="url(#shape-clip)"
+      />
+   </g>
+</svg>

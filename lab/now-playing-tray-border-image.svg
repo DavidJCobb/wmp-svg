@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="86" height="70">
+   <defs>
+      <!--
+         Derived from `now-playing-tray.svg`, this is just the 
+         endcaps and middle stretch for the left and right 
+         "wings" of the tray. The middle stretch is 16px long.
+      -->
+      <path id="shape"
+         d="M 35 6 l 16 0 a 29 29 0 0 1 0 58 l -16 0 a 29 29 0 0 1 0 -58 z"
+      />
+      
+      <!-- used when we need an inner stroke only -->
+      <clipPath id="shape-clip">
+         <use href="#shape" />
+      </clipPath>
+      
+      <linearGradient id="shape-stroke" x1="0" x2="0" y1="0" y2="1">
+         <stop offset="0" stop-color="#292951" />
+         <stop offset=".5" stop-color="#7d7fa0" />
+         <stop offset="1" stop-color="#9c9db8" />
+      </linearGradient>
+      
+      <mask id="mask" color-interpolation="linearrgb">
+         <use href="#shape"
+            fill="#8b8b8b"
+            stroke="#7d7d7d"
+            stroke-width="8"
+            clip-path="url(#shape-clip)"
+         />
+         <use href="#shape"
+            fill="none"
+            stroke="#b7b7b7"
+            stroke-width="4"
+            filter="blur(1)"
+         />
+      </mask>
+   </defs>
+   
+   <g mask="url(#mask)">
+      <use href="#shape"
+         fill="none"
+         stroke="#FFF"
+         stroke-width="5"
+      />
+      <use href="#shape"
+         fill="#eff7fb"
+         stroke="url(#shape-stroke)"
+         stroke-width="5"
+         clip-path="url(#shape-clip)"
+      />
+   </g>
+</svg>
