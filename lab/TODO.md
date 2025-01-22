@@ -18,6 +18,10 @@ Overview:
 ## Specifics
 
 * `WMPlayerElement`
+  * I've finished building graphics for the controls tray background used in Now Playing view (i.e. `data-overlay-controls`). I should bring those styles over to `wmplayer.css`.
+  * When Windows Media Player is in Now Playing view, it displays all button "glass" (and the controls tray border and background) at 92% scale, but button glyphs are still displayed at 100% scale. Right now, we have no means to alter the scale of button glyphs independently of the buttons themselves.
+    * The seek slider and current timestamp don't appear to be downscaled in Now Playing view.
+    * If we add an independent scaling factor for glyphs, we need to bear in mind that glyphs are shown on the same element as glass (they're two background layers). This means that the two scales can only differ so much before one of the graphics gets clipped *or* before more sprites than intended become visible (i.e. if the total size is too much larger than that of a single sprite). For the scaling difference we intend (92% times the overall scaling factor of the player controls), this won't matter so much, but if outside code alters the scaling, then things may go haywire.
   * Dark tray background
     * Current timestamp is vertically aligned a bit jankily.
     * The height of the tray graphic should adjust to match the total height of the seek slider (including whatever padding we add to it) and the controls. Currently, we do this using lots of explicit heights and whatnot, but it'd be nice if there were some way to automatically compute this based on the grid height. (IIRC `background-size` is relative to the size of the element what has a background, but I don't remember if `border-image`, which we use for the left and right endcaps, works the same way.)
