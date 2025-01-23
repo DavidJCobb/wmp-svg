@@ -27,12 +27,29 @@ Overview:
   * When Windows Media Player is in Now Playing view, it displays all button "glass" (and the controls tray border and background) at 92% scale, but button glyphs are still displayed at 100% scale. Right now, we have no means to alter the scale of button glyphs independently of the buttons themselves.
     * The seek slider and current timestamp don't appear to be downscaled in Now Playing view.
     * If we add an independent scaling factor for glyphs, we need to bear in mind that glyphs are shown on the same element as glass (they're two background layers). This means that the two scales can only differ so much before one of the graphics gets clipped *or* before more sprites than intended become visible (i.e. if the total size is too much larger than that of a single sprite). For the scaling difference we intend (92% times the overall scaling factor of the player controls), this won't matter so much, but if outside code alters the scaling, then things may go haywire.
+  * Current timestamp widget
+    * Fix vertical alignment (non-overlaid controls, dark theme, scale 1)
+    * Timestamp should respond to the current `--scale`
+    * Add CSS variables:
+      * `--timestamp-force-font-size`
+      * `--timestamp-scale-font-size` (when not forcing)
+      * `--timestamp-min-font-size` (when not forcing)
+      * `--timestamp-max-font-size` (when not forcing)
   * We need "disabled" states for the "previous" and "next" buttons' glassy backing. In the normal player UI, these buttons are never disabled (because WMP will just pick something from your library, same as play/pause), but they can be disabled in the "theater" UI  (wherein the player controls are overlaid on the video). We're mimicking WMP's UI, not the full program design: we won't always have a previous or next media item, so I think we want more visible disable states. (Plus, we need the graphics for "theater" mode either way.)
   * Theater: "previous" and "next" don't have a glassy shine on their "normal" state when in this view. We should implement this as a fifth "button sprite" in their spritesheet, setting `--button-sprite-count: 5` and then using `--use-button-sprite: 4` for the "normal" state in the theater view.
   * Make it possible to scale the player UI based on a scaling factor relative to the vanilla size *or* maximum main- and cross-axis sizes.
   * Look into offering differing arrangements of buttons
     * Current arrangement
     * Play/pause, seek slider, timestamp, and volume
+    * Better yet: add reflected properties/attributes that consist of a space-separated list of buttons to show e.g. `"shuffle loop stop prev"`.
+      * `data-controls-in-tray-left` and `data-controls-in-tray-right`
+      * When none of these properties are set, use the default layout. When any properties are set, show only the buttons listed in their values.
+        * Note: We need to treat the attributes being absent as `null`, not `""`, so that `""` can be used to hide all optional controls.
+      * For now, do not allow moving the Play/Pause button.
+      * If a control is listed more than once, then display it in the leftmost position only.
+        * Allow `separator` as a value that can appear more than once, spawning an `hr` element.
+      * If `seek` is included in any of these, move the seek slider into the tray.
+      * If there are no controls on one side of the tray (or if the Play/Pause button is the sole button being shown), then adjust how we render the tray "bulge" behind the Play/Pause button.
   * Full-screen toggle button in lower-right corner
   * Tests
     * Support for subtitle tracks, etc.

@@ -237,9 +237,8 @@ video {
 }
 
 .controls {
-   
-   --height:  calc(64px * var(--scale,1) / (2 * 0.92));
-   --padding: 4px;
+   --height:  calc(62px * var(--scale,1) / (2 * 0.92));
+   --padding: calc(4px * var(--scale,1));
    
    --tray-spritesheet:            url(spritesheet-tray-background.svg#overlay);
    --tray-spritesheet-w-unitless: 70;
@@ -248,21 +247,22 @@ video {
    --tray-spritesheet-scale:      calc(2 * 0.96);
    
    --tray-endcap-sprite-w: 32px;
-   --tray-endcap-sprite-h: 64px;
+   --tray-endcap-sprite-h: 63px;
    
-   --tray-middle-sprite-y: calc(var(--tray-endcap-sprite-h) * 2);
-   --tray-middle-sprite-h: 64px;
+   --tray-middle-sprite-y: 128px;
+   --tray-middle-sprite-h: 63px;
    
-   --tray-bulge-sprite-y: 196px;
+   --tray-bulge-sprite-y: 196.5px; /* TODO: width doesn't include the whole stroke? this should be 196px. */
    --tray-bulge-sprite-w: 68.818px;
    --tray-bulge-sprite-h: 96px;
    
    --tray-spritesheet-effective-scale: calc(var(--scale,1) / var(--tray-spritesheet-scale));
-   --tray-spritesheet-effective-scale: calc(
+   /* attempted fix for browsers' sub-pixel rounding; disabled for now: */
+   /*--tray-spritesheet-effective-scale: calc(
       round(var(--tray-spritesheet-w-unitless) * var(--scale,1) / var(--tray-spritesheet-scale))
       /
       var(--tray-spritesheet-w-unitless)
-   );
+   );*/
    --tray-spritesheet-effective-size:
       calc(var(--tray-spritesheet-w) * var(--tray-spritesheet-effective-scale))
       calc(var(--tray-spritesheet-h) * var(--tray-spritesheet-effective-scale))
@@ -282,7 +282,6 @@ video {
       order: -1;
       
       box-sizing: border-box;
-      padding: var(--padding) 0; /* spacing between prev/next and play/pause */
       background:
          var(--tray-spritesheet)
          left calc(-1 * var(--tray-middle-sprite-y) * var(--tray-spritesheet-effective-scale))
@@ -329,13 +328,13 @@ video {
       --endcap-position-x: 0;
       --endcap-position-y: 0;
       border-left:   var(--tray-endcap-effective-w) solid transparent;
-      padding-right: var(--padding);
+      padding-right: var(--padding); /* spacing between prev/next and play/pause */
    }
    .right {
       --endcap-position-x: right;
-      --endcap-position-y: calc(-1 * var(--tray-endcap-effective-h));
+      --endcap-position-y: calc(-1 * 64px * var(--tray-spritesheet-effective-scale));
       border-right: var(--tray-endcap-effective-w) solid transparent;
-      padding-left: var(--padding);
+      padding-left: var(--padding); /* spacing between prev/next and play/pause */
    }
    
    &::before {
