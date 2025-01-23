@@ -36,6 +36,16 @@
          
          left: var(--pos-x-ipart);
          transform: translate3d(var(--pos-x-fpart), 0, 0);
+         
+         /*
+            HACK: Firefox does some unhinged bullshit with the transforms, 
+            e.g. having them affect the positioning of adjacent boxes, and 
+            rounding even 3D-space transforms. This tweak is designed to 
+            skew rounding of the play/pause glass-sprite position so that 
+            it lines up with the tray "bulge" sprite when controls are 
+            overlaid. (1/22/2025)
+         */
+         -moz-transform: translate3d(calc(var(--pos-x-fpart) * 1.2), 0, 0);
       
       width:  var(--glass-sprite-effective-width);
       height: var(--glass-sprite-effective-height);

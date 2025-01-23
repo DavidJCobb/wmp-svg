@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="70" height="292">
+   <!--
+      Derived from `now-playing-tray.svg`.
+   
+      Row 1 (y-offset   0): Left endcap. 32x64px.
+   
+      Row 1 (y-offset  64): right endcap. 32x64px.
+      
+      Row 2 (y-offset 128 middle section. 64px high. Occupies the 
+      entire row, so you can use repeat-x.
+      
+      Row 2 (y-offset 196): play/pause bulge. 68.818x96px.
+   -->
+   <defs>
+      <linearGradient id="shape-stroke" x1="0" x2="0" y1="0" y2="1">
+         <stop offset="0" stop-color="#292951" />
+         <stop offset=".5" stop-color="#7d7fa0" />
+         <stop offset="1" stop-color="#9c9db8" />
+      </linearGradient>
+      
+      <style><![CDATA[
+.mask-base-shape {
+   /* The background color and inner shadowing for each alpha mask. */
+   fill:         #8B8B8B;
+   stroke:       #7D7D7D;
+   stroke-width: 8px;
+}
+.mask-edge-shape {
+   /* The outer edge for each alpha mask. */
+   fill:         none;
+   stroke:       #B7B7B7;
+   stroke-width: 4px;
+   filter:       blur(1px);
+}
+
+.diffuse-base-shape {
+   fill:         none;
+   stroke:       #FFF;
+   stroke-width: 5px;
+}
+.diffuse-edge-shape {
+   fill:         #EFF7FB;
+   stroke:       url(#shape-stroke);
+   stroke-width: 5px;
+}
+      ]]></style>
+      
+      <!--
+         The general pattern here is:
+         
+            #foo-shape
+               The shape we're working with.
+            
+            #foo-clip
+               A clipPath element containing the shape, used so we can 
+               have inner strokes only in some cases.
+            
+            #foo-mask
+               The alpha mask for the shape.
+      -->
+      
+      <circle id="endcaps-shape" cx="32" cy="32" r="29" />
+      <clipPath id="endcaps-clip">
+         <use href="#endcaps-shape" />
+      </clipPath>
+      <mask id="endcaps-mask" color-interpolation="linearrgb">
+         <use href="#endcaps-shape" class="mask-base-shape" clip-path="url(#endcaps-clip)" />
+         <use href="#endcaps-shape" class="mask-edge-shape" />
+      </mask>
+      <!--
+         NOTE: The endcaps include one pixel of "spillover" on purpose, 
+         to aid with sub-pixel rounding errors seen in Firefox at some 
+         zoom levels. I suspect a better way to do this would be to 
+         design a single capsule shape, and have the pseudo-elements 
+         that we use to render the endcaps sample from that.
+      -->
+      <mask id="endcap-mask-l">
+         <rect x="0" y="0" width="33" height="64" fill="#FFF" />
+      </mask>
+      <mask id="endcap-mask-r">
+         <rect x="31" y="0" width="33" height="64" fill="#FFF" />
+      </mask>
+      
+      <rect id="middle-shape" x="-10" y="3" width="90" height="58" />
+      <clipPath id="middle-clip">
+         <use href="#middle-shape" />
+      </clipPath>
+      <mask id="middle-mask" color-interpolation="linearrgb">
+         <use href="#middle-shape" class="mask-base-shape" clip-path="url(#middle-clip)" />
+         <use href="#middle-shape" class="mask-edge-shape" />
+      </mask>
+      
+      <path id="bulge-shape" d="M -21.591 19 L 0 19 A 45 45 0 0 1 68.818 19 L 88.409 19 L 88.409 77 L 68.818 77 A 45 45 0 0 1 0 77 L -21.591 77 z" />
+      <clipPath id="bulge-clip">
+         <use href="#bulge-shape" />
+      </clipPath>
+      <mask id="bulge-mask" color-interpolation="linearrgb">
+         <use href="#bulge-shape" class="mask-base-shape" clip-path="url(#bulge-clip)" />
+         <use href="#bulge-shape" class="mask-edge-shape" />
+         
+         <!--
+            darken the stroke, but not the fill, on the bottom of the 
+            play/pause bulge's alpha mask.
+         -->
+         <circle fill="#00000020" r="41" cx="34.409" cy="100" />
+         <circle fill="#8B8B8B" r="41" cx="34.409" cy="48" />
+      </mask>
+   </defs>
+   
+   <g mask="url(#endcaps-mask) intersect, url(#endcap-mask-l) intersect">
+      <use href="#endcaps-shape" class="diffuse-base-shape" />
+      <use href="#endcaps-shape" class="diffuse-edge-shape" clip-path="url(#endcaps-clip)" />
+   </g>
+   <g mask="url(#endcaps-mask) intersect, url(#endcap-mask-r) intersect" transform="translate(6 64)">
+      <use href="#endcaps-shape" class="diffuse-base-shape" />
+      <use href="#endcaps-shape" class="diffuse-edge-shape" clip-path="url(#endcaps-clip)" />
+   </g>
+   <g mask="url(#middle-mask)" transform="translate(0 128)">
+      <use href="#middle-shape" class="diffuse-base-shape" />
+      <use href="#middle-shape" class="diffuse-edge-shape" clip-path="url(#middle-clip)" />
+   </g>
+   <g mask="url(#bulge-mask)" transform="translate(0 196)">
+      <use href="#bulge-shape" class="diffuse-base-shape" />
+      <use href="#bulge-shape" class="diffuse-edge-shape" clip-path="url(#bulge-clip)" />
+   </g>
+</svg>

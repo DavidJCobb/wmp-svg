@@ -175,36 +175,190 @@ video {
 }
 
 .controls {
+   grid-area: controls;
+   
+   --height:          calc(23px * var(--scale,1));
+   --base-widget-gap: calc( 6px * var(--scale,1));
+   
+   /* TODO: find a way to get rid of these vars */
+   --play-pause-button-region: calc(50px * var(--scale,1));
+   --play-pause-button-hitbox: calc(43px * var(--scale,1));
+   --extra-height: var(--play-pause-button-hitbox);
+   --extra-diff:   calc((var(--extra-height) - var(--height)) / 2);
+   
+   --play-pause-flex-area-width: var(--play-pause-button-hitbox);
+   
+   display: grid;
+   grid-template:
+      "left play right" var(--height)
+      /
+      min-content var(--play-pause-flex-area-width) min-content
+   ;
+   justify-content: center;
+   align-items:     center;
+   
+   margin: var(--extra-diff) 0;
+   
+   .left {
+      grid-area: left;
+   }
+   .right {
+      grid-area: right;
+   }
+   .play-pause {
+      grid-area: play;
+   }
+   
+   .left,
+   .right {
+      display:         flex;
+      flex-flow:       row nowrap;
+      justify-content: center;
+      align-items:     center;
+      gap:             var(--base-widget-gap);
+      
+      height: var(--height);
+   }
+}
+
+:host([data-overlay-controls]) .controls {
+   
+   --height:  calc(64px * var(--scale,1) / (2 * 0.96));
+   --padding: 4px;
+   
+   --tray-spritesheet:            url(spritesheet-tray-background-overlay-2.svg);
+   --tray-spritesheet-w-unitless: 70;
+   --tray-spritesheet-w:          calc(1px * var(--tray-spritesheet-w-unitless));
+   --tray-spritesheet-h:          292px;
+   --tray-spritesheet-scale:      calc(2 * 0.96);
+   
+   --tray-endcap-sprite-w: 32px;
+   --tray-endcap-sprite-h: 64px;
+   
+   --tray-middle-sprite-y: calc(var(--tray-endcap-sprite-h) * 2);
+   --tray-middle-sprite-h: 64px;
+   
+   --tray-bulge-sprite-y: 196px;
+   --tray-bulge-sprite-w: 68.818px;
+   --tray-bulge-sprite-h: 96px;
+   
+   --tray-spritesheet-effective-scale: calc(var(--scale,1) / var(--tray-spritesheet-scale));
+   --tray-spritesheet-effective-scale: calc(
+      round(var(--tray-spritesheet-w-unitless) * var(--scale,1) / var(--tray-spritesheet-scale))
+      /
+      var(--tray-spritesheet-w-unitless)
+   );
+   --tray-spritesheet-effective-size:
+      calc(var(--tray-spritesheet-w) * var(--tray-spritesheet-effective-scale))
+      calc(var(--tray-spritesheet-h) * var(--tray-spritesheet-effective-scale))
+   ;
+   
+   --play-pause-flex-area-width: calc(var(--tray-bulge-sprite-w) * var(--tray-spritesheet-effective-scale));
+   
+   .left,
+   .right {
+      --tray-endcap-effective-w: calc(var(--tray-endcap-sprite-w) * var(--tray-spritesheet-effective-scale));
+      --tray-endcap-effective-h: calc(var(--tray-endcap-sprite-h) * var(--tray-spritesheet-effective-scale));
+      
+      /*
+         Ensure the backgrounds on these elements (the right half in particular) 
+         don't partially overlap and cover the play/pause button.
+      */
+      order: -1;
+      
+      box-sizing: border-box;
+      padding: var(--padding) 0; /* spacing between prev/next and play/pause */
+      background:
+         var(--tray-spritesheet)
+         left calc(-1 * var(--tray-middle-sprite-y) * var(--tray-spritesheet-effective-scale))
+         /
+         var(--tray-spritesheet-effective-size)
+         repeat-x
+         padding-box padding-box
+      ;
+      
+      /*
+         The original plan was to use two background images: one for the endcap and 
+         one for the middle portion. Unfortunately, in both Firefox and Chrome, that 
+         produces sub-pixel rounding errors and visible seams.
+         
+         If we position the endcaps via the box model, i.e. using a pseudo-element, 
+         then things seem to render just fine... mostly. Firefox gets sub-pixel gaps 
+         at some zoom levels if the background on the pseudo-element is *just* the 
+         endcap.
+      */
+      position: relative;
+      &::before {
+         content:  " ";
+         display:  block;
+         width:    var(--tray-endcap-effective-w);
+         position: absolute;
+         top:      0;
+         bottom:   0;
+         right:    100%;
+         background:
+            var(--tray-spritesheet)
+            var(--endcap-position-x) var(--endcap-position-y)
+            /
+            var(--tray-spritesheet-effective-size)
+            no-repeat
+            border-box border-box
+         ;
+      }
+      &.right::before {
+         right: auto;
+         left:  100%;
+      }
+   }
+   .left {
+      --endcap-position-x: 0;
+      --endcap-position-y: 0;
+      border-left:   var(--tray-endcap-effective-w) solid transparent;
+      padding-right: var(--padding);
+   }
+   .right {
+      --endcap-position-x: right;
+      --endcap-position-y: calc(-1 * var(--tray-endcap-effective-h));
+      border-right: var(--tray-endcap-effective-w) solid transparent;
+      padding-left: var(--padding);
+   }
+   
+   &::before {
+      --tray-bulge-effective-w: calc(var(--tray-bulge-sprite-w) * var(--tray-spritesheet-effective-scale));
+      --tray-bulge-effective-h: calc(var(--tray-bulge-sprite-h) * var(--tray-spritesheet-effective-scale));
+      
+      grid-area: play;
+      justify-self: center;
+      align-self: center;
+      
+      content: " ";
+      width:   var(--tray-bulge-effective-w);
+      height:  var(--tray-bulge-effective-h);
+      background:
+         var(--tray-spritesheet)
+         left calc(-1 * var(--tray-bulge-sprite-y) * var(--tray-spritesheet-effective-scale))
+         /
+         var(--tray-spritesheet-effective-size)
+         no-repeat
+      ;
+   }
+}
+:host(:not([data-overlay-controls])) .controls {
    --background: transparent;
    
    --padding: calc(5px * var(--scale,1));
-   --height:  calc(23px * var(--scale,1));
    
-   --base-widget-gap: calc(6px * var(--scale,1));
    --endcap-padding:  calc(18px * var(--scale,1));
    
    --border-thickness: calc(1px * var(--scale,1));
    
-   --play-pause-button-region: calc(50px * var(--scale,1));
-   --play-pause-button-hitbox: calc(43px * var(--scale,1));
-   
    --extra-height: calc(var(--play-pause-button-hitbox) + (var(--padding) + var(--border-thickness)) * 2);
-   --extra-diff:   calc((var(--extra-height) - var(--height)) / 2);
    
    /*
       Setting border-radius to 50% creates an ellipse, whereas what we want 
       is a capsule. Setting an arbitrary huge value gives us a capsule.
    */
    --really-huge-value: 800px;
-   
-   grid-area: controls;
-   
-   display: grid;
-   grid-template: "left play right" var(--height) / min-content var(--play-pause-button-hitbox) min-content;
-   justify-content: center;
-   align-items: center;
-   
-   margin: var(--extra-diff) 0;
    
    /*
       We want an outline wrapping the player controls, hugging them tightly: 
@@ -223,14 +377,7 @@ video {
    */
    & .left,
    & .right {
-      display:   flex;
-      flex-flow: row nowrap;
-      justify-content: center;
-      align-items: center;
-      gap: var(--base-widget-gap);
-      
       padding: var(--padding) 0;
-      height:  var(--height);
       
       border: var(--border-thickness) solid #A8A8A9;
       border-top-color: #A8A8A9;
@@ -240,14 +387,12 @@ video {
       background: var(--background);
    }
    & .left {
-      grid-area: left;
       padding-left: calc(var(--endcap-padding) + 4px*var(--scale,1));
       padding-right: calc(3px * var(--scale,1));
       border-radius: var(--really-huge-value) 0 0 var(--really-huge-value);
       border-right-width: 0;
    }
    & .right {
-      grid-area: right;
       padding-right: var(--endcap-padding);
       padding-left: calc(3px * var(--scale,1));
       border-radius: 0 var(--really-huge-value) var(--really-huge-value) 0;
