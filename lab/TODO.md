@@ -19,11 +19,11 @@ Overview:
 
 * `WMPlayerElement`
   * Tray background
-    * Dark theme
-      * There needs to be more padding between the tray border and the tray buttons. We may actually need a separate SVG with separate metrics for this.
-      * Current timestamp is vertically aligned incorrectly.
-    * Non-overlaid, non-dark theme
-      * Create an equivalent to the spritesheet we're using for the dark and overlaid trays
+    * Modify the overlaid-controls spritesheet to handle endcaps the same way as the non-overlaid-controls spritesheet.
+    * Clean up the spritesheet files.
+      * Rename `spritesheet-tray-background.svg` to `spritesheet-tray-background-overlay.svg`.
+      * Rename `spritesheet-tray-background-non-overlay.svg` to `spritesheet-tray-background.svg`.
+      * Delete the other spritesheets for the tray background and border.
   * When Windows Media Player is in Now Playing view, it displays all button "glass" (and the controls tray border and background) at 92% scale, but button glyphs are still displayed at 100% scale. Right now, we have no means to alter the scale of button glyphs independently of the buttons themselves.
     * The seek slider and current timestamp don't appear to be downscaled in Now Playing view.
     * If we add an independent scaling factor for glyphs, we need to bear in mind that glyphs are shown on the same element as glass (they're two background layers). This means that the two scales can only differ so much before one of the graphics gets clipped *or* before more sprites than intended become visible (i.e. if the total size is too much larger than that of a single sprite). For the scaling difference we intend (92% times the overall scaling factor of the player controls), this won't matter so much, but if outside code alters the scaling, then things may go haywire.

@@ -53,6 +53,17 @@ svg[hidden] {
       <diff-view width="558" height="69">
          <img slot="raster" src="rips/tray-dark.bmp" width="558" height="69" />
          <img slot="vector" src="spritesheet-tray-background-dark.svg" width="558" height="69" />
+         <svg slot="vector" width="558" height="69">
+            <defs>
+               <path id="edge"
+                  d="M 78 35.5 a 15.5 15.5 0 0 1 15.5 -15.5 l 166.5 0 a 25.5 25.5 0 0 1 38 0 L 465 20 a 15.5 15.5 0 0 1 15.5 15.5 A 15.5 15.5 0 0 1 465 51 L 298 51 a 25.5 25.5 0 0 1 -38 0 l -167.5 0 a 15.5 15.5 0 0 1 -15.5 -16 z"
+               />
+               <clipPath id="inner-stroke-only">
+                  <use href="#edge" />
+               </clipPath>
+            </defs>
+            <use href="#edge" clip-path="url(#inner-stroke-only)" fill="none" stroke="#F00" stroke-width="2" />
+         </svg>
       </diff-view>
    </body>
 </html>

@@ -230,7 +230,7 @@ video {
    }
 }
 
-:host(:is([data-overlay-controls], [data-theme="dark" i])) .controls {
+.controls {
    
    --height:  calc(64px * var(--scale,1) / (2 * 0.92));
    --padding: 4px;
@@ -352,110 +352,53 @@ video {
       ;
    }
 }
-:host([data-theme="dark" i]:not([data-overlay-controls])) .controls {
-   --tray-spritesheet: url(spritesheet-tray-background.svg#dark);
+:host(:not([data-overlay-controls])) .controls {
+   --height:  calc(31px * var(--scale,1));
+   --padding: 4px;
+   
+   --tray-spritesheet:            url(spritesheet-tray-background-non-overlay.svg#lite);
+   --tray-spritesheet-w-unitless: 41;
+   --tray-spritesheet-w:          calc(1px * var(--tray-spritesheet-w-unitless));
+   --tray-spritesheet-h:          115px;
+   --tray-spritesheet-scale:      1;
+   
+   --tray-endcap-sprite-w: 15.5px;
+   --tray-endcap-sprite-h: 31px;
+   
+   --tray-middle-sprite-y: 32px;
+   --tray-middle-sprite-h: 31px;
+   
+   --tray-bulge-sprite-y: 63px;
+   --tray-bulge-sprite-w: 40.497px;
+   --tray-bulge-sprite-h: 51px;
+   
+   --extra-diff: calc((var(--tray-bulge-sprite-h) - var(--tray-middle-sprite-h)) * var(--tray-spritesheet-effective-scale) / 2);
+   
+   .right {
+      --endcap-position-y: 0;
+   }
+   
+   /* fake a 1.5px width using a mask, since browsers round everything */
+   hr {
+      width: 2px;
+      mask: linear-gradient(to right, #FFF, #FFF 50%, #000) 0 0/2px 100%;
+   }
 }
-:host(:not([data-overlay-controls]):not([data-theme="dark" i])) .controls {
-   --background: transparent;
+:host([data-theme="dark" i]) .controls {
+   --tray-spritesheet: url(spritesheet-tray-background-non-overlay.svg#dark);
    
-   --padding: calc(5px * var(--scale,1));
+   margin:  calc(var(--extra-diff) - 3px * var(--scale,1)) 0 var(--extra-diff) 0;
    
-   --endcap-padding:  calc(18px * var(--scale,1));
-   
-   --border-thickness: calc(1px * var(--scale,1));
-   
-   --extra-height: calc(var(--play-pause-button-hitbox) + (var(--padding) + var(--border-thickness)) * 2);
-   
-   /*
-      Setting border-radius to 50% creates an ellipse, whereas what we want 
-      is a capsule. Setting an arbitrary huge value gives us a capsule.
-   */
-   --really-huge-value: 800px;
-   
-   /*
-      We want an outline wrapping the player controls, hugging them tightly: 
-      think of a horizontal capsule where, at the center, it bulges in a 
-      circular shape around the play/pause button.
-      
-      The easiest way to do this is:
-      
-       - Split the controls around the play/pause button into "left" and 
-         "right" halves.
-         
-       - Put borders on those halves.
-       
-       - Overlay the play/pause button with a circular element that has a 
-         border, and use clip paths to slice off the middle portions.
-   */
-   & .left,
-   & .right {
-      padding: var(--padding) 0;
-      
-      border: var(--border-thickness) solid #A8A8A9;
-      border-top-color: #A8A8A9;
-      border-bottom-color: #CECDCF;
-      border-radius: var(--really-huge-value);
-      
-      background: var(--background);
-   }
-   & .left {
-      padding-left: calc(var(--endcap-padding) + 4px*var(--scale,1));
-      padding-right: calc(3px * var(--scale,1));
-      border-radius: var(--really-huge-value) 0 0 var(--really-huge-value);
-      border-right-width: 0;
-   }
-   & .right {
-      padding-right: var(--endcap-padding);
-      padding-left: calc(3px * var(--scale,1));
-      border-radius: 0 var(--really-huge-value) var(--really-huge-value) 0;
-      border-left-width: 0;
-   }
-   &::before {
-      content: " ";
-      grid-area: play;
-      justify-self: center;
-      pointer-events: none;
-      
-      --extent:       calc(var(--play-pause-button-hitbox) + (var(--padding) + var(--border-thickness))*2);
-      --area-to-show: calc(11px * var(--scale,1));
-      
-      width:   var(--play-pause-button-hitbox);
-      height:  var(--play-pause-button-hitbox);
-      padding: var(--padding);
-      
-      border: var(--border-thickness) solid #A8A8A9;
-      border-top-color: #A8A8A9;
-      border-bottom-color: #CECDCF;
-      border-radius: 50%;
-      
-      background: var(--background);
-      
-      mask:
-         linear-gradient(
-            to bottom,
-            #FFF 0px,
-            #FFF var(--area-to-show),
-            #000 var(--area-to-show),
-            #000 calc(var(--extent) - var(--area-to-show)),
-            #FFF calc(var(--extent) - var(--area-to-show)),
-            #FFF var(--extent)
-         ) luminance 0 0/var(--extent) var(--extent) no-repeat,
-         linear-gradient(
-            to bottom,
-            #FFF 0%,
-            #FFF 100%
-         ) luminance calc(var(--padding) + 1px*var(--scale,1)) calc(5px*var(--scale,1))/var(--play-pause-button-hitbox) calc(39px*var(--scale,1)) no-repeat
-      ;
+   hr {
+      background: linear-gradient(to bottom, #2a2d35, #2a2d35, #131415, #2a2e37);
    }
 }
 
 .controls hr {
-   width:  0;
-   height: 100%;
-   margin: 0 .25em;
-   border: 0 solid #CECDCF;
-   border-left-width: 1px;
-   border-right-width: 1px;
+   width:  1.5px;
+   height: calc(19px * var(--scale,1));
+   background: #CECDCF;
+   border: 0;
 }
 
 /*
