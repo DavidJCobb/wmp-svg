@@ -28,6 +28,12 @@
       /
       1fr 10ch auto 10ch 1fr
    ;
+   
+   /*
+      The way we set up the dark theme's bottom background, portions of it can poke 
+      out if the player is too narrow / the scale is too large.
+   */
+   overflow: hidden;
 }
 
 :host([data-overlay-controls]) {
