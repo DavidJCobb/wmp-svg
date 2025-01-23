@@ -390,7 +390,7 @@ video {
       mask: linear-gradient(to right, #FFF, #FFF 50%, #000) 0 0/2px 100%;
    }
 }
-:host([data-theme="dark" i]) .controls {
+:host([data-theme="dark" i]:not([data-overlay-controls])) .controls {
    --tray-spritesheet: url(spritesheet-tray-background-non-overlay.svg#dark);
    
    margin:  calc(var(--extra-diff) - 3px * var(--scale,1)) 0 var(--extra-diff) 0;
