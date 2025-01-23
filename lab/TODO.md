@@ -18,18 +18,17 @@ Overview:
 ## Specifics
 
 * `WMPlayerElement`
+  * Tray background
+    * Dark theme
+      * There needs to be more padding between the tray border and the tray buttons. We may actually need a separate SVG with separate metrics for this.
+      * Current timestamp is vertically aligned incorrectly.
+    * Non-overlaid, non-dark theme
+      * Create an equivalent to the spritesheet we're using for the dark and overlaid trays
   * When Windows Media Player is in Now Playing view, it displays all button "glass" (and the controls tray border and background) at 92% scale, but button glyphs are still displayed at 100% scale. Right now, we have no means to alter the scale of button glyphs independently of the buttons themselves.
     * The seek slider and current timestamp don't appear to be downscaled in Now Playing view.
     * If we add an independent scaling factor for glyphs, we need to bear in mind that glyphs are shown on the same element as glass (they're two background layers). This means that the two scales can only differ so much before one of the graphics gets clipped *or* before more sprites than intended become visible (i.e. if the total size is too much larger than that of a single sprite). For the scaling difference we intend (92% times the overall scaling factor of the player controls), this won't matter so much, but if outside code alters the scaling, then things may go haywire.
-  * Dark tray background
-    * Current timestamp is vertically aligned a bit jankily.
-    * The height of the tray graphic should adjust to match the total height of the seek slider (including whatever padding we add to it) and the controls. Currently, we do this using lots of explicit heights and whatnot, but it'd be nice if there were some way to automatically compute this based on the grid height. (IIRC `background-size` is relative to the size of the element what has a background, but I don't remember if `border-image`, which we use for the left and right endcaps, works the same way.)
   * We need "disabled" states for the "previous" and "next" buttons' glassy backing. In the normal player UI, these buttons are never disabled (because WMP will just pick something from your library, same as play/pause), but they can be disabled in the "theater" UI  (wherein the player controls are overlaid on the video). We're mimicking WMP's UI, not the full program design: we won't always have a previous or next media item, so I think we want more visible disable states. (Plus, we need the graphics for "theater" mode either way.)
   * Theater: "previous" and "next" don't have a glassy shine on their "normal" state when in this view. We should implement this as a fifth "button sprite" in their spritesheet, setting `--button-sprite-count: 5` and then using `--use-button-sprite: 4` for the "normal" state in the theater view.
-  * The tray's fill and borders aren't well-handled. I don't like the mishmash of borders, clip-paths, and positioning tricks we use for it.
-    * The tray has too much `--padding` &mdash; 5px including the border thickness, instead of 3px including the border thickness. (If we didn't include the border and similar, we'd want 2px padding.) However, this is complicated to fix due to how we position the Previous and Next buttons relative to the Play/Pause button. These buttons should be at a distance of 2px from the Play/Pause button &mdash; specifically, the center of their inner curve should be that distance from the edge of the Play/Pause button. (For reference, that point on the Next button's curve is at X-position 6 within the SVG, and the SVG is designed at 2x scale.)
-    * We should investigate replacing the CSS-based tray border and fill with something relying on SVGs via `background` and/or `border-image`. This could potentially make it easier to swap to different tray shapes (e.g. "Play on the left and buttons only on the right, like a thermometer") for different control layouts.
-      * Notably, the existing tray borders aren't accurate for the Library UI or the Now Playing UI. In the latter case, it's semitransparent white but with a two-stroke border, dark then light. See the 2572200 PNG (resource 257/2200).
   * Make it possible to scale the player UI based on a scaling factor relative to the vanilla size *or* maximum main- and cross-axis sizes.
   * Look into offering differing arrangements of buttons
     * Current arrangement

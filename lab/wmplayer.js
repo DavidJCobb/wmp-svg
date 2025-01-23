@@ -64,24 +64,26 @@ class WMPlayerElement extends HTMLElement {
    static #HTML = `
 <link rel="stylesheet" href="wmplayer.button-styles.css" />
 <link rel="stylesheet" href="wmplayer.css" />
-<div class="content">
-   <video></video>
-</div>
-<wm-slider class="seek" title="Seek" aria-label="Seek"></wm-slider>
-<time class="current-time" aria-label="Current time"></time>
-<div class="controls">
-   <div class="left">
-      <input type="checkbox" aria-label="Shuffle" aria-role="switch" class="basic-button shuffle" />
-      <input type="checkbox" aria-label="Loop" aria-role="switch" class="basic-button loop" />
-      <hr />
-      <button class="basic-button stop" disabled title="Stop">Stop</button>
-      <button class="prev-rw" disabled title="Previous (press and hold to rewind)">Previous</button>
+<div class="main">
+   <div class="content">
+      <video></video>
    </div>
-   <button class="play-pause">Play</button>
-   <div class="right">
-      <button class="next-ff" disabled title="Next (press and hold to fast-forward)">Next</button>
-      <input type="checkbox" aria-label="Mute" aria-role="switch" class="basic-button mute" />
-      <wm-slider aria-label="Volume" class="volume constant-thumb circular-thumb" min="0" max="100" value="100" step="1" title="Volume"></wm-slider>
+   <wm-slider class="seek" title="Seek" aria-label="Seek"></wm-slider>
+   <time class="current-time" aria-label="Current time"></time>
+   <div class="controls">
+      <div class="left">
+         <input type="checkbox" aria-label="Shuffle" aria-role="switch" class="basic-button shuffle" />
+         <input type="checkbox" aria-label="Loop" aria-role="switch" class="basic-button loop" />
+         <hr />
+         <button class="basic-button stop" disabled title="Stop">Stop</button>
+         <button class="prev-rw" disabled title="Previous (press and hold to rewind)">Previous</button>
+      </div>
+      <button class="play-pause">Play</button>
+      <div class="right">
+         <button class="next-ff" disabled title="Next (press and hold to fast-forward)">Next</button>
+         <input type="checkbox" aria-label="Mute" aria-role="switch" class="basic-button mute" />
+         <wm-slider aria-label="Volume" class="volume constant-thumb circular-thumb" min="0" max="100" value="100" step="1" title="Volume"></wm-slider>
+      </div>
    </div>
 </div>
    `.trim();
