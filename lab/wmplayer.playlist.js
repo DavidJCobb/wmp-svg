@@ -1,6 +1,7 @@
 
 class WMPlaylistItem {
    #audio_only = false;
+   #poster     = null;
    #src        = null;
    #sources    = []; // Array<HTMLSourceElement>
    #tracks     = []; // Array<HTMLTrackElement>
@@ -37,6 +38,7 @@ class WMPlaylistItem {
          }
       }
       this.#audio_only = o?.audio_only || false; // force audio-only even if a video file
+      this.#poster     = o?.poster || null;
       this.#src        = o?.src || null;
       this.#realize(o?.tracks, o?.sources);
    }
@@ -55,7 +57,8 @@ class WMPlaylistItem {
    }
    
    populateMediaElement(media) {
-      media.src = this.#src || "";
+      media.poster = this.#poster || "";
+      media.src    = this.#src || "";
       media.append(this.#sources.concat(this.#tracks));
       media.currentTime = 0;
    }

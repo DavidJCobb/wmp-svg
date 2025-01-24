@@ -19,6 +19,10 @@ wm-player {
 document.getElementsByTagName("wm-player")[0].addToPlaylist("test-video-2.m4v");
 document.getElementsByTagName("wm-player")[0].addToPlaylist("test-video-3.mp4");
 document.getElementsByTagName("wm-player")[0].addToPlaylist("test-audio.wav");
+document.getElementsByTagName("wm-player")[0].addToPlaylist({
+   src:    "test-audio-2.wav",
+   poster: "rips/main-active.png", // test album art, basically
+});
       </script>
    </body>
 </html>

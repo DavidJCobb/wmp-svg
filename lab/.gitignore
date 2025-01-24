@@ -1,4 +1,6 @@
 test-audio.wav
+test-audio-*.wav
 test-video.mp4
-test-video-2.m4v
-test-video-3.mp4
+test-video-*.avi
+test-video-*.m4v
+test-video-*.mp4

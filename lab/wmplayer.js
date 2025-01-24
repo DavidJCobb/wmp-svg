@@ -820,6 +820,8 @@ class WMPlayerElement extends HTMLElement {
          } else {
             this.#media.playbackRate = this.#speed;
          }
+      } else {
+         this.#media.poster = ""; // clear any leftover poster from the last playlist item
       }
       this.#update_play_state();
    }

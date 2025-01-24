@@ -18,7 +18,6 @@ Overview:
 ## Specifics
 
 * `WMPlayerElement`
-  * Make it possible to scale the player UI based on a scaling factor relative to the vanilla size *or* maximum main- and cross-axis sizes.
   * Look into offering differing arrangements of buttons
     * Current arrangement
     * Play/pause, seek slider, timestamp, and volume
@@ -32,6 +31,8 @@ Overview:
       * If `seek` is included in any of these, move the seek slider into the tray.
       * If there are no controls on one side of the tray (or if the Play/Pause button is the sole button being shown), then adjust how we render the tray "bulge" behind the Play/Pause button.
   * Full-screen toggle button in lower-right corner
+  * Investigate [`navigator.mediaSession`](https://stackoverflow.com/questions/76445098/how-do-i-set-the-album-art-and-or-title-of-currently-playing-media-in-javascript) support. (Full details [here](https://web.dev/articles/media-session).) Note that Firefox doesn't support this API.
+  * Make it possible to scale the player UI based on a scaling factor relative to the vanilla size *or* maximum main- and cross-axis sizes.
   * Tests
     * Support for subtitle tracks, etc.
   * Player APIs in JavaScript
@@ -47,9 +48,18 @@ Overview:
       * If we want playlist items to be mutable, then an API that exposes the current playlist needs to wrap playlist items in [gs]etters, so that changes to the current playlist item are immediately reacted to by the player.
     * I don't like that there's no API for removing a playlist item.
       * Ideally it should be possible to do `playerElement.playlist[3]` and `playerElement.playlist.remove(3)` and whatnot.
+    * Potential improvements:
+      * `.length`
+      * `.toArray()`
+      * `.clear()`
+      * `.insertAt(n, new_item)`
+      * `.indexOf(item)`
+      * `.item(n)` returning an immutable playlist item; the method name matches `HTMLCollection`'s API
+      * `.moveItemBy(index_or_item, by)`
+      * `.moveItemTo(index_or_item, to)`
+      * `.remove(n, count = 1)` and `.remove(item)`
   * Optional: currently-playing media title offset to the left edge (WMP: seen in music UI, not in video UI).
-  * Investigate adding support for displaying an audio file's album art (or at least displaying some accessory image that can be specified when adding the audio file to the current playlist) when in `theater` view.
-    * Investigate automatically switching in and out of "theater" mode depending on whether we hit an audio file or a video file
+  * Investigate automatically switching in and out of "theater" mode depending on whether we hit an audio file or a video file
   * Document the fact that our baseline styles line up with the "Library" view in WMP, while the `theater` class lines up with the "Now Playing" view.
   * Investigate adding support for displaying subtitles, lyrics, et cetera.
   * Consider switching this all to TypeScript.
