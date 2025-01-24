@@ -28,13 +28,7 @@ Overview:
     * The seek slider and current timestamp don't appear to be downscaled in Now Playing view.
     * If we add an independent scaling factor for glyphs, we need to bear in mind that glyphs are shown on the same element as glass (they're two background layers). This means that the two scales can only differ so much before one of the graphics gets clipped *or* before more sprites than intended become visible (i.e. if the total size is too much larger than that of a single sprite). For the scaling difference we intend (92% times the overall scaling factor of the player controls), this won't matter so much, but if outside code alters the scaling, then things may go haywire.
   * Current timestamp widget
-    * Fix vertical alignment (non-overlaid controls, dark theme, scale 1)
-    * Timestamp should respond to the current `--scale`
-    * Add CSS variables:
-      * `--timestamp-force-font-size`
-      * `--timestamp-scale-font-size` (when not forcing)
-      * `--timestamp-min-font-size` (when not forcing)
-      * `--timestamp-max-font-size` (when not forcing)
+    * Fix vertical alignment (non-overlaid controls, dark theme)
   * We need "disabled" states for the "previous" and "next" buttons' glassy backing. In the normal player UI, these buttons are never disabled (because WMP will just pick something from your library, same as play/pause), but they can be disabled in the "theater" UI  (wherein the player controls are overlaid on the video). We're mimicking WMP's UI, not the full program design: we won't always have a previous or next media item, so I think we want more visible disable states. (Plus, we need the graphics for "theater" mode either way.)
   * Theater: "previous" and "next" don't have a glassy shine on their "normal" state when in this view. We should implement this as a fifth "button sprite" in their spritesheet, setting `--button-sprite-count: 5` and then using `--use-button-sprite: 4` for the "normal" state in the theater view.
   * Make it possible to scale the player UI based on a scaling factor relative to the vanilla size *or* maximum main- and cross-axis sizes.

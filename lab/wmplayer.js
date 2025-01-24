@@ -69,7 +69,9 @@ class WMPlayerElement extends HTMLElement {
       <video></video>
    </div>
    <wm-slider class="seek" title="Seek" aria-label="Seek"></wm-slider>
-   <time class="current-time" aria-label="Current time"></time>
+   <div class="gutter-left">
+      <time class="current-time" aria-label="Current time"></time>
+   </div>
    <div class="controls">
       <div class="left">
          <input type="checkbox" aria-label="Shuffle" aria-role="switch" class="basic-button shuffle" />
