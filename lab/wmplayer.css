@@ -40,6 +40,8 @@
       out if the player is too narrow / the scale is too large.
    */
    overflow: hidden;
+   
+   --button-glyph-scale: var(--scale, 1);
 }
 .gutter-left {
    grid-area: left-gutter;
@@ -50,6 +52,23 @@
 }
 
 :host([data-overlay-controls]) {
+   .main {
+      --requested-scale: var(--scale);
+      .controls {
+         /*
+            In WMP's Now Playing view, player controls are overlaid 
+            on the playing media. The controls are rendered at 92% 
+            scale, but the icon glyphs that serve as button labels 
+            remain at 100% scale.
+            
+            Notably, elements like the seek slider and the current 
+            timestamp are also not downscaled.
+         */
+         --scale: calc(var(--requested-scale,1) * 0.92);
+         --button-glyph-scale: var(--requested-scale,1);
+      }
+   }
+   
    .content {
       grid-row: 1 / span 100;
    }

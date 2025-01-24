@@ -73,6 +73,14 @@
       BUTTON GLASS
    \**************************************************************/
    
+   /*
+      The "glass" is the physical button, not including any text or icon that 
+      it has been labeled with. For example, the Play/Pause button is a blue 
+      "jewel" with a white icon serving as a label; that jewel is the "glass." 
+      All buttons have "glass," though for some button types, the glass isn't 
+      actually visible except on hover or activation.
+   */
+   
    /* REQUIRED INPUTS:
    
       --glass-spritesheet
@@ -105,11 +113,6 @@
    --glass-sprite-effective-width:  calc(var(--glass-sprite-width) * var(--glass-sprite-effective-scale));
    --glass-sprite-effective-height: calc(var(--glass-sprite-height) * var(--glass-sprite-effective-scale));
    
-   --glass-computed-x: calc(var(--glass-x) * var(--glass-sprite-effective-scale));
-   --glass-rounded-x:  round(to-zero, var(--glass-computed-x), 1px);
-   --glass-x-error:    round(up, calc(var(--glass-rounded-x) - var(--glass-computed-x))) - round(down, calc(var(--glass-rounded-x) - var(--glass-computed-x)));
-   margin-right: var(--glass-x-error);
-   
    --glass-background:
       var(--glass-spritesheet)
       /*pos-x*/  calc(-1 * var(--glass-current-sprite) * var(--glass-sprite-effective-width))
@@ -123,6 +126,21 @@
    /**************************************************************\
       BUTTON GLYPHS
    \**************************************************************/
+   
+   /*
+      The "glyphs" are the icons that are used to label the buttons, 
+      e.g. the right-facing triangle on the "Play" button.
+      
+      Glyphs are usually scaled consistently with the glass, but in 
+      some cases, you may wish to scale them differently. As such, 
+      glyphs prioritize `--button-glyph-scale` over `--scale`. Note 
+      that since glass and glyphs exist as background-images on the 
+      same pseudo-element (which is sized based on the glass), you 
+      can't make the scales diverge too far or you'll get broken 
+      visuals. For the intended use case (mimicking WMP's "Now 
+      Playing" view), where the glass is at 92% and the glyphs are 
+      at 100%, this implementation is sufficient.
+   */
    
    /* REQUIRED INPUTS:
    
@@ -146,12 +164,37 @@
    --glyph-current-col: 0;
    
    /* COMPUTED */
-   --glyph-sprite-effective-scale:  calc(var(--scale,1) / var(--glyph-sprite-scale));
+   --glyph-sprite-effective-scale:  calc(var(--button-glyph-scale,var(--scale,1)) / var(--glyph-sprite-scale));
    --glyph-sprite-effective-width:  calc(var(--glyph-sprite-width) * var(--glyph-sprite-effective-scale));
    --glyph-sprite-effective-height: calc(var(--glyph-sprite-height) * var(--glyph-sprite-effective-scale));
    
+   /*
    --glyph-sprite-effective-x: calc(var(--glyph-x) * var(--glyph-sprite-effective-scale) - var(--glass-x) * var(--glass-sprite-effective-scale));
    --glyph-sprite-effective-y: calc(var(--glyph-y) * var(--glyph-sprite-effective-scale) - var(--glass-y) * var(--glass-sprite-effective-scale));
+   */
+   
+   /*
+      We want it to be possible to scale the button glyphs separately from 
+      the glass sprites. Glyphs should scale from the center, so we need 
+      to compute the centerpoint of the glyph, scale it by the glass scale, 
+      and then displace it by half the glyph's (glyph-scale) size.
+   */
+   --glyph-center-x: calc(var(--glyph-x) + var(--glyph-sprite-width)  / 2);
+   --glyph-center-y: calc(var(--glyph-y) + var(--glyph-sprite-height) / 2);
+   --glyph-sprite-effective-x: calc(
+      var(--glyph-center-x) * var(--glass-sprite-effective-scale)
+      -
+      (var(--glyph-sprite-effective-width) / 2)
+      -
+      (var(--glass-x) * var(--glass-sprite-effective-scale))
+   );
+   --glyph-sprite-effective-y: calc(
+      var(--glyph-center-y) * var(--glass-sprite-effective-scale)
+      -
+      (var(--glyph-sprite-effective-height) / 2)
+      -
+      var(--glass-y) * var(--glass-sprite-effective-scale)
+   );
    
    --glyph-background:
       var(--glyph-spritesheet)
