@@ -18,8 +18,9 @@
    
    /* Control the sizing of the current timestamp. */
    --timestamp-force-font-size: unset;          /* force an exact font size */
+   --timestamp-base-font-size:  12px;           /* font size when not scaled */
    --timestamp-scale-font-size: var(--scale,1); /* adjust the font size scaling*/
-   --timestamp-min-font-size:   0px;
+   --timestamp-min-font-size:   unset;
    --timestamp-max-font-size:   unset;
 }
 
@@ -103,7 +104,7 @@
          ;
       }
       &::after {
-         --endcap-outset: calc(-99px * var(--scale,1));
+         --endcap-outset: calc(-78px * var(--scale,1));
          --endcap-border-width: calc(110px * var(--scale,1));
          
          content: " ";
@@ -134,6 +135,11 @@
       color: #FFF;
       -webkit-text-stroke: 0px;
       margin-top: -.25em; /* fixes vertical align (TODO: find a cleaner way) */
+      
+      /*
+         Displace the timestamp out of the "curve" around the tray.
+      */
+      padding-right: calc(51px * var(--scale,1));
    }
    
    .controls {
@@ -219,7 +225,7 @@ video {
    font-size: var(--timestamp-force-font-size, 
       clamp(
          var(--timestamp-min-font-size, 0px),
-         calc(1em * var(--timestamp-scale-font-size,1)),
+         calc(var(--timestamp-base-font-size,12px) * var(--timestamp-scale-font-size,1)),
          var(--timestamp-max-font-size, 999999px)
       )
    );
