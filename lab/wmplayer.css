@@ -25,6 +25,14 @@
 }
 
 .main {
+   /* Internal variables */
+   --button-glyph-scale: var(--scale, 1);
+}
+
+/*
+   LAYOUT
+*/
+.main {
    display: grid;
    grid-template:
       "content     content  content     " 1fr
@@ -44,8 +52,6 @@
       out if the player is too narrow / the scale is too large.
    */
    overflow: hidden;
-   
-   --button-glyph-scale: var(--scale, 1);
 }
 .gutter-left {
    grid-area: left-gutter;
@@ -54,117 +60,6 @@
    grid-template: ". time" / 1fr auto;
    align-items:   center;
 }
-
-:host([data-overlay-controls]) {
-   .main {
-      --requested-scale: var(--scale);
-      .controls {
-         /*
-            In WMP's Now Playing view, player controls are overlaid 
-            on the playing media. The controls are rendered at 92% 
-            scale, but the icon glyphs that serve as button labels 
-            remain at 100% scale.
-            
-            Notably, elements like the seek slider and the current 
-            timestamp are also not downscaled.
-         */
-         --scale: calc(var(--requested-scale,1) * 0.92);
-         --button-glyph-scale: var(--requested-scale,1);
-      }
-   }
-   
-   .content {
-      grid-row: 1 / span 100;
-   }
-   .seek {
-      margin-left: calc(12px * var(--scale,1));
-      margin-right: calc(12px * var(--scale,1));
-   }
-}
-
-/* WMP11-on-XP dark theme */
-:host([data-theme="dark" i]:not([data-overlay-controls])) {
-   /* background */
-   .main {
-      --tray-background-height: calc(69px*var(--scale,1));
-      &::before {
-         content: " ";
-         grid-row:    lower-start / lower-background-end;
-         grid-column: 1 / span 3;
-         order: -2;
-         z-index: -2;
-         
-         background:
-            url(spritesheet-tray-background-dark.svg#middle) left top/1px var(--tray-background-height) repeat-x
-         ;
-      }
-      &::after {
-         --endcap-outset: calc(-78px * var(--scale,1));
-         --endcap-border-width: calc(110px * var(--scale,1));
-         
-         content: " ";
-         
-         grid-row:    lower-start / lower-background-end;
-         grid-column: controls-start / controls-end;
-         z-index:    -1;
-         
-         margin:     0 var(--endcap-outset);
-         min-height: var(--tray-background-height);
-         border-image:
-            url(spritesheet-tray-background-dark.svg)
-            69 110 0 110 / var(--tray-background-height) var(--endcap-border-width) 0 var(--endcap-border-width)
-            stretch space
-         ;
-      }
-   }
-   
-   .seek {
-      padding-top:  calc(5px*var(--scale,1));
-      margin-left:  calc(5px*var(--scale,1));
-      margin-right: calc(5px*var(--scale,1));
-      
-      --track-border-color-upper: #444b5e;
-      --track-border-color-lower: #656e86;
-   }
-   .current-time {
-      color: #FFF;
-      -webkit-text-stroke: 0px;
-      margin-top: -.25em; /* fixes vertical align (TODO: find a cleaner way) */
-      
-      /*
-         Displace the timestamp out of the "curve" around the tray.
-      */
-      padding-right: calc(51px * var(--scale,1));
-   }
-   
-   .controls {
-      position: relative;
-   }
-}
-
-/*
-   General element styles:
-*/
-
-wm-slider {
-   position: relative;
-   /*&:focus-visible {
-      outline: none;
-      &::before {
-         position: absolute;
-         content: " ";
-         inset:   0;
-         z-index: 20;
-         border-image: var(--focus-border-image, none);
-         border-image-outset: 3px;
-         outline:      var(--focus-outline);
-      }
-   }*/
-}
-
-/*
-   Layout
-*/
 
 .content {
    grid-area:  content;
@@ -194,7 +89,6 @@ video {
 
 .seek {
    grid-area: seek;
-   margin: calc(2px * var(--scale,1)) 0;
 }
 :host(:state(buffering)) .seek {
    --fill-gradient: linear-gradient(to bottom, #a7c2d3, #3c587f, #90a7c5);
@@ -282,12 +176,13 @@ video {
       height: var(--height);
    }
 }
-:host([data-overlay-controls]) .main {
-   --gap-between-seek-and-controls: calc(12px * var(--scale,1));
-   --gap-below-controls: calc( 3px * var(--scale,1));
-}
 
 .controls {
+   /*
+      The spritesheet being configured here is for when controls are overlaid 
+      (i.e. WMP's "Now Playing" view). These variables are redefined as needed 
+      for the other player themes.
+   */
    --height:  calc(62px * var(--scale,1) / (2 * 0.92));
    --padding: calc(4px * var(--scale,1));
    
@@ -403,6 +298,30 @@ video {
       ;
    }
 }
+
+.controls hr {
+   width:  1.5px;
+   height: calc(19px * var(--scale,1));
+   background: #CECDCF;
+   border: 0;
+}
+
+.play-pause {
+   grid-area: play;
+   justify-self: center;
+}
+
+.volume {
+   width: calc(67px * var(--scale,1));
+   height: calc(30px * var(--scale,1));
+   margin-left: calc(4px * var(--scale,1));
+}
+
+
+/*
+   THEMES
+*/
+
 :host(:not([data-overlay-controls])) .controls {
    --height:  calc(31px * var(--scale,1));
    --padding: 4px;
@@ -435,34 +354,98 @@ video {
       mask: linear-gradient(to right, #FFF, #FFF 50%, #000) 0 0/2px 100%;
    }
 }
-:host([data-theme="dark" i]:not([data-overlay-controls])) .controls {
-   --tray-spritesheet: url(spritesheet-tray-background-non-overlay.svg#dark);
+:host([data-overlay-controls]) {
+   .main {
+      --requested-scale: var(--scale);
+      .controls {
+         /*
+            In WMP's Now Playing view, player controls are overlaid 
+            on the playing media. The controls are rendered at 92% 
+            scale, but the icon glyphs that serve as button labels 
+            remain at 100% scale.
+            
+            Notably, elements like the seek slider and the current 
+            timestamp are also not downscaled.
+         */
+         --scale: calc(var(--requested-scale,1) * 0.92);
+         --button-glyph-scale: var(--requested-scale,1);
+      }
+      
+      --gap-between-seek-and-controls: calc(12px * var(--scale,1));
+      --gap-below-controls: calc( 3px * var(--scale,1));
+   }
    
-   margin:  calc(var(--extra-diff) - 3px * var(--scale,1)) 0 var(--extra-diff) 0;
-   
-   hr {
-      background: linear-gradient(to bottom, #2a2d35, #2a2d35, #131415, #2a2e37);
+   .content {
+      grid-row: 1 / span 100;
+   }
+   .seek {
+      margin-left: calc(12px * var(--scale,1));
+      margin-right: calc(12px * var(--scale,1));
    }
 }
-
-.controls hr {
-   width:  1.5px;
-   height: calc(19px * var(--scale,1));
-   background: #CECDCF;
-   border: 0;
-}
-
-/*
-   The play/pause button separates its hitbox from its visuals using the same 
-   tricks as the "previous" and "next" buttons.
-*/
-.play-pause {
-   grid-area: play;
-   justify-self: center;
-}
-
-.volume {
-   width: calc(67px * var(--scale,1));
-   height: calc(30px * var(--scale,1));
-   margin-left: calc(4px * var(--scale,1));
+:host([data-theme="dark" i]:not([data-overlay-controls])) {
+   /*
+      Styles for the dark theme used by WMP 11 on Windows XP.
+   */
+   
+   /* background */
+   .main {
+      --tray-background-height: calc(69px*var(--scale,1));
+      &::before {
+         content: " ";
+         grid-row:    lower-start / lower-background-end;
+         grid-column: 1 / span 3;
+         order: -2;
+         z-index: -2;
+         
+         background:
+            url(spritesheet-tray-background-dark.svg#middle) left top/1px var(--tray-background-height) repeat-x
+         ;
+      }
+      &::after {
+         --endcap-outset: calc(-78px * var(--scale,1));
+         --endcap-border-width: calc(110px * var(--scale,1));
+         
+         content: " ";
+         
+         grid-row:    lower-start / lower-background-end;
+         grid-column: controls-start / controls-end;
+         z-index:    -1;
+         
+         margin:     0 var(--endcap-outset);
+         min-height: var(--tray-background-height);
+         border-image:
+            url(spritesheet-tray-background-dark.svg)
+            69 110 0 110 / var(--tray-background-height) var(--endcap-border-width) 0 var(--endcap-border-width)
+            stretch space
+         ;
+      }
+   }
+   
+   .seek {
+      padding-top: calc(5px*var(--scale,1));
+      margin:      calc(2px*var(--scale,1)) calc(5px*var(--scale,1));
+      
+      --track-border-color-upper: #444b5e;
+      --track-border-color-lower: #656e86;
+   }
+   .current-time {
+      color: #FFF;
+      -webkit-text-stroke: 0px;
+      
+      /*
+         Displace the timestamp out of the "curve" around the tray.
+      */
+      padding-right: calc(51px * var(--scale,1));
+   }
+   
+   .controls {
+      --tray-spritesheet: url(spritesheet-tray-background-non-overlay.svg#dark);
+      
+      margin:  calc(var(--extra-diff) - 3px * var(--scale,1)) 0 var(--extra-diff) 0;
+      
+      hr {
+         background: linear-gradient(to bottom, #2a2d35, #2a2d35, #131415, #2a2e37);
+      }
+   }
 }
