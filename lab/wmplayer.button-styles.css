@@ -368,6 +368,7 @@
    }
    
    --glass-spritesheet:   url(spritesheet-next.svg);
+   --glass-sprite-count:  5;
    --glass-sprite-width:  112px;
    --glass-sprite-height:  70px;
    --glass-sprite-scale:      2;
@@ -401,15 +402,22 @@
       --glyph-current-col: var(--glyph-col-disabled);
    }
    
-   :host(:is([data-overlay-controls], [data-theme="dark" i])) & {
-      --glyph-spritesheet: url(spritesheet-glyphs-next.svg#theater);
+   :host(:is([data-theme="dark" i])) & {
+      --glyph-spritesheet: url(spritesheet-glyphs-next.svg#white);
+   }
+   :host(:is([data-overlay-controls])) & {
+      --glyph-spritesheet: url(spritesheet-glyphs-next.svg#overlay);
+      &:not(:hover, :active),
+      &:disabled {
+         --glass-current-sprite: 4;
+      }
    }
    
    &.fast-forward,
    &.can-only-fast-forward,
    &.rewind,
    &.can-only-rewind {
-      --current-sprite-row: var(--glyph-row-secondary);
+      --glyph-current-row: var(--glyph-row-secondary);
    }
 }
 .prev-rw {
@@ -420,10 +428,16 @@
          some sizes. Moving the sub-pixel transform hack out to the 
          whole button, so that it's done in tandem with the rotation, 
          seems to fix this.
+         
+         NOTE: Having just one transform seems to work best on Chrome,
+         but Chrome needs additional help when dealing with overlaid 
+         controls (i.e. glass at 92% scale).
       */
       transform: none;
    }
-   transform-box:    content-box;
-   transform-origin: center center;
-   transform:        scale(-100%, 100%) translate3d(var(--glass-pos-x-fpart), 0, 0);
+   transform-box:     content-box;
+   transform-origin:  center center;
+   transform:         scale(-100%, 100%);
+   -moz-transform:    scale(-100%, 100%) translate3d(var(--glass-pos-x-fpart), 0, 0);
+   -webkit-transform: scale(-100%, 100%) translate(0, 0.5px);
 }

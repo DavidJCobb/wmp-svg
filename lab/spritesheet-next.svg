@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="448" height="70" color-interpolation="linearrgb">
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="70" color-interpolation="linearrgb">
    <defs id="views">
       <!--
          The current size of each button, including room for any 
@@ -421,6 +421,31 @@ path.button {
          <path class="button"
             fill="none"
             stroke="url(#edge-color-normal)"
+            stroke-width="4"
+            clip-path="url(#shape-clip)"
+         />
+      </g>
+   </g>
+   
+   <g id="state-overlay" transform="translate(4 12) translate(448 0)">
+      <defs>
+         <mask id="alpha-mask-overlay">
+            <g fill="none" filter="blur(1px)">
+               <path class="button"
+                  transform="translate(0 0)"
+                  stroke="#999"
+                  stroke-width="4"
+               />
+            </g>
+         </mask>
+      </defs>
+      
+      <g mask="url(#alpha-mask-overlay)">
+         <rect x="-10%" y="-10%" width="120%" height="120%" fill="#000" />
+         <path class="button" fill="#FFF" />
+         <path class="button"
+            fill="none"
+            stroke="#FFF"
             stroke-width="4"
             clip-path="url(#shape-clip)"
          />

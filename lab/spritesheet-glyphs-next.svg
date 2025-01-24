@@ -15,7 +15,8 @@
       Next         │ Enabled │ Disabled │
       ─────────────┴─────────┴──────────┘
    -->
-   <view id="theater" />
+   <view id="white" />
+   <view id="overlay" />
    <defs>
       <style><![CDATA[
 :root {
@@ -28,7 +29,8 @@
    fill: url(#icon-fill-disabled);
 }
 
-:root:has(#theater:target) {
+:root:has(#white:target),
+:root:has(#overlay:target) {
    --line-color: #000000;
    #icon-fill-normal {
       stop:first-child { stop-color: #FFF; }
@@ -36,6 +38,14 @@
    }
    .disabled {
       stroke: #FFF;
+   }
+}
+:root:has(#overlay:target) {
+   #icon-fill-disabled stop:last-child { stop-color: #666; }
+   .disabled {
+      opacity: 0.6;
+      stroke:  url(#icon-fill-disabled);
+      stroke-width: 0.5px;
    }
 }
       ]]></style>
