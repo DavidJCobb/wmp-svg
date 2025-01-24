@@ -30,8 +30,11 @@
       "content     content  content     " 1fr
       [lower-start]
       "seek        seek     seek        "
-      "left-gutter controls right-gutter" var(--tray-height, auto)
+      ".           .        ." var(--gap-between-seek-and-controls, 0px)
+      "left-gutter controls right-gutter"
       [lower-end]
+      ".           .        ." var(--gap-below-controls, min-content)
+      [lower-background-end]
       /
       1fr auto 1fr
    ;
@@ -77,24 +80,16 @@
       margin-left: calc(12px * var(--scale,1));
       margin-right: calc(12px * var(--scale,1));
    }
-   .controls {
-      border: 0 solid transparent;
-      border-width: calc(8px * var(--scale,1)) 0;
-      
-      --background: #FFFFFF60;
-   }
 }
 
 /* WMP11-on-XP dark theme */
 :host([data-theme="dark" i]:not([data-overlay-controls])) {
-   --tray-background-height: calc(69px*var(--scale,1));
-   --tray-height: calc((69px - 11px) * var(--scale,1));
-   
    /* background */
    .main {
+      --tray-background-height: calc(69px*var(--scale,1));
       &::before {
          content: " ";
-         grid-row: 2 / span 2;
+         grid-row:    lower-start / lower-background-end;
          grid-column: 1 / span 3;
          order: -2;
          z-index: -2;
@@ -109,8 +104,8 @@
          
          content: " ";
          
-         grid-row:    2 / span 2;
-         grid-column: 2;
+         grid-row:    lower-start / lower-background-end;
+         grid-column: controls-start / controls-end;
          z-index:    -1;
          
          margin:     0 var(--endcap-outset);
@@ -211,7 +206,7 @@ video {
 .current-time {
    grid-area:  time;
    align-self: center;
-   padding-right: .3em;
+   padding-right: calc(6px * var(--scale,1));
    
    text-align: right;
    
@@ -234,6 +229,7 @@ video {
 :host([data-overlay-controls]) .current-time {
    color: #FFF;
    -webkit-text-stroke: 4px #000A;
+   padding-right: calc(10px * var(--scale,1));
 }
 
 .controls {
@@ -242,11 +238,13 @@ video {
    --height:          calc(23px * var(--scale,1));
    --base-widget-gap: calc( 6px * var(--scale,1));
    
-   /* TODO: find a way to get rid of these vars */
-   --play-pause-button-region: calc(50px * var(--scale,1));
-   --play-pause-button-hitbox: calc(43px * var(--scale,1));
-   --extra-height: var(--play-pause-button-hitbox);
-   --extra-diff:   calc((var(--extra-height) - var(--height)) / 2);
+   /* computed below, in the spritesheet code */
+   --play-pause-flex-area-width:  unset;
+   --play-pause-flex-area-height: unset;
+   
+   --play-pause-extra-thickness: calc((var(--play-pause-flex-area-height) - var(--height)) / 2);
+   
+   --extra-diff: calc((var(--tray-bulge-sprite-h) - var(--tray-middle-sprite-h)) * var(--tray-spritesheet-effective-scale) / 2);
    
    --play-pause-flex-area-width: var(--play-pause-button-hitbox);
    
@@ -259,7 +257,9 @@ video {
    justify-content: center;
    align-items:     center;
    
-   margin: var(--extra-diff) 0;
+   height:        var(--height, auto);
+   margin-top:    calc(var(--play-pause-extra-thickness,0px) + var(--margin-above,0px));
+   margin-bottom: calc(var(--play-pause-extra-thickness,0px) + var(--margin-below,0px));
    
    .left {
       grid-area: left;
@@ -281,6 +281,10 @@ video {
       
       height: var(--height);
    }
+}
+:host([data-overlay-controls]) .main {
+   --gap-between-seek-and-controls: calc(12px * var(--scale,1));
+   --gap-below-controls: calc( 3px * var(--scale,1));
 }
 
 .controls {
@@ -304,18 +308,16 @@ video {
    --tray-bulge-sprite-h: 96px;
    
    --tray-spritesheet-effective-scale: calc(var(--scale,1) / var(--tray-spritesheet-scale));
-   /* attempted fix for browsers' sub-pixel rounding; disabled for now: */
-   /*--tray-spritesheet-effective-scale: calc(
-      round(var(--tray-spritesheet-w-unitless) * var(--scale,1) / var(--tray-spritesheet-scale))
-      /
-      var(--tray-spritesheet-w-unitless)
-   );*/
    --tray-spritesheet-effective-size:
       calc(var(--tray-spritesheet-w) * var(--tray-spritesheet-effective-scale))
       calc(var(--tray-spritesheet-h) * var(--tray-spritesheet-effective-scale))
    ;
+   --tray-bulge-effective-w: calc(var(--tray-bulge-sprite-w) * var(--tray-spritesheet-effective-scale));
+   --tray-bulge-effective-h: calc(var(--tray-bulge-sprite-h) * var(--tray-spritesheet-effective-scale));
    
-   --play-pause-flex-area-width: calc(var(--tray-bulge-sprite-w) * var(--tray-spritesheet-effective-scale));
+   /* set these to assist with how the controls tray is laid out, in the styles further above */
+   --play-pause-flex-area-width:  var(--tray-bulge-effective-w);
+   --play-pause-flex-area-height: var(--tray-bulge-effective-h);
    
    .left,
    .right {
@@ -346,7 +348,7 @@ video {
          If we position the endcaps via the box model, i.e. using a pseudo-element, 
          then things seem to render just fine... mostly. Firefox gets sub-pixel gaps 
          at some zoom levels if the background on the pseudo-element is *just* the 
-         endcap.
+         endcap; we fix this by just having extra width in that background.
       */
       position: relative;
       &::before {
@@ -385,9 +387,6 @@ video {
    }
    
    &::before {
-      --tray-bulge-effective-w: calc(var(--tray-bulge-sprite-w) * var(--tray-spritesheet-effective-scale));
-      --tray-bulge-effective-h: calc(var(--tray-bulge-sprite-h) * var(--tray-spritesheet-effective-scale));
-      
       grid-area: play;
       justify-self: center;
       align-self: center;
