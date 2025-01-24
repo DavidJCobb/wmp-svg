@@ -24,28 +24,22 @@
       --pos-x: calc(var(--glass-x) * var(--glass-sprite-effective-scale));
       --pos-y: calc(var(--glass-y) * var(--glass-sprite-effective-scale));
       
-      left: var(--pos-x);
-      top:  var(--pos-y);
+      left: var(--glass-pos-x);
+      top:  var(--glass-pos-y);
       
       /*
          Fix for sub-pixel rounding errors: have the sub-pixel positioning 
          be done on the GPU so that there isn't actually any rounding.
       */
-         --pos-x-ipart: round(var(--pos-x), 1px);
-         --pos-x-fpart: calc(var(--pos-x) - var(--pos-x-ipart));
-         
-         left: var(--pos-x-ipart);
-         transform: translate3d(var(--pos-x-fpart), 0, 0);
+         left: var(--glass-pos-x-ipart);
+         transform: translate3d(var(--glass-pos-x-fpart), 0, 0);
          
          /*
-            HACK: Firefox does some unhinged bullshit with the transforms, 
-            e.g. having them affect the positioning of adjacent boxes, and 
-            rounding even 3D-space transforms. This tweak is designed to 
-            skew rounding of the play/pause glass-sprite position so that 
-            it lines up with the tray "bulge" sprite when controls are 
-            overlaid. (1/22/2025)
+            HACK: Tweak the transform further in Firefox, to try and 
+            improve how the Play/Pause button lines up with its space 
+            in the tray background.
          */
-         -moz-transform: translate3d(calc(var(--pos-x-fpart) * 1.2), 0, 0);
+         -moz-transform: translate3d(calc(var(--glass-pos-x-fpart) * 1.2), 0, 0);
       
       width:  var(--glass-sprite-effective-width);
       height: var(--glass-sprite-effective-height);
@@ -113,6 +107,19 @@
    --glass-sprite-effective-width:  calc(var(--glass-sprite-width) * var(--glass-sprite-effective-scale));
    --glass-sprite-effective-height: calc(var(--glass-sprite-height) * var(--glass-sprite-effective-scale));
    
+   /*
+      The --glass-pos-x and --glass-pos-y variables are needed to 
+      position the pseudo-element.
+   
+      We also decompose the X-position into its integer part and 
+      fractional part, so we can fiddle with browsers' sub-pixel 
+      rounding in some other styles.
+   */
+   --glass-pos-x: calc(var(--glass-x) * var(--glass-sprite-effective-scale));
+   --glass-pos-y: calc(var(--glass-y) * var(--glass-sprite-effective-scale));
+   --glass-pos-x-ipart: round(var(--glass-pos-x), 1px);
+   --glass-pos-x-fpart: calc(var(--glass-pos-x) - var(--glass-pos-x-ipart));
+   
    --glass-background:
       var(--glass-spritesheet)
       /*pos-x*/  calc(-1 * var(--glass-current-sprite) * var(--glass-sprite-effective-width))
@@ -167,11 +174,6 @@
    --glyph-sprite-effective-scale:  calc(var(--button-glyph-scale,var(--scale,1)) / var(--glyph-sprite-scale));
    --glyph-sprite-effective-width:  calc(var(--glyph-sprite-width) * var(--glyph-sprite-effective-scale));
    --glyph-sprite-effective-height: calc(var(--glyph-sprite-height) * var(--glyph-sprite-effective-scale));
-   
-   /*
-   --glyph-sprite-effective-x: calc(var(--glyph-x) * var(--glyph-sprite-effective-scale) - var(--glass-x) * var(--glass-sprite-effective-scale));
-   --glyph-sprite-effective-y: calc(var(--glyph-y) * var(--glyph-sprite-effective-scale) - var(--glass-y) * var(--glass-sprite-effective-scale));
-   */
    
    /*
       We want it to be possible to scale the button glyphs separately from 
@@ -411,7 +413,17 @@
    }
 }
 .prev-rw {
+   &::before {
+      /*
+         Transforming both elements separately will result in worse 
+         sub-pixel rounding errors, causing vertical displacement at 
+         some sizes. Moving the sub-pixel transform hack out to the 
+         whole button, so that it's done in tandem with the rotation, 
+         seems to fix this.
+      */
+      transform: none;
+   }
    transform-box:    content-box;
    transform-origin: center center;
-   transform:        scale(-100%, 100%);
+   transform:        scale(-100%, 100%) translate3d(var(--glass-pos-x-fpart), 0, 0);
 }
