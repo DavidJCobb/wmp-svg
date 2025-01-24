@@ -171,7 +171,7 @@ video {
       flex-flow:       row nowrap;
       justify-content: center;
       align-items:     center;
-      gap:             var(--base-widget-gap);
+      gap:             var(--base-widget-gap, calc(6px*var(--scale,1)));
       
       height: var(--height);
    }
@@ -317,6 +317,55 @@ video {
    margin-left: calc(4px * var(--scale,1));
 }
 
+/*
+   As it turns out, the spacing between buttons in the WMP player UI 
+   is... all over the place. Including button glass:
+   
+    - ~6px between the lefthand endcap and Shuffle
+    -  6px between Shuffle and Loop
+    - ~9px between Loop and the separator
+    - ~8px between the separator and Stop
+    -  9px between Stop and Prev
+    - 12px between Next and Mute
+    - 10px between Mute and the volume slider track
+    
+   Notably, if you've got the volume at 50%, then the Mute glyph (not 
+   the glass) is roughly 16px away from both the Prev button glass 
+   and the volume slider track. Similarly, the Stop glyph (not the 
+   glass) is roughly 14px from the separator and the Prev button. So 
+   Microsoft designed the controls so that the spacing would appear 
+   balanced when the UI is in a non-interacted-with state, i.e. when 
+   no hover-only button glass is visible. Unfortunately, we lay out 
+   the controls based on their hitboxes, which to some extent reflect 
+   the glass sizes, so we're... gonna have to get creative.
+   
+   We've set the baseline spacing between buttons to 6px, so we'll go 
+   from there. We use `--button-glyph-scale` to ensure relatively 
+   consistent spacing when controls are overlaid, but it looks like 
+   WMP uses fairly different spacing in that case, so we're not 100% 
+   accurate there.
+   
+   As of this writing, I want to implement rearranging the control 
+   layout, but haven't yet. These styles, then, shouldn't target any 
+   specific button, but rather should target the various button styles 
+   based on their locations relative to one another.
+*/
+.controls {
+   --base-widget-gap: calc(6px * var(--button-glyph-scale,1));
+   hr {
+      margin: 0 calc(3px*var(--button-glyph-scale,1));
+   }
+   .basic-button + .prev-rw {
+      margin-left: calc(3px*var(--button-glyph-scale,1));
+   }
+   .next-ff + .basic-button {
+      margin-left: calc(6px*var(--button-glyph-scale,1));
+   }
+   .basic-button + .volume {
+      margin-left: calc(4px*var(--button-glyph-scale,1));
+   }
+}
+
 
 /*
    THEMES
@@ -381,6 +430,15 @@ video {
    .seek {
       margin-left: calc(12px * var(--scale,1));
       margin-right: calc(12px * var(--scale,1));
+   }
+   .controls {
+      hr {
+         background:      #00000040;
+         background-clip: content-box;
+         border:          calc(1px*var(--scale,1)) solid #FFFFFF20;
+         width:           calc(1px*var(--scale,1));
+         border-radius:   calc(2px*var(--scale,1));
+      }
    }
 }
 :host([data-theme="dark" i]:not([data-overlay-controls])) {
