@@ -4,15 +4,12 @@
 Overview:
 
 * Graphics work
-  * Previous/Next
-  * Controls tray
   * Slider thumb refinements
 * API
   * Support different controls layouts
   * Redesign playlist API
 * General coding
   * Subtitle support
-  * Album art?
   * Switch to TypeScript?
 
 ## Specifics
