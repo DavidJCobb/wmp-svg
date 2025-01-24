@@ -18,12 +18,6 @@ Overview:
 ## Specifics
 
 * `WMPlayerElement`
-  * Tray background
-    * Modify the overlaid-controls spritesheet to handle endcaps the same way as the non-overlaid-controls spritesheet.
-    * Clean up the spritesheet files.
-      * Rename `spritesheet-tray-background.svg` to `spritesheet-tray-background-overlay.svg`.
-      * Rename `spritesheet-tray-background-non-overlay.svg` to `spritesheet-tray-background.svg`.
-      * Delete the other spritesheets for the tray background and border.
   * We need "disabled" states for the "previous" and "next" buttons' glassy backing. In the normal player UI, these buttons are never disabled (because WMP will just pick something from your library, same as play/pause), but they can be disabled in the "theater" UI  (wherein the player controls are overlaid on the video). We're mimicking WMP's UI, not the full program design: we won't always have a previous or next media item, so I think we want more visible disable states. (Plus, we need the graphics for "theater" mode either way.)
   * Overlaid controls: "previous" and "next" don't have a glassy shine on their "normal" state when in this view. We should implement this as a fifth "button sprite" in their spritesheet, setting `--button-sprite-count: 5` and then using `--use-button-sprite: 4` for the "normal" state in the theater view.
   * Make it possible to scale the player UI based on a scaling factor relative to the vanilla size *or* maximum main- and cross-axis sizes.

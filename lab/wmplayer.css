@@ -186,7 +186,7 @@ video {
    --height:  calc(62px * var(--scale,1) / (2 * 0.92));
    --padding: calc(4px * var(--scale,1));
    
-   --tray-spritesheet:            url(spritesheet-tray-background.svg#overlay);
+   --tray-spritesheet:            url(spritesheet-tray-background-overlay.svg);
    --tray-spritesheet-w-unitless: 70;
    --tray-spritesheet-w:          calc(1px * var(--tray-spritesheet-w-unitless));
    --tray-spritesheet-h:          292px;
@@ -195,11 +195,11 @@ video {
    --tray-endcap-sprite-w: 32px;
    --tray-endcap-sprite-h: 63px;
    
-   --tray-middle-sprite-y: 128px;
+   --tray-middle-sprite-y: 64px;
    --tray-middle-sprite-h: 63px;
    
-   --tray-bulge-sprite-y: 196.5px; /* TODO: width doesn't include the whole stroke? this should be 196px. */
-   --tray-bulge-sprite-w: 68.818px;
+   --tray-bulge-sprite-y: 128.5px; /* TODO: width doesn't include the whole stroke? this should be 196px. */
+   --tray-bulge-sprite-w: 69px;
    --tray-bulge-sprite-h: 96px;
    
    --tray-spritesheet-effective-scale: calc(var(--scale,1) / var(--tray-spritesheet-scale));
@@ -256,7 +256,7 @@ video {
          right:    100%;
          background:
             var(--tray-spritesheet)
-            var(--endcap-position-x) var(--endcap-position-y)
+            var(--endcap-position-x) 0
             /
             var(--tray-spritesheet-effective-size)
             no-repeat
@@ -270,13 +270,11 @@ video {
    }
    .left {
       --endcap-position-x: 0;
-      --endcap-position-y: 0;
       border-left:   var(--tray-endcap-effective-w) solid transparent;
       padding-right: var(--padding); /* spacing between prev/next and play/pause */
    }
    .right {
       --endcap-position-x: right;
-      --endcap-position-y: calc(-1 * 64px * var(--tray-spritesheet-effective-scale));
       border-right: var(--tray-endcap-effective-w) solid transparent;
       padding-left: var(--padding); /* spacing between prev/next and play/pause */
    }
@@ -392,10 +390,6 @@ video {
    --tray-bulge-sprite-h: 51px;
    
    --extra-diff: calc((var(--tray-bulge-sprite-h) - var(--tray-middle-sprite-h)) * var(--tray-spritesheet-effective-scale) / 2);
-   
-   .right {
-      --endcap-position-y: 0;
-   }
    
    /* fake a 1.5px width using a mask, since browsers round everything */
    hr {
