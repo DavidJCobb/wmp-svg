@@ -28,7 +28,7 @@ wm-player {
 }
       </script>
       
-      <script src="lrc-to-text-track.js"></script>
+      <script src="lrc-to-vtt.js"></script>
       <script>
 (async function() {
    let player = document.getElementsByTagName("wm-player")[0];
@@ -39,9 +39,7 @@ wm-player {
    } catch (e) {
       return;
    }
-console.log(lrc);
    lrc = lrc_to_vtt(lrc);
-console.log(lrc);
    
    player.addToPlaylist({
       src:    "test-audio-3.m4a",

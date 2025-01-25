@@ -160,6 +160,7 @@ class WMPlaylist extends EventTarget {
       this.dispatchEvent(new CustomEvent("shuffle-flag-changed", { detail: v }));
    }
    
+   get length() { return this.#items.length; }
    get size() { return this.#items.length; }
    
    //
@@ -199,6 +200,126 @@ class WMPlaylist extends EventTarget {
       this.#current_index_started = 0;
       this.dispatchEvent(new Event("cleared"));
       this.#dispatch_current_item_changed();
+   }
+   indexOf(item) {
+      return this.#items.indexOf(item);
+   }
+   insertAt(n, item) {
+      if (n < 0)
+         n = 0;
+      else if (n >= this.#items.length)
+         n = this.#items.length;
+      this.#items.splice(n, 0, item);
+      
+      let list = this.#indices_for_shuffle;
+      let size = list.length;
+      for(let i = 0; i < size; ++i)
+         if (list[i] >= n)
+            ++list[i];
+      list.push(n);
+   }
+   item(n) {
+      return this.#items[n];
+   }
+   moveItemTo(a, to) {
+      let i;
+      if (a instanceof WMPlaylistItem) {
+         i = this.indexOf(a);
+         if (i < 0)
+            return;
+      } else {
+         i = +a;
+         if (isNaN(i) || i != Math.floor(i))
+            throw new TypeError("must specify a source WMPlaylistItem or integerindex");
+         if (i < 0 || i >= this.#items.length)
+            throw new Error("out-of-bounds source index");
+      }
+      
+      to = +to;
+      if (isNaN(to) || to != Math.floor(to))
+         throw new TypeError("must specify an integer destination index");
+      if (to < 0)
+         throw new Error("out-of-bounds destination index");
+      if (to > this.#items.length)
+         return;
+      
+      if (to == i)
+         return;
+      let item = this.#items[i];
+      this.#items.splice(i, 1);
+      if (to > i)
+         --to;
+      this.#items.splice(to, 0, item);
+      
+      let list = this.#indices_for_shuffle;
+      let size = list.length;
+      for(let j = 0; j < list; ++j) {
+         if (list[j] == i)
+            list[j] = to;
+         else if (list[j] > i && list[j] <= to)
+            --list[j];
+         else if (list[j] > to && list[j] < i)
+            ++list[j];
+      }
+      if (this.#index == i) {
+         this.#index = to;
+      }
+      this.dispatchEvent(new Event("modified"));
+   }
+   remove(a, count) {
+      if (count === void 0)
+         count = 1;
+      else if (count == 0)
+         return;
+      else if (count < 0)
+         throw new Error("cannot remove a negative amount of items");
+      
+      let i;
+      if (a instanceof WMPlaylistItem) {
+         let i = this.indexOf(a);
+         if (i < 0)
+            return;
+      } else {
+         i = +a;
+         if (isNaN(i))
+            throw new TypeError("must specify a WMPlaylistItem or an index");
+         if (i < 0) {
+            count += i;
+            i = 0;
+            if (count < 0)
+               return;
+         }
+      }
+      this.#items.splice(i, count);
+      
+      if (count == 1) {
+         let n = this.#indices_for_shuffle.indexOf(i);
+         if (n >= 0)
+            this.#indices_for_shuffle.splice(n, 1);
+      } else {
+         let list = [];
+         for(let n of this.#indices_for_shuffle) {
+            if (n >= i && n < i + count)
+               continue;
+            if (n >= i + count)
+               n -= count;
+            list.push(n);
+         }
+         this.#indices_for_shuffle = list;
+      }
+      
+      let changed = false;
+      if (this.#index >= i && this.#index < i + count) {
+         this.#index = i;
+         this.#current_index_started = false;
+         changed = true;
+      }
+      this.dispatchEvent(new Event("modified"));
+      if (changed)
+         this.#dispatch_current_item_changed();
+   }
+   toArray() {
+      return ([]).concat(this.#items);
    }
    
    // Mark the current item as having started playing, meaning that 

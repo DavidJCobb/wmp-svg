@@ -27,21 +27,12 @@ Overview:
     * Muting
     * Setting volume
   * Investigate improvements to the playlist API
-    * I don't like that playlist items are immutable.
-    * I don't like that there's no API for accessing the current playlist.
-      * If we want playlist items to be mutable, then an API that exposes the current playlist needs to wrap playlist items in [gs]etters, so that changes to the current playlist item are immediately reacted to by the player.
-    * I don't like that there's no API for removing a playlist item.
-      * Ideally it should be possible to do `playerElement.playlist[3]` and `playerElement.playlist.remove(3)` and whatnot.
-    * Potential improvements:
-      * `.length`
-      * `.toArray()`
-      * `.clear()`
-      * `.insertAt(n, new_item)`
-      * `.indexOf(item)`
-      * `.item(n)` returning an immutable playlist item; the method name matches `HTMLCollection`'s API
-      * `.moveItemBy(index_or_item, by)`
-      * `.moveItemTo(index_or_item, to)`
-      * `.remove(n, count = 1)` and `.remove(item)`
+    * Test accessors on WMPlaylist
+      * `.toArray`
+      * `.insertAt`
+      * `.indexOf`
+      * `.moveItemTo`
+      * `.remove`
   * Optional: currently-playing media title offset to the left edge (WMP: seen in music UI, not in video UI).
   * Investigate automatically switching in and out of "theater" mode depending on whether we hit an audio file or a video file
   * Document the fact that our baseline styles line up with the "Library" view in WMP, while the `theater` class lines up with the "Now Playing" view.
