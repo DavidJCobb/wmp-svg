@@ -22,6 +22,31 @@
    --timestamp-scale-font-size: var(--scale,1); /* adjust the font size scaling*/
    --timestamp-min-font-size:   unset;
    --timestamp-max-font-size:   unset;
+   
+   /* Control baseline subtitle styles. */
+   /*
+      We need to offer CSS variables for this because there's no way to expose a 
+      native pseudo-element i.e. ::cue to styles outside of the shadow DOM, whether 
+      as a ::part or otherwise. We'd have to expose the whole `video` element, which 
+      would allow outside styles to break it.
+      
+      Moreover, as of 1/25/2025, Firefox mishandles style properties on ::cue: if a 
+      property computes to an invalid value, Firefox resets it to the document-level 
+      default (e.g. black Times New Roman) rather than leaving it unchanged. On top 
+      of that, `initial`, `revert`, and friends all appear to be broken on ::cue as 
+      well.
+   */
+   --subtitle-background:      unset;
+   --subtitle-color:           #FFF;
+   --subtitle-font-family:     "Segoe UI", Arial, sans-serif;
+   --subtitle-font-size:       2em;
+   --subtitle-font-style:      unset;
+   --subtitle-font-variant:    unset;
+   --subtitle-font-weight:     unset;
+   --subtitle-opacity:         unset;
+   --subtitle-outline:         1px solid #000;
+   --subtitle-text-decoration: unset;
+   --subtitle-text-shadow:     unset;
 }
 
 .main {
@@ -93,6 +118,19 @@ video {
    /* ensure we shrink to fit the player when necessary */
    width:  100%;
    height: 100%;
+}
+video::cue {
+   background:      var(--subtitle-background);
+   color:           var(--subtitle-color);
+   font-family:     var(--subtitle-font-family);
+   font-size:       var(--subtitle-font-size, 2em);
+   font-style:      var(--subtitle-font-style);
+   font-variant:    var(--subtitle-font-variant);
+   font-weight:     var(--subtitle-font-weight);
+   opacity:         var(--subtitle-opacity);
+   outline:         var(--subtitle-outline);
+   text-decoration: var(--subtitle-text-decoration);
+   text-shadow:     var(--subtitle-text-shadow);
 }
 
 .seek {
