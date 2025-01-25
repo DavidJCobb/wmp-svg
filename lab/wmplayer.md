@@ -41,6 +41,10 @@ A video player element that mimics Windows Media Player 11 and 12's UI. The func
 * A built-in system for playlists.
 * Accordingly, "loop" cycles from each end of the playlist to the other, and "shuffle" randomizes playback order. "Previous" and "next" buttons are offered as well.
 
+We match WMP's "Library" theme (the normal) and the "Now Playing" theme (wherein player controls are overlaid on the playing media). Our "Library" light theme is barebones, but the "Library" dark theme attempts to match the original WMP 11 dark theme (from Windows XP, as I recall) very closely. You can set `data-theme` to `dark` to enable the dark theme, or add the `data-overlay-controls` boolean attribute to enable the "Now Playing" theme.
+
+CSS variables are offered to allow configuration of the player's visuals.
+
 
 ### Usage notes
 

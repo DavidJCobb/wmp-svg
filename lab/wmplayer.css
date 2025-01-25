@@ -13,7 +13,7 @@
    --max-video-width:  100%;
    --max-video-height: none;
    
-   /* Scale the player UI. */
+   /* Scale the player UI. Note that very large values may clip the player. */
    --scale: 1;
    
    /* Control the sizing of the current timestamp. */
