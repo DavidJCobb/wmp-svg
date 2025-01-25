@@ -16,6 +16,13 @@ wm-player {
 }
       </style>
       
+      <script>
+{
+   let player = document.getElementsByTagName("wm-player")[0];
+   player.useMediaSession = true; // NOTE: not supported in Firefox as of 1/25/2025
+}
+      </script>
+      
       <!-- Test playlists. -->
       <script>
 {
@@ -55,7 +62,12 @@ wm-player {
             vttText: lrc,
             default: true,
          }
-      ]
+      ],
+      metadata: {
+         artist: "Scar Symmetry",
+         album:  "The Unseen Empire",
+         title:  "Rise of the Reptilian Regime",
+      }
    });
 })();
       </script>

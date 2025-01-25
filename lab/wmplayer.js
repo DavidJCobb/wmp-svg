@@ -56,6 +56,13 @@ class WMPlayerElement extends HTMLElement {
    
    #is_stopped = true;
    
+   // Private state for the `useMediaSession` property. We only allow this 
+   // to become `true` within the setter, if `navigator.mediaSession` exists. 
+   // Therefore anything that needs to work with MediaSession can just check 
+   // this, and not have to constantly check whether MediaSession itself is 
+   // supported. (That said, individual features still need checks.)
+   #is_controlling_media_session = false;
+   
    //
    // DOM and similar:
    //
@@ -296,6 +303,11 @@ class WMPlayerElement extends HTMLElement {
          this.#media.addEventListener("canplay", bound);
          this.#media.addEventListener("canplaythrough", bound);
       }
+      {
+         let bound = this.#update_media_session_playback_state.bind(this);
+         this.#media.addEventListener("play",  bound);
+         this.#media.addEventListener("pause", bound);
+      }
       
       this.#current_time_readout = this.#shadow.querySelector("time");
       
@@ -363,6 +375,17 @@ class WMPlayerElement extends HTMLElement {
             node.addEventListener("keypress", bound);
          }
          this.#seek_slider.addEventListener("change", bound);
+      }
+      
+      //
+      
+      if (navigator.mediaSession) {
+         this.#media.addEventListener("play", function() {
+            navigator.mediaSession.playbackState = "playing";
+         });
+         this.#media.addEventListener("pause", function() {
+            navigator.mediaSession.playbackState = "paused";
+         });
       }
       
       this.#control_names_to_nodes = {
@@ -602,6 +625,22 @@ class WMPlayerElement extends HTMLElement {
       this.#shuffle_button.checked = v;
       this.#update_shuffle_tooltip();
       this.#update_next_state();
+   }
+   
+   get useMediaSession() { return this.#is_controlling_media_session; }
+   set useMediaSession(v) {
+      if (!navigator.mediaSession) {
+         return;
+      }
+      v = !!v;
+      let prior = this.#is_controlling_media_session;
+      this.#is_controlling_media_session = v;
+      if (v) {
+         this.#set_up_media_session();
+      } else {
+         if (prior)
+            this.#tear_down_media_session();
+      }
    }
    
    #controls_layout_setter(name, attr, v) {
@@ -870,6 +909,7 @@ class WMPlayerElement extends HTMLElement {
       
       this.#media.pause();
       item.populateMediaElement(this.#media);
+      this.#update_media_session_metadata();
       this.#update_current_time_readout(0);
       this.#update_prev_next_state(0);
       if (index > 0) {
@@ -879,6 +919,11 @@ class WMPlayerElement extends HTMLElement {
    #on_playlist_cleared() {
       this.#media.pause();
       this.#media.src = "";
+      if (this.#is_controlling_media_session) {
+         this.#update_media_session_metadata();
+         this.#media_session_disable_handler("play");
+         this.#media_session_disable_handler("pause");
+      }
       this.#set_is_stopped(true);
    }
    #on_playlist_replaced() {
@@ -892,6 +937,17 @@ class WMPlayerElement extends HTMLElement {
       if (no_media) {
          this.#stop_button.disabled = true;
          this.#hide_current_time_readout();
+         if (this.#is_controlling_media_session) {
+            this.#media_session_disable_handler("play");
+            this.#media_session_disable_handler("pause");
+            this.#media_session_disable_handler("stop");
+         }
+      } else {
+         if (this.#is_controlling_media_session) {
+            this.#update_media_session_metadata();
+            this.#media_session_restore_handler("play");
+            this.#media_session_restore_handler("pause");
+         }
       }
       
       this.#update_prev_next_state(no_media ? 0 : this.#media.currentTime);
@@ -921,6 +977,101 @@ class WMPlayerElement extends HTMLElement {
       this.#set_is_stopped(false);
       if (playing)
          this.#media.play();
+   }
+   
+   //
+   // MediaSession
+   //
+   
+   #media_session_handlers = {
+      play:          this.play.bind(this),
+      pause:         this.pause.bind(this),
+      previoustrack: this.toPrevMedia.bind(this),
+      nexttrack:     this.toNextMedia.bind(this),
+      stop:          this.stop.bind(this),
+   };
+   #set_up_media_session() {
+      if (!navigator.mediaSession) {
+         return;
+      }
+      if (this.#playlist.empty()) {
+         return; // none of these actions are allowed when the playlist is empty
+      }
+      const handlers = this.#media_session_handlers;
+      for(let key in handlers) {
+         try {
+            navigator.mediaSession.setActionHandler(key, handlers[key]);
+         } catch (e) {}
+      }
+      
+      this.#update_media_session_metadata();
+      this.#update_media_session_time();
+      
+      // Force an update to these, so we can disable the MediaSession prev/next 
+      // actions if there's no prev/next track to go to.
+      this.#update_prev_state();
+      this.#update_next_state();
+      
+      if (this.#is_stopped) {
+         this.#media_session_disable_handler("stop");
+      }
+   }
+   #tear_down_media_session() {
+      const handlers = this.#media_session_handlers;
+      for(let key in handlers) {
+         try {
+            navigator.mediaSession.setActionHandler(key, null);
+         } catch (e) {}
+      }
+      navigator.mediaSession.metadata = null;
+      if ("setPositionState" in navigator.mediaSession) {
+         navigator.mediaSession.setPositionState(null);
+      }
+   }
+   
+   #media_session_disable_handler(name) {
+      try {
+         navigator.mediaSession.setActionHandler(name, null);
+      } catch (e) {}
+   }
+   #media_session_restore_handler(name) {
+      const handlers = this.#media_session_handlers;
+      try {
+         navigator.mediaSession.setActionHandler(name, handlers[name]);
+      } catch (e) {}
+   }
+   
+   #update_media_session_metadata() {
+      if (this.#is_stopped || this.#playlist.empty()) {
+         navigator.mediaSession.metadata = null;
+         return;
+      }
+      let item     = this.#playlist.currentItem || null;
+      let metadata = item?.metadata || null;
+      navigator.mediaSession.metadata = metadata;
+   }
+   #update_media_session_playback_state() {
+      if (!this.#is_controlling_media_session)
+         return;
+      navigator.mediaSession.playbackState = this.#media.paused ? "paused" : "playing";
+   }
+   #update_media_session_time(time) {
+      if (!this.#is_controlling_media_session)
+         return;
+      if (!("setPositionState" in navigator.mediaSession))
+         return;
+      if (this.#is_stopped) {
+         navigator.mediaSession.setPositionState(null);
+         return;
+      }
+      if (time === void 0) {
+         time = this.#media.currentTime;
+      }
+      navigator.mediaSession.setPositionState({
+         duration:     this.#media.duration || 0, // may be NaN, which makes MediaSession choke
+         playbackRate: this.#media.playbackRate,
+         position:     time
+      });
    }
    
    //
@@ -1052,6 +1203,12 @@ class WMPlayerElement extends HTMLElement {
          this.#hide_current_time_readout();
       } else {
          this.#stop_button.disabled = false;
+      }
+      if (this.#is_controlling_media_session) {
+         if (v)
+            this.#media_session_restore_handler("stop");
+         else
+            this.#media_session_disable_handler("stop");
       }
    }
    
@@ -1231,6 +1388,7 @@ class WMPlayerElement extends HTMLElement {
    #hide_current_time_readout() {
       this.#current_time_readout.textContent = "";
       this.#current_time_readout.removeAttribute("datetime");
+      this.#update_media_session_time();
    }
    #update_current_time_readout(time) {
       if (this.#is_stopped) {
@@ -1250,6 +1408,8 @@ class WMPlayerElement extends HTMLElement {
       }
       this.#current_time_readout.textContent = text;
       this.#current_time_readout.setAttribute("datetime", `P${h}H${m}M${s_sub}S`);
+      
+      this.#update_media_session_time(time);
    }
    
    #update_mute_glyph(volume) {
@@ -1284,7 +1444,13 @@ class WMPlayerElement extends HTMLElement {
          node.classList.remove("can-only-rewind");
          node.disabled = true;
          node.title    = TEXT_FOR_ALL_BEHAVIORS;
+         if (this.#is_controlling_media_session) {
+            this.#media_session_disable_handler("previoustrack");
+         }
          return;
+      }
+      if (this.#is_controlling_media_session) {
+         this.#media_session_restore_handler("previoustrack");
       }
       let can_rewind = this.#can_rewind();
       if (current_time < this.#previous_button_time_threshold) {
@@ -1321,25 +1487,36 @@ class WMPlayerElement extends HTMLElement {
       const TEXT_FOR_FAST_FWD_ONLY = "Press and hold to fast-forward";
       const TEXT_FOR_ALL_BEHAVIORS = "Next (press and hold to fast-forward)";
       
-      let node = this.#next_button;
+      let has_next = false;
+      let node     = this.#next_button;
       if (this.#playlist.size == 0) {
          node.classList.remove("can-only-fast-forward");
          node.disabled = true;
          node.title    = TEXT_FOR_ALL_BEHAVIORS;
-         return;
-      }
-      //
-      // It's always possible to fast-forward, so the button will always be enabled 
-      // if we have any media in our playlist. The only real question is whether we 
-      // can move to the next media item (i.e. whether there is one).
-      //
-      node.disabled = false;
-      if (this.#playlist.hasNextItem()) {
-         node.classList.remove("can-only-fast-forward");
-         node.title = TEXT_FOR_ALL_BEHAVIORS;
+         if (this.#is_controlling_media_session) {
+            this.#media_session_disable_handler("nexttrack");
+         }
       } else {
-         node.classList.add("can-only-fast-forward");
-         node.title = TEXT_FOR_FAST_FWD_ONLY;
+         //
+         // It's always possible to fast-forward, so the button will always be enabled 
+         // if we have any media in our playlist. The only real question is whether we 
+         // can move to the next media item (i.e. whether there is one).
+         //
+         node.disabled = false;
+         if (this.#playlist.hasNextItem()) {
+            node.classList.remove("can-only-fast-forward");
+            node.title = TEXT_FOR_ALL_BEHAVIORS;
+            has_next   = true;
+         } else {
+            node.classList.add("can-only-fast-forward");
+            node.title = TEXT_FOR_FAST_FWD_ONLY;
+         }
+      }
+      if (this.#is_controlling_media_session) {
+         if (has_next)
+            this.#media_session_restore_handler("nexttrack");
+         else
+            this.#media_session_disable_handler("nexttrack");
       }
    }
    #update_prev_next_state(current_time) {

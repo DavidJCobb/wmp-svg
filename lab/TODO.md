@@ -17,7 +17,6 @@ Overview:
 * `WMPlayerElement`
   * Investigate allowing control repositioning to move the current timestamp into the tray, e.g. between Play/Pause and Seek.
   * Full-screen toggle button in lower-right corner
-  * Investigate [`navigator.mediaSession`](https://stackoverflow.com/questions/76445098/how-do-i-set-the-album-art-and-or-title-of-currently-playing-media-in-javascript) support. (Full details [here](https://web.dev/articles/media-session).) Note that Firefox doesn't support this API.
   * Make it possible to scale the player UI based on a scaling factor relative to the vanilla size *or* maximum main- and cross-axis sizes.
   * Investigate improvements to the playlist API
     * Test accessors on WMPlaylist

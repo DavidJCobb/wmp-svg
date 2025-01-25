@@ -1,6 +1,7 @@
 
 class WMPlaylistItem {
    #audio_only = false;
+   #metadata   = null; // MediaMetadata
    #poster     = null;
    #src        = null;
    #sources    = []; // Array<HTMLSourceElement>
@@ -38,6 +39,19 @@ class WMPlaylistItem {
          }
       }
       this.#audio_only = o?.audio_only || false; // force audio-only even if a video file
+      this.#metadata   = null;
+      if ("mediaSession" in navigator) {
+         let meta = o?.metadata;
+         try {
+            if (meta) {
+               if (!(meta instanceof MediaMetadata))
+                  meta = new MediaMetadata(meta);
+               this.#metadata = meta;
+            }
+         } catch (e) {
+            console.warn(e); // swallow invalid metadata
+         }
+      }
       this.#poster     = o?.poster || null;
       this.#src        = o?.src || null;
       this.#realize(o?.tracks, o?.sources);
@@ -55,6 +69,7 @@ class WMPlaylistItem {
       }
       return true;
    }
+   get metadata() { return this.#metadata; }
    
    populateMediaElement(media) {
       media.poster = this.#poster || "";
@@ -410,7 +425,11 @@ class WMPlaylist extends EventTarget {
       return this.#index != prior;
    }
    
-   replace(items) {
+   replace(/*Array<WMPlaylistItem>*/ items) {
+      if (items.length == 0) {
+         this.clear();
+         return;
+      }
       this.#items = Array.from(items); // deliberately clone
       this.#index = 0;
       this.#indices_for_shuffle   = Object.keys(this.#items);

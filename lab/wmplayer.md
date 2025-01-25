@@ -100,6 +100,10 @@ In Windows Media Player, these are tied to the Next and Previous buttons: click 
 
 * In Windows Media Player, the Rewind and Fast-Forward features *only* trigger when the buttons are *clicked* and held; pressing and holding Space or Enter is not sufficient. Keyboard users instead have to use keyboard shortcuts (specifically, accelerator keys) to toggle the features on and off.
 
+### `MediaSession` support
+
+* When buttons (e.g. stop, prev, next) are disabled, we have `MediaSession` match that by setting the action handlers to `null`.
+
 ## Custom element lifecycle
 
 The lifecycle of a custom element isn't terribly clear: the relative ordering of callbacks is well-defined, but the ordering of these callbacks relative to other operations doesn't seem to be.
