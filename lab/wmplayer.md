@@ -48,7 +48,18 @@ CSS variables are offered to allow configuration of the player's visuals.
 
 ### Usage notes
 
-* Windows Media Player uses a 500% fast-forward speed ([source](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/wmp/controls-fastforward)), but we default our fast-forward speed to 400% because Gecko will mute media if it has a playback rate outside the range [25%, 400%]. You can set `fastForwardSpeed` to change the speed (the value you specify must be greater than `1` i.e. 100% speed).
+* Windows Media Player uses a 500% fast-forward speed ([source](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/wmp/controls-fastforward)). You can set `fastForwardSpeed` to change the speed (the value you specify must be greater than `1` i.e. 100% speed).
+
+* Playlists consist of immutable `WMPlaylistItem`s. The API for adding content to a playlist accepts a playlist item, an object (from which a `WMPlaylistItem` will be automatically constructed), or a file path.
+
+  The `WMPlaylistItem` constructor accepts an object literal:
+  
+  * **audio_only:** Optional boolean indicating whether the playlist item is audio-only. When playlist items are constructed from a file path, this value is inferred from the file extension.
+  * **metadata:** Optional `MediaMetadata` instance or object to be passed to the `MediaMetadata` constructor. Checked, used, and stored only if the browser supports `MediaSession`. Errors thrown by the `MediaMetadata` constructor are swallowed and fed to `console.warn`.
+  * **poster:** Optional filepath for the `HTMLVideoElement` `poster` attribute.
+  * **src:** Optional file path.
+  * **tracks:** Optional array of `HTMLTrackElement`s or object literals with the same fields.
+  * **sources:** Optional array of `source` elements.
 
 * We currently don't support `defaultPlaybackRate` (i.e. we don't expose that property on the underlying `HTMLMediaElement`).
   
