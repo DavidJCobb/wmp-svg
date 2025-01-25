@@ -39,7 +39,7 @@
    --subtitle-background:      unset;
    --subtitle-color:           #FFF;
    --subtitle-font-family:     "Segoe UI", Arial, sans-serif;
-   --subtitle-font-size:       2em;
+   --subtitle-font-size:       1em;
    --subtitle-font-style:      unset;
    --subtitle-font-variant:    unset;
    --subtitle-font-weight:     unset;
@@ -123,7 +123,7 @@ video::cue {
    background:      var(--subtitle-background);
    color:           var(--subtitle-color);
    font-family:     var(--subtitle-font-family);
-   font-size:       var(--subtitle-font-size, 2em);
+   font-size:       var(--subtitle-font-size);
    font-style:      var(--subtitle-font-style);
    font-variant:    var(--subtitle-font-variant);
    font-weight:     var(--subtitle-font-weight);
