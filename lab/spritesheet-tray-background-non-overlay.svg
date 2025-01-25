@@ -68,9 +68,9 @@
          <use href="#middle-shape" />
       </clipPath>
       
-      <path id="bulge-shape" d="M -5.2515 10 L 0 10 a 25.5 25.5 0 0 1 40.497 0 l 4.2515 0 l 0 31 l -4.2515 0 a 25.5 25.5 0 0 1 -40.497 0 l -5.2515 0 z" />
-      <clipPath id="bulge-clip">
-         <use href="#bulge-shape" />
+      <path id="bulge-shape-2s" d="M -5.2515 10 L 0 10 a 25.5 25.5 0 0 1 40.497 0 l 4.2515 0 l 0 31 l -4.2515 0 a 25.5 25.5 0 0 1 -40.497 0 l -5.2515 0 z" />
+      <clipPath id="bulge-clip-2s">
+         <use href="#bulge-shape-2s" />
       </clipPath>
       
       <path id="bulge-shape-1s" d="M 45.747 10 l 4.2515 0 l 0 31 l -4.2515 0 a 25.5 25.5 0 1 1 0 -31 z" />
@@ -91,7 +91,7 @@
       <use href="#middle-shape" class="edge" clip-path="url(#middle-clip)" />
    </g>
    <g transform="translate(0 63)">
-      <use href="#bulge-shape" class="edge" clip-path="url(#bulge-clip)" />
+      <use href="#bulge-shape-2s" class="edge" clip-path="url(#bulge-clip-2s)" />
    </g>
    <g transform="translate(0 115)">
       <use href="#bulge-shape-1s" class="edge" clip-path="url(#bulge-clip-1s)" />

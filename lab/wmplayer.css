@@ -326,28 +326,27 @@ video {
       Account for changes to the control layouts which leave either side 
       of the tray empty.
    */
+   .left:empty,
+   .right:empty {
+      display: none;
+   }
+   &:has(.left:empty):has(.right:not(:empty)),
+   &:has(.right:empty):has(.left:not(:empty)) {
+      --tray-bulge-sprite-y: 224px;
+      --tray-bulge-sprite-w: 82.595px;
+      --tray-bulge-sprite-h: 96px;
+      
+      --tray-bulge-button-displacement: calc(5px*var(--scale,1));
+   }
+   
    &:has(.left:empty ~ .right:not(:empty)) {
-      --tray-bulge-sprite-y: 224px;
-      --tray-bulge-sprite-w: 82.595px;
-      --tray-bulge-sprite-h: 96px;
-      
-      .left {
-         display: none;
-      }
       .play-pause {
-         margin-left: calc(5.595px*var(--scale,1));
+         margin-left: var(--tray-bulge-button-displacement);
       }
-   }0
+   }
    &:has(.left:not(:empty) ~ .right:empty) {
-      --tray-bulge-sprite-y: 224px;
-      --tray-bulge-sprite-w: 82.595px;
-      --tray-bulge-sprite-h: 96px;
-      
-      .right {
-         display: none;
-      }
       .play-pause {
-         margin-right: calc(7px*var(--scale,1));
+         margin-right: var(--tray-bulge-button-displacement);
       }
       &::before {
          transform: scale(-100%, 100%);
@@ -357,11 +356,6 @@ video {
       --tray-bulge-sprite-y: 320px;
       --tray-bulge-sprite-w: 96px;
       --tray-bulge-sprite-h: 96px;
-      
-      .left,
-      .right {
-         display: none;
-      }
    }
 }
 
@@ -483,42 +477,16 @@ video {
       Account for changes to the control layouts which leave either side 
       of the tray empty.
    */
-   &:has(.left:empty ~ .right:not(:empty)) {
+   &:has(.left:empty):has(.right:not(:empty)),
+   &:has(.right:empty):has(.left:not(:empty)) {
       --tray-bulge-sprite-y: 115px;
       --tray-bulge-sprite-w: 45.747px;
       --tray-bulge-sprite-h: 51px;
-      
-      .left {
-         display: none;
-      }
-      .play-pause {
-         margin-left: calc(5.595px*var(--scale,1));
-      }
-   }
-   &:has(.left:not(:empty) ~ .right:empty) {
-      --tray-bulge-sprite-y: 115px;
-      --tray-bulge-sprite-w: 45.747px;
-      --tray-bulge-sprite-h: 51px;
-      
-      .right {
-         display: none;
-      }
-      .play-pause {
-         margin-right: calc(7px*var(--scale,1));
-      }
-      &::before {
-         transform: scale(-100%, 100%);
-      }
    }
    &:has(.left:empty):has(.right:empty) {
       --tray-bulge-sprite-y: 167px;
       --tray-bulge-sprite-w: 51px;
       --tray-bulge-sprite-h: 51px;
-      
-      .left,
-      .right {
-         display: none;
-      }
    }
 }
 :host([data-overlay-controls]) {
