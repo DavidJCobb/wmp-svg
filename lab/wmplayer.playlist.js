@@ -97,6 +97,9 @@ class WMPlaylistItem {
                if (data)
                   node[attr] = data;
             }
+            if (!item.src && item.vttText) {
+               node.src = `data:text/vtt;charset=UTF-8,${encodeURIComponent(item.vttText)}`;
+            }
             if (item.default)
                node.setAttribute("default", "default");
             this.#tracks.push(node);
