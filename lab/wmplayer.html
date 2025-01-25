@@ -15,6 +15,8 @@ wm-player {
    --max-video-height: 720px;
 }
       </style>
+      
+      <!-- Test playlists. -->
       <script>
 {
    let player = document.getElementsByTagName("wm-player")[0];
@@ -28,6 +30,8 @@ wm-player {
 }
       </script>
       
+      
+      <!-- Test text tracks. -->
       <script src="lrc-to-vtt.js"></script>
       <script>
 (async function() {
@@ -54,6 +58,22 @@ wm-player {
       ]
    });
 })();
+      </script>
+      
+      <!-- Test events. -->
+      <script>
+{
+   "use strict";
+   
+   function listener(e) {
+      console.log("External listener picked up " + e.type + ".", e);
+   }
+   
+   let player = document.getElementsByTagName("wm-player")[0];
+   player.addEventListener("pause", listener);
+   player.addEventListener("play",  listener);
+   player.addEventListener("durationchange", listener);
+}
       </script>
    </body>
 </html>

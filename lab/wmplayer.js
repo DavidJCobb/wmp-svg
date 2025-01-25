@@ -272,7 +272,7 @@ class WMPlayerElement extends HTMLElement {
    constructor() {
       super();
       this.#internals = this.attachInternals();
-      this.#shadow    = this.attachShadow({ mode: "open" });
+      this.#shadow    = this.attachShadow({ mode: "closed" });
       
       this.#shadow.innerHTML = WMPlayerElement.#HTML;
       
@@ -375,6 +375,88 @@ class WMPlayerElement extends HTMLElement {
          stop:    this.#stop_button,
          volume:  this.#volume_slider,
       };
+      
+      //
+      // Finally, prepare to re-dispatch events from our wrapped media element.
+      //
+      {
+         let bound = this.#dispatch.bind(this);
+         for(let name of [
+            // HTMLMediaElement
+            "aborted",
+            "canplay",
+            "canplaythrough",
+            "durationchange",
+            "emptied",
+            "encrypted",
+            "ended",
+            "error",
+            "loadeddata",
+            "loadedmetadata",
+            "loadstart",
+            "pause",
+            //"play", // fired manually, to avoid false-positives
+            "playing",
+            //"progress", // debounced
+            "ratechange",
+            "seeked",
+            "seeking",
+            "stalled",
+            "suspend",
+            //"timeupdate", // debounced
+            "volumechange",
+            "waiting",
+            "waitingforkey",
+            // HTMLVideoElement
+            "enterpictureinpicture",
+            "leavepictureinpicture",
+            "resize",
+         ]) {
+            this.#media.addEventListener(name, bound);
+         }
+      }
+      //
+      // We should debounce some event types. They fire very, very frequently, 
+      // and I don't want to be spawning new Event objects (which will have to 
+      // be GC'd) that frequently.
+      //
+      {
+         let bound = this.#dispatch_debounced.bind(this);
+         for(let name of [
+            "progress",
+            "timeupdate",
+         ]) {
+            this.#media.addEventListener(name, bound);
+         }
+      }
+   }
+   
+   async #dispatch(e) {
+      let forwarded = new (e.constructor)(e.type, e);
+      this.dispatchEvent(forwarded);
+   }
+   
+   #dispatch_debounce_timers = {};
+   async #dispatch_debounced(e) {
+      let timer = this.#dispatch_debounce_timers[e.type];
+      if (!timer) {
+         timer = this.#dispatch_debounce_timers[e.type] = { last: -1, timeout: null };
+      }
+      if (timer.timeout) {
+         window.clearTimeout(timer.timeout);
+         timer.timeout = null;
+      }
+      let now = Date.now();
+      if (now - timer.last < 500) {
+         timer.timeout = window.setTimeout(this.#dispatch_debounced.bind(this, e), 500);
+         return;
+      }
+      timer.last = now;
+      await this.#dispatch(e);
+   }
+   
+   async #dispatch_simple(name) {
+      this.dispatchEvent(new Event(name));
    }
    
    //
@@ -432,6 +514,7 @@ class WMPlayerElement extends HTMLElement {
       this.#ready_to_autoplay = false;
       this.#media.play();
       this.#set_is_stopped(false);
+      this.#dispatch_simple("play");
    }
    
    // Get the current playback rate, accounting for both the desired 
@@ -559,6 +642,7 @@ class WMPlayerElement extends HTMLElement {
       if (this.#playlist.size == 0)
          return;
       this.#media.play();
+      this.#dispatch_simple("play");
    }
    pause() { this.#media.pause(); }
    stop() { this.#set_is_stopped(true); }
@@ -998,12 +1082,16 @@ class WMPlayerElement extends HTMLElement {
    //
    
    #on_play_pause_click(e) {
-      if (this.#media.paused) {
+      let will_play = this.#media.paused;
+      if (will_play) {
          this.#media.play();
       } else {
          this.#media.pause();
       }
       this.#set_is_stopped(false);
+      if (will_play) {
+         this.#dispatch_simple("play");
+      }
    }
    #update_play_state() {
       if (this.#media.paused) {
