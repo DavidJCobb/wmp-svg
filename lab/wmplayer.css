@@ -44,7 +44,7 @@
       ".           .        ." var(--gap-below-controls, min-content)
       [lower-background-end]
       /
-      1fr auto 1fr
+      1fr var(--controls-flex, auto) 1fr
    ;
    
    /*
@@ -52,6 +52,14 @@
       out if the player is too narrow / the scale is too large.
    */
    overflow: hidden;
+   
+   /*
+      If the seek slider is moved into the controls tray, we want the tray to expand 
+      as much as possible.
+   */
+   &:has(.controls .seek) {
+      --controls-flex: 10fr;
+   }
 }
 .gutter-left {
    grid-area: left-gutter;
@@ -89,6 +97,13 @@ video {
 
 .seek {
    grid-area: seek;
+   
+   .main > & {
+      grid-area: seek;
+   }
+   .controls & {
+      flex: 1 0 auto;
+   }
 }
 :host(:state(buffering)) .seek {
    --fill-gradient: linear-gradient(to bottom, #a7c2d3, #3c587f, #90a7c5);
@@ -146,7 +161,7 @@ video {
    grid-template:
       "left play right" var(--height)
       /
-      min-content var(--play-pause-flex-area-width) min-content
+      var(--tray-left-flex, min-content) var(--play-pause-flex-area-width) var(--tray-right-flex, min-content)
    ;
    justify-content: center;
    align-items:     center;
@@ -175,6 +190,17 @@ video {
       
       height: var(--height);
    }
+   
+   /*
+      If the seek slider is moved into either side of the controls tray, we 
+      want that side of the tray to expand as much as possible.
+   */
+   &:has(.left .seek) {
+      --tray-left-flex: 1fr;
+   }
+   &:has(.right .seek) {
+      --tray-right-flex: 1fr;
+   }
 }
 
 .controls {
@@ -187,9 +213,9 @@ video {
    --padding: calc(4px * var(--scale,1));
    
    --tray-spritesheet:            url(spritesheet-tray-background-overlay.svg);
-   --tray-spritesheet-w-unitless: 70;
+   --tray-spritesheet-w-unitless: 96;
    --tray-spritesheet-w:          calc(1px * var(--tray-spritesheet-w-unitless));
-   --tray-spritesheet-h:          292px;
+   --tray-spritesheet-h:          416px;
    --tray-spritesheet-scale:      calc(2 * 0.96);
    
    --tray-endcap-sprite-w: 32px;
@@ -295,6 +321,48 @@ video {
          no-repeat
       ;
    }
+   
+   /*
+      Account for changes to the control layouts which leave either side 
+      of the tray empty.
+   */
+   &:has(.left:empty ~ .right:not(:empty)) {
+      --tray-bulge-sprite-y: 224px;
+      --tray-bulge-sprite-w: 82.595px;
+      --tray-bulge-sprite-h: 96px;
+      
+      .left {
+         display: none;
+      }
+      .play-pause {
+         margin-left: calc(5.595px*var(--scale,1));
+      }
+   }0
+   &:has(.left:not(:empty) ~ .right:empty) {
+      --tray-bulge-sprite-y: 224px;
+      --tray-bulge-sprite-w: 82.595px;
+      --tray-bulge-sprite-h: 96px;
+      
+      .right {
+         display: none;
+      }
+      .play-pause {
+         margin-right: calc(7px*var(--scale,1));
+      }
+      &::before {
+         transform: scale(-100%, 100%);
+      }
+   }
+   &:has(.left:empty):has(.right:empty) {
+      --tray-bulge-sprite-y: 320px;
+      --tray-bulge-sprite-w: 96px;
+      --tray-bulge-sprite-h: 96px;
+      
+      .left,
+      .right {
+         display: none;
+      }
+   }
 }
 
 .controls hr {
@@ -362,6 +430,20 @@ video {
    .basic-button + .volume {
       margin-left: calc(4px*var(--button-glyph-scale,1));
    }
+   
+   /* account for widgets being placed directly next to the play/pause button */
+   .left .seek:last-child {
+      margin-right: calc(4px*var(--scale,1));
+   }
+   .right .seek:first-child {
+      margin-left: calc(4px*var(--scale,1));
+   }
+   .left .basic-button:last-child {
+      margin-right: calc(10px*var(--scale,1));
+   }
+   .right .basic-button:first-child {
+      margin-left: calc(10px*var(--scale,1));
+   }
 }
 
 
@@ -374,9 +456,9 @@ video {
    --padding: 4px;
    
    --tray-spritesheet:            url(spritesheet-tray-background-non-overlay.svg#lite);
-   --tray-spritesheet-w-unitless: 41;
+   --tray-spritesheet-w-unitless: 52;
    --tray-spritesheet-w:          calc(1px * var(--tray-spritesheet-w-unitless));
-   --tray-spritesheet-h:          115px;
+   --tray-spritesheet-h:          219px;
    --tray-spritesheet-scale:      1;
    
    --tray-endcap-sprite-w: 15.5px;
@@ -395,6 +477,48 @@ video {
    hr {
       width: 2px;
       mask: linear-gradient(to right, #FFF, #FFF 50%, #000) 0 0/2px 100%;
+   }
+   
+   /*
+      Account for changes to the control layouts which leave either side 
+      of the tray empty.
+   */
+   &:has(.left:empty ~ .right:not(:empty)) {
+      --tray-bulge-sprite-y: 115px;
+      --tray-bulge-sprite-w: 45.747px;
+      --tray-bulge-sprite-h: 51px;
+      
+      .left {
+         display: none;
+      }
+      .play-pause {
+         margin-left: calc(5.595px*var(--scale,1));
+      }
+   }
+   &:has(.left:not(:empty) ~ .right:empty) {
+      --tray-bulge-sprite-y: 115px;
+      --tray-bulge-sprite-w: 45.747px;
+      --tray-bulge-sprite-h: 51px;
+      
+      .right {
+         display: none;
+      }
+      .play-pause {
+         margin-right: calc(7px*var(--scale,1));
+      }
+      &::before {
+         transform: scale(-100%, 100%);
+      }
+   }
+   &:has(.left:empty):has(.right:empty) {
+      --tray-bulge-sprite-y: 167px;
+      --tray-bulge-sprite-w: 51px;
+      --tray-bulge-sprite-h: 51px;
+      
+      .left,
+      .right {
+         display: none;
+      }
    }
 }
 :host([data-overlay-controls]) {
@@ -421,7 +545,7 @@ video {
    .content {
       grid-row: 1 / span 100;
    }
-   .seek {
+   .seek:not(.controls *) {
       margin-left: calc(12px * var(--scale,1));
       margin-right: calc(12px * var(--scale,1));
    }
@@ -471,10 +595,11 @@ video {
             69 110 0 110 / var(--tray-background-height) var(--endcap-border-width) 0 var(--endcap-border-width)
             stretch space
          ;
+         min-width: calc(var(--endcap-border-width) * 2);
       }
    }
    
-   .seek {
+   .seek:not(.controls *) {
       padding-top: calc(5px*var(--scale,1));
       margin:      calc(2px*var(--scale,1)) calc(5px*var(--scale,1));
       

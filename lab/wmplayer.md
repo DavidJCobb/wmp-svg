@@ -52,6 +52,22 @@ A video player element that mimics Windows Media Player 11 and 12's UI. The func
   
   Set `playbackRate` to change the baseline playback rate. Use the fast-forward and rewind APIs to perform those tasks.
 
+* You can use `data-controls-in-tray-left` and `data-controls-in-tray-right` (reflected by JavaScript properties `controlsInTrayLeft` and `controlsInTrayRight`) to configure which controls (besides the play/pause button) are shown in the tray. If *any* of these attributes are set, then only the controls you list will be displayed.
+  
+  Each attribute accepts a space-separated list of control names. If a control name other than `separator` appears more than once, then the leftmost position is used for that control. (You cannot duplicate built-in buttons.)
+  
+  The configurable controls are:
+  
+  * `loop`
+  * `mute`
+  * `next`
+  * `prev`
+  * `seek` (if not specified, it displays above the tray)
+  * `separator` (a vertical bar between controls)
+  * `shuffle`
+  * `stop`
+  * `volume` (for the slider)
+
 
 ## `WMPlayerSliderElement`
 

@@ -5,6 +5,23 @@ class WMPlayerElement extends HTMLElement {
    // Options:
    //
    
+   #control_names_to_nodes;
+   #controls_layout = (function() {
+      let out = {
+         tray_left:  [],
+         tray_right: [],
+      };
+      let str = {};
+      for(let key in out) {
+         str[key] = null;
+      }
+      out.computed  = str;
+      out.requested = Object.seal(Object.assign({}, str));
+      Object.seal(str);
+      Object.seal(out);
+      return out;
+   })();
+   
    #playlist = new WMPlaylist();
    #autoplay = false;
    #loop     = false;
@@ -160,7 +177,12 @@ class WMPlayerElement extends HTMLElement {
       // entirely by ourselves. After this, we'll register the 
       // attributes we want to automatically mirror to the wrapped 
       // media element.
-      this.observedAttributes = [ "autoplay", "src" ];
+      this.observedAttributes = [
+         "autoplay",
+         "src",
+         "data-controls-in-tray-left",
+         "data-controls-in-tray-right",
+      ];
       
       //
       // We handle `autoplay` ourselves.
@@ -339,6 +361,17 @@ class WMPlayerElement extends HTMLElement {
          }
          this.#seek_slider.addEventListener("change", bound);
       }
+      
+      this.#control_names_to_nodes = {
+         loop:    this.#loop_button,
+         mute:    this.#mute_button,
+         next:    this.#next_button,
+         prev:    this.#prev_button,
+         seek:    this.#seek_slider,
+         shuffle: this.#shuffle_button,
+         stop:    this.#stop_button,
+         volume:  this.#volume_slider,
+      };
    }
    
    //
@@ -485,6 +518,36 @@ class WMPlayerElement extends HTMLElement {
       this.#update_next_state();
    }
    
+   #controls_layout_setter(name, attr, v) {
+      if (Array.isArray(v)) {
+         v = v.join(" ");
+      } else if (v !== null) {
+         let u = v + "";
+         if (v == u)
+            v = v.trim();
+         else
+            v = u;
+      }
+      let prior = this.#controls_layout.requested[name];
+      this.#controls_layout.requested[name] = v;
+      this.#setting_attribute = true;
+      this[v !== null ? "setAttribute" : "removeAttribute"](attr, v);
+      this.#setting_attribute = false;
+      if (prior !== v) {
+         this.#update_controls_layout();
+      }
+   }
+   
+   get controlsInTrayLeft() { return this.#controls_layout.computed.tray_left; }
+   set controlsInTrayLeft(v) {
+      this.#controls_layout_setter("tray_left", "data-controls-in-tray-left", v);
+   }
+   
+   get controlsInTrayRight() { return this.#controls_layout.computed.tray_right; }
+   set controlsInTrayRight(v) {
+      this.#controls_layout_setter("tray_right", "data-controls-in-tray-right", v);
+   }
+   
    //
    // Public methods (not related to any specific feature)
    //
@@ -534,6 +597,7 @@ class WMPlayerElement extends HTMLElement {
          this.#loop_button.checked = state;
          this.#update_loop_tooltip(state);
          this.#update_prev_next_state(this.#media.currentTime);
+         return;
       }
       if (name == "src") {
          //
@@ -552,6 +616,22 @@ class WMPlayerElement extends HTMLElement {
             this.#playlist.replace([ item ]);
             this.#try_autoplay();
          }
+         return;
+      }
+      
+      if (name == "data-controls-in-tray-left") {
+         if (after)
+            after = after.trim();
+         this.#controls_layout.requested.tray_left = after;
+         this.#update_controls_layout();
+         return;
+      }
+      if (name == "data-controls-in-tray-right") {
+         if (after)
+            after = after.trim();
+         this.#controls_layout.requested.tray_right = after;
+         this.#update_controls_layout();
+         return;
       }
    }
    
@@ -1174,6 +1254,87 @@ class WMPlayerElement extends HTMLElement {
    #update_prev_next_state(current_time) {
       this.#update_prev_state(current_time);
       this.#update_next_state();
+   }
+   
+   //
+   // Controls layout
+   //
+   
+   #update_controls_layout() {
+      let layout    = this.#controls_layout;
+      let requested = this.#controls_layout.requested;
+      let computed  = this.#controls_layout.computed;
+      let empty     = true;
+      let used      = {};
+      for(let key in this.#control_names_to_nodes) {
+         used[key] = false;
+      }
+      {
+         let handle_member = (function(name) {
+            computed[name] = null;
+            layout[name]   = [];
+            
+            let list = requested[name];
+            if (!list) {
+               if (list !== null)
+                  empty = false;
+               return;
+            }
+            list = list.split(" ");
+            
+            let first = true;
+            for(let item of list) {
+               let node;
+               if (item == "separator") {
+                  node = document.createElement("hr");
+               } else {
+                  node = this.#control_names_to_nodes[item];
+                  if (!node || used[item]) {
+                     continue;
+                  }
+                  used[item] = true;
+               }
+               
+               empty = false;
+               layout[name].push(node);
+               if (first) {
+                  computed[name] = item;
+                  first = false;
+               } else {
+                  computed[name] += ' ' + item;
+               }
+            }
+         }).bind(this);
+         handle_member("tray_left");
+         handle_member("tray_right");
+      }
+      if (empty) {
+         layout.tray_left = [
+            this.#shuffle_button,
+            this.#loop_button,
+            document.createElement("hr"),
+            this.#stop_button,
+            this.#prev_button
+         ];
+         layout.tray_right = [
+            this.#next_button,
+            this.#mute_button,
+            this.#volume_slider
+         ];
+      }
+      
+      function apply_member(name, container) {
+         let frag = new DocumentFragment();
+         for(let node of layout[name]) {
+            frag.append(node);
+         }
+         container.replaceChildren(frag);
+      }
+      if (!used.seek) {
+         this.#shadow.querySelector(".content").after(this.#seek_slider);
+      }
+      apply_member("tray_left",  this.#shadow.querySelector(".controls .left"));
+      apply_member("tray_right", this.#shadow.querySelector(".controls .right"));
    }
    
 };

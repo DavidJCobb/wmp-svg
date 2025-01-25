@@ -15,18 +15,7 @@ Overview:
 ## Specifics
 
 * `WMPlayerElement`
-  * Look into offering differing arrangements of buttons
-    * Current arrangement
-    * Play/pause, seek slider, timestamp, and volume
-    * Better yet: add reflected properties/attributes that consist of a space-separated list of buttons to show e.g. `"shuffle loop stop prev"`.
-      * `data-controls-in-tray-left` and `data-controls-in-tray-right`
-      * When none of these properties are set, use the default layout. When any properties are set, show only the buttons listed in their values.
-        * Note: We need to treat the attributes being absent as `null`, not `""`, so that `""` can be used to hide all optional controls.
-      * For now, do not allow moving the Play/Pause button.
-      * If a control is listed more than once, then display it in the leftmost position only.
-        * Allow `separator` as a value that can appear more than once, spawning an `hr` element.
-      * If `seek` is included in any of these, move the seek slider into the tray.
-      * If there are no controls on one side of the tray (or if the Play/Pause button is the sole button being shown), then adjust how we render the tray "bulge" behind the Play/Pause button.
+  * Investigate allowing control repositioning to move the current timestamp into the tray, e.g. between Play/Pause and Seek.
   * Full-screen toggle button in lower-right corner
   * Investigate [`navigator.mediaSession`](https://stackoverflow.com/questions/76445098/how-do-i-set-the-album-art-and-or-title-of-currently-playing-media-in-javascript) support. (Full details [here](https://web.dev/articles/media-session).) Note that Firefox doesn't support this API.
   * Make it possible to scale the player UI based on a scaling factor relative to the vanilla size *or* maximum main- and cross-axis sizes.

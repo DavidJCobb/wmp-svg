@@ -325,10 +325,10 @@
    --glyph-x: -7px;
    --glyph-y: -7px;
    
-   --current-sprite-col: 0;
+   --glyph-current-col: 0;
 }
 :host(:state(playing)) .play-pause {
-   --current-sprite-col: 1;
+   --glyph-current-col: 1;
 }
 
 /*
