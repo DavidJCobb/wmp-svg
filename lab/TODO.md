@@ -5,12 +5,6 @@ Overview:
 
 * Graphics work
   * Slider thumb refinements
-* API
-  * Support different controls layouts
-  * Redesign playlist API
-* General coding
-  * Subtitle support
-  * Switch to TypeScript?
 
 ## Specifics
 
@@ -27,8 +21,6 @@ Overview:
       * `.remove`
   * Optional: currently-playing media title offset to the left edge (WMP: seen in music UI, not in video UI).
   * Investigate automatically switching in and out of "theater" mode depending on whether we hit an audio file or a video file
-  * Investigate adding support for displaying subtitles, lyrics, et cetera.
-  * Consider switching this all to TypeScript.
   * Add APIs/accessors for the following features.
     * Zoom video
       * Present in WMP's context menu
