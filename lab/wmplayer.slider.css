@@ -82,14 +82,14 @@
 
 :host(.constant-thumb) .thumb,
 :host(:hover) .thumb {
-   --sprite: url(spritesheet-jewel-no-shadow.svg#normal);
+   --sprite: url(spritesheet-slider-thumb.svg#normal);
 }
 :host(:hover:not(:active):not(:state(active))) .thumb:hover {
-   --sprite: url(spritesheet-jewel-no-shadow.svg#hover);
+   --sprite: url(spritesheet-slider-thumb.svg#hover);
 }
 :host(:active) .thumb,
 :host(:state(active)) .thumb {
-   --sprite: url(spritesheet-jewel-no-shadow.svg#active);
+   --sprite: url(spritesheet-slider-thumb.svg#active);
 }
 :host(:disabled) .thumb {
    display: none;

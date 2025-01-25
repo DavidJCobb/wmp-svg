@@ -1,13 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" shape-rendering="crisp-edges">
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="100" shape-rendering="crisp-edges">
    <defs id="views">
-      <!--
-      -->
       <view id="normal" viewBox="7 8 86 86" />
       <view id="hover" viewBox="107 8 86 86" />
       <view id="active" viewBox="207 8 86 86" />
-      <view id="disabled" viewBox="307 8 86 86" />
    </defs>
-
+   
    <defs name="common-defs">
       <g id="alpha-mask-outer-area" fill="none">
          <circle cx="50" cy="51" r="43" stroke="#FFF" stroke-width="6" />
@@ -60,12 +57,12 @@
    </defs>
    <defs name="common-shapes">
       <ellipse id="outline" fill="#043287" rx="43" ry="43" cx="50" cy="51" /> 
-      <ellipse id="edge" rx="42" ry="40.5" cx="50" cy="50.75" />
+      <ellipse id="edge" rx="38" ry="36.5" cx="50" cy="50.75" />
       
-      <ellipse id="inner-fill-base" rx="40" ry="38.5" cx="50" cy="50.5" />
-      <ellipse id="inner-fill-highlight" rx="43" ry="43" cx="50" cy="51" mask="url(#inner-highlight-mask-common)" />
+      <ellipse id="inner-fill-base" rx="36" ry="34.5" cx="50" cy="50.5" />
+      <ellipse id="inner-fill-highlight" rx="39" ry="39" cx="50" cy="51" mask="url(#inner-highlight-mask-common)" />
       
-      <circle id="glass-highlight" mask="url(#glass-highlight-shape-mask)" r="41.5" cx="50" cy="51" style="mix-blend-mode: screen" />
+      <circle id="glass-highlight" mask="url(#glass-highlight-shape-mask)" r="37.5" cx="50" cy="51" style="mix-blend-mode: screen" />
    </defs>
    
    <g id="state-normal">
@@ -188,51 +185,6 @@
             <use href="#inner-fill-highlight" fill="url(#inner-highlight-fill-active)" />
          </g>
          <use href="#glass-highlight" fill="url(#glass-highlight-fill-active)" />
-      </g>
-   </g>
-   
-   <!--
-      based on back/forward buttons found in WMP assets.
-      the play/pause button is never naturally disabled.
-   -->
-   <g id="state-disabled" transform="translate(300 0)">
-      <defs>
-         <mask id="disabled-alpha-mask" color-interpolation="linearrgb">
-            <defs>
-               <linearGradient id="disabled-alpha-mask-edge-grad" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0" stop-color="#FFF" />
-                  <stop offset="0.5" stop-color="#c8c8c8" />
-               </linearGradient>
-               <linearGradient id="disabled-alpha-mask-glass-grad" x1="0" x2="0" y1="0" y2="1">
-                  <stop stop-color="#eaeaea" offset="0%" />
-                  <stop stop-color="#b4b4b4" offset="25%" />
-                  <stop stop-color="#878787" offset="50%" />
-               </linearGradient>
-               <radialGradient id="disabled-alpha-mask-base-grad"
-                  cx="0.5" cy="1.0" r="2"
-               >
-                  <stop offset="100%" stop-color="#000" />
-                  <stop offset="90%" stop-color="#2e2e2e" />
-                  <stop offset="80%" stop-color="#000" />
-                  <stop offset="60%" stop-color="#2e2e2e" />
-                  <stop offset="40%" stop-color="#000" />
-               </radialGradient>
-            </defs>
-            <use href="#inner-fill-base" fill="url(#disabled-alpha-mask-base-grad)" />
-            <circle mask="url(#glass-highlight-shape-mask)" r="41.5" cx="50" cy="51" fill="url(#disabled-alpha-mask-glass-grad)" />
-            <ellipse fill="none" stroke="url(#disabled-alpha-mask-edge-grad)" stroke-width="2" rx="41" ry="39.5" cx="50" cy="50.75" />
-         </mask>
-         
-         <linearGradient id="glass-highlight-fill-disabled" x1="0" x2="0" y1="0" y2="1">
-            <stop stop-color="#FFFFFF" offset="0%" />
-            <stop stop-color="#fbffff" offset="25%" />
-            <stop stop-color="#eaffff" offset="50%" />
-         </linearGradient>
-      </defs>
-      <g mask="url(#disabled-alpha-mask)">
-         <use href="#edge" fill="#FFF" />
-         <use href="#inner-fill-base" fill="#a2b6c4" />
-         <use href="#glass-highlight" fill="url(#glass-highlight-fill-disabled)" />
       </g>
    </g>
 </svg>

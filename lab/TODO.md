@@ -8,12 +8,9 @@ Overview:
 
 ## Specifics
 
-* The thumbs for the seek slider and volume slider have outlines that are too thin, because we're taking the 86x86px jewel from the play/pause graphic and reusing it at a smaller size.
-  * The bare minimum fix for this would be to guarantee a minimum outline thickness of 1px using a `non-scaling-stroke`. We already had to split the slider thumb into a separate graphic so we could get rid of the alpha mask and drop shadow that were built into the play/pause button, so we *can* make this fix.
-    * But the graphics still end up looking bad at larger sizes (e.g. 2x scale, 3x scale) because the outlines should be thicker for the scrollbar thumbs, basically.
 * Button glyphs
-  * Full-screen (enter/exit)
-  * Now Playing (enter/exit)
+  * Full-screen (enter/exit) (with disabled states too)
+  * Now Playing (enter/exit) (with disabled states too)
 * `WMPlayerElement`
   * Full-screen toggle button in lower-right corner (name for layout customization: `fullscreen`)
   * Now Playing toggle (lower-right in Library view; upper-right in Now Playing view) (name for layout customization: `toggle-overlaid`)
