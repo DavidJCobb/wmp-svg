@@ -13,8 +13,10 @@ Overview:
     * But the graphics still end up looking bad at larger sizes (e.g. 2x scale, 3x scale) because the outlines should be thicker for the scrollbar thumbs, basically.
 * Button glyphs
   * Full-screen (enter/exit)
+  * Now Playing (enter/exit)
 * `WMPlayerElement`
-  * Full-screen toggle button in lower-right corner
+  * Full-screen toggle button in lower-right corner (name for layout customization: `fullscreen`)
+  * Now Playing toggle (lower-right in Library view; upper-right in Now Playing view) (name for layout customization: `toggle-overlaid`)
   * Investigate allowing control repositioning to move the current timestamp into the tray, e.g. between Play/Pause and Seek.
   * Investigate improvements to the playlist API
     * Test accessors on WMPlaylist
