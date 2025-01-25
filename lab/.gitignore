@@ -1,6 +1,8 @@
 test-audio.wav
+test-audio-*.m4a
 test-audio-*.wav
 test-video.mp4
 test-video-*.avi
 test-video-*.m4v
 test-video-*.mp4
+*.lrc

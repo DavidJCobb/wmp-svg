@@ -59,7 +59,7 @@ class WMPlaylistItem {
    populateMediaElement(media) {
       media.poster = this.#poster || "";
       media.src    = this.#src || "";
-      media.append(this.#sources.concat(this.#tracks));
+      media.append(...this.#sources.concat(this.#tracks));
       media.currentTime = 0;
    }
    

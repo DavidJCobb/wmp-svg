@@ -16,13 +16,46 @@ wm-player {
 }
       </style>
       <script>
-document.getElementsByTagName("wm-player")[0].addToPlaylist("test-video-2.m4v");
-document.getElementsByTagName("wm-player")[0].addToPlaylist("test-video-3.mp4");
-document.getElementsByTagName("wm-player")[0].addToPlaylist("test-audio.wav");
-document.getElementsByTagName("wm-player")[0].addToPlaylist({
-   src:    "test-audio-2.wav",
-   poster: "rips/main-active.png", // test album art, basically
-});
+{
+   let player = document.getElementsByTagName("wm-player")[0];
+   player.addToPlaylist("test-video-2.m4v");
+   player.addToPlaylist("test-video-3.mp4");
+   player.addToPlaylist("test-audio.wav");
+   player.addToPlaylist({
+      src:    "test-audio-2.wav",
+      poster: "rips/main-active.png", // test album art, basically
+   });
+}
+      </script>
+      
+      <script src="lrc-to-text-track.js"></script>
+      <script>
+(async function() {
+   let player = document.getElementsByTagName("wm-player")[0];
+   let lrc;
+   try {
+      lrc = await fetch("test-audio-3.lrc");
+      lrc = await lrc.text();
+   } catch (e) {
+      return;
+   }
+console.log(lrc);
+   lrc = lrc_to_vtt(lrc);
+console.log(lrc);
+   
+   player.addToPlaylist({
+      src:    "test-audio-3.m4a",
+      tracks: [
+         {
+            kind:    "subtitles",
+            label:   "lyrics",
+            srclang: "en",
+            src:     `data:text/vtt;charset=UTF-8,${encodeURIComponent(lrc)}`,
+            default: true,
+         }
+      ]
+   });
+})();
       </script>
    </body>
 </html>

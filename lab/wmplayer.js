@@ -133,7 +133,7 @@ class WMPlayerElement extends HTMLElement {
          "videoHeight",
          "videoWidth",
       ]) {
-         Object.defineProperty(this, name, {
+         Object.defineProperty(this.prototype, name, {
             get: function() { return this.#media[name]; }
          });
       }
@@ -163,7 +163,7 @@ class WMPlayerElement extends HTMLElement {
          // HTMLVideoElement:
          "disablePictureInPicture",
       ]) {
-         Object.defineProperty(this, name, {
+         Object.defineProperty(this.prototype, name, {
             get: function() { return this.#media[name]; },
             set: function(v) { this.#media[name] = v; }
          });
@@ -200,6 +200,9 @@ class WMPlayerElement extends HTMLElement {
       // case, one would expect `width` and `height` to refer to the 
       // total size of the player, and not just the video dimensions.
       //
+      // We allow the `poster` to be set per playlist item, so we don't 
+      // forward that either.
+      //
       for(const name of [
          // HTMLMediaElement:
          //"autoplay",
@@ -208,11 +211,11 @@ class WMPlayerElement extends HTMLElement {
          //"src",
          // HTMLVideoElement:
          //"height",
-         "poster",
+         //"poster",
          //"width",
       ]) {
          this.observedAttributes.push(name);
-         Object.defineProperty(this, name, {
+         Object.defineProperty(this.prototype, name, {
             get: function() { return this.#media[name]; },
             set: function(v) {
                this.#setting_attribute = true;
@@ -230,7 +233,7 @@ class WMPlayerElement extends HTMLElement {
          ["defaultMuted", "muted"],
       ]) {
          this.observedAttributes.push(attr);
-         Object.defineProperty(this, name, {
+         Object.defineProperty(this.prototype, name, {
             get: function() { return this.#media[name]; },
             set: function(v) {
                this.#setting_attribute = true;
@@ -258,8 +261,8 @@ class WMPlayerElement extends HTMLElement {
          "requestPictureInPicture",
          "requestVideoFrameCallback",
       ]) {
-         this[name] = function(...args) {
-            this.#media[name](...args);
+         this.prototype[name] = function(...args) {
+            return this.#media[name](...args);
          };
       }
    };
