@@ -224,7 +224,7 @@
    --glass-y: -4px;
    
    --glyph-spritesheet:      url(spritesheet-glyphs-general.svg);
-   --glyph-spritesheet-rows: 4;
+   --glyph-spritesheet-rows: 5;
    --glyph-spritesheet-cols: 5;
    --glyph-x: -1.5px;
    --glyph-y: -2px;
@@ -233,16 +233,21 @@
    --glyph-sprite-scale:  2;
    
    /* what rows represent what glyphs */
-   --glyph-row-loop:    0;
-   --glyph-row-shuffle: 1;
-   --glyph-row-stop:    2;
-   --glyph-row-volume:  3;
+   --glyph-row-loop:       0;
+   --glyph-row-shuffle:    1;
+   --glyph-row-stop:       2;
+   --glyph-row-volume:     3;
+   --glyph-row-fullscreen: 4;
    
    /* what columns represent what variants */
    --glyph-col-off:      0;
    --glyph-col-on:       1;
    --glyph-col-enabled:  0;
    --glyph-col-disabled: 1;
+   --glyph-col-fullscreen-enter-enabled:  0;
+   --glyph-col-fullscreen-enter-disabled: 1;
+   --glyph-col-fullscreen-exit-enabled:   2;
+   --glyph-col-fullscreen-exit-disabled:  3;
    
    /* Icons: */
    

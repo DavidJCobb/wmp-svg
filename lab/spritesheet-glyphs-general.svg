@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" color-interpolation="linearrgb" width="250" height="200">
+<svg xmlns="http://www.w3.org/2000/svg" color-interpolation="linearrgb" width="250" height="250">
    <view id="theater" />
    <defs>
       <style><![CDATA[
@@ -25,16 +25,18 @@
       Glyphs are, formally, 50x50px graphics, but in general they don't 
       extend very far beyond a 26x26px AABB.
       
-      SPRITE │ COL 0   │ COL 1    │ COL 2 │ COL 3 │ COL 4 │
-      ───────┼─────────┼──────────┼───────┴───────┴───────┤
-      Loop   │ Off     │ On       │                       │
-      ───────┼─────────┼──────────┼───────────────────────┤
-      Shuffle│ Off     │ On       │                       │
-      ───────┼─────────┼──────────┼───────────────────────┤
-      Stop   │ Enabled │ Disabled │                       │
-      ───────┼─────────┼──────────┼───────┬───────┬───────┤
-      Volume │ 0       │ 33%      │ 66%   │ 100%  │ Muted │
-      ───────┴─────────┴──────────┴───────┴───────┴───────┘
+      SPRITE     │ COL 0   │ COL 1    │ COL 2  │ COL 3  │ COL 4 │
+      ───────────┼─────────┼──────────┼────────┴────────┴───────┤
+      Loop       │ Off     │ On       │                         │
+      ───────────┼─────────┼──────────┼─────────────────────────┤
+      Shuffle    │ Off     │ On       │                         │
+      ───────────┼─────────┼──────────┼─────────────────────────┤
+      Stop       │ Enabled │ Disabled │                         │
+      ───────────┼─────────┼──────────┼────────┬────────┬───────┤
+      Volume     │ 0       │ 33%      │ 66%    │ 100%   │ Muted │
+      ───────────┼─────────┼──────────┼────────┼────────┼───────┤
+      Fullscreen │ Enter E │ Enter D  │ Exit E │ Exit D │       │
+      ───────────┴─────────┴──────────┴────────┴────────┴───────┘
    -->
    
    <!-- Loop -->
@@ -335,6 +337,66 @@
                <line x1="-7.4235" y1="-7.4235" x2="7.4235" y2="7.4235" />
             </g>
          </g>
+      </g>
+   </g>
+   
+   <!-- Full-screen -->
+   <g transform="translate(0 200)">
+      <defs>
+         <path id="fullscreen-frame-shape" d="M 10,10 L40,10 L40,40 L10,40 L10,10 z M12,16 L12,36 L38,36 L38,16 z" />
+         
+         <!-- centered -->
+         <path id="fullscreen-arrow-shape" d="M -4 -8 l 12 0 l 0 12 l -4 -3 L -6 8 L -8 6 L -1 -4 z" />
+         <path id="fullscreen-arrow-shape-down" d="M 4 8 l -12 0 l -0 -12 l 4 3 L 6 -8 L 8 -6 L 1 4 z" />
+         
+         <g id="fullscreen-enter-shape">
+            <use href="#fullscreen-frame-shape" />
+            <use href="#fullscreen-arrow-shape" transform="translate(28 26)" />
+         </g>
+         <g id="fullscreen-exit-shape">
+            <use href="#fullscreen-frame-shape" />
+            <use href="#fullscreen-arrow-shape-down" transform="translate(28 26)" />
+         </g>
+         
+         <linearGradient id="fullscreen-fill-enabled" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stop-color="#399FFF" />
+            <stop offset="1" stop-color="#0064cc" />
+         </linearGradient>
+         <linearGradient id="fullscreen-fill-disabled" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stop-color="#888888" />
+            <stop offset="1" stop-color="#333333" />
+         </linearGradient>
+         
+         <mask id="fullscreen-enter-mask">
+            <use href="#fullscreen-enter-shape" fill="#FFF" stroke="#AAA" stroke-width="2" paint-order="stroke fill" />
+         </mask>
+         <mask id="fullscreen-exit-mask">
+            <use href="#fullscreen-exit-shape" fill="#FFF" stroke="#AAA" stroke-width="2" paint-order="stroke fill" />
+         </mask>
+      </defs>
+      
+      <!-- enter, enabled -->
+      <g mask="url(#fullscreen-enter-mask)">
+         <rect x="0" y="0" width="50" height="50" fill="#FFF" />
+         <use href="#fullscreen-enter-shape" fill="url(#fullscreen-fill-enabled)" />
+      </g>
+      
+      <!-- enter, disabled -->
+      <g mask="url(#fullscreen-enter-mask)" transform="translate(50 0)">
+         <rect x="0" y="0" width="50" height="50" fill="#FFF" />
+         <use href="#fullscreen-enter-shape" fill="url(#fullscreen-fill-disabled)" opacity="0.6" />
+      </g>
+      
+      <!-- exit, enabled -->
+      <g mask="url(#fullscreen-exit-mask)" transform="translate(100 0)">
+         <rect x="0" y="0" width="50" height="50" fill="#FFF" />
+         <use href="#fullscreen-exit-shape" fill="url(#fullscreen-fill-enabled)" />
+      </g>
+      
+      <!-- exit, disabled -->
+      <g mask="url(#fullscreen-exit-mask)" transform="translate(150 0)">
+         <rect x="0" y="0" width="50" height="50" fill="#FFF" />
+         <use href="#fullscreen-exit-shape" fill="url(#fullscreen-fill-disabled)" opacity="0.6" />
       </g>
    </g>
 </svg>
