@@ -512,6 +512,41 @@ class WMPlayerElement extends HTMLElement {
       return true;
    }
    
+   #update_content_type_classes() {
+      let main = this.#shadow.querySelector(".main");
+      let item = null;
+      if (this.#playlist.length != 0) {
+         item = this.#playlist.currentItem;
+      }
+      
+      let is_video = false;
+      if (item) {
+         let tracks = this.#media.videoTracks;
+         if (tracks && tracks.length > 0) {
+            is_video = true;
+         } else {
+            if (this.#media.readyState < HTMLMediaElement.HAVE_METADATA) {
+               //
+               // Impossible for us to know if this is a video or if it's only 
+               // audio. If we forge ahead anyway, then that'll cause flickering 
+               // between video and non-video states when the user clicks Next 
+               // to move from one video in a playlist to another.
+               //
+               return;
+            }
+            if (this.#media.videoWidth && this.#media.videoHeight) { // fallback
+               is_video = true;
+            }
+         }
+      }
+      
+      if (is_video) {
+         main.classList.add("video");
+      } else {
+         main.classList.remove("video");
+      }
+   }
+   
    //
    // Accessors
    //
@@ -795,6 +830,7 @@ class WMPlayerElement extends HTMLElement {
       
       this.#mute_button.checked = this.#media.muted; // account for `defaultMuted`
       this.#update_mute_tooltip();
+      this.#update_content_type_classes();
       
       window.setTimeout((function() {
          this.#ready_to_autoplay = false;
@@ -927,6 +963,7 @@ class WMPlayerElement extends HTMLElement {
       if (index > 0) {
          this.#set_is_stopped(false);
       }
+      this.#update_content_type_classes();
    }
    #on_playlist_cleared() {
       this.#media.pause();
@@ -1115,6 +1152,7 @@ class WMPlayerElement extends HTMLElement {
    #on_loaded_metadata(e) {
       this.#media.width  = this.#media.videoWidth  || 0;
       this.#media.height = this.#media.videoHeight || 0;
+      this.#update_content_type_classes(); // we rely on metadata for older browsers
    }
    #on_duration_change(e) {
       let duration = this.#media.duration;
@@ -1235,6 +1273,7 @@ class WMPlayerElement extends HTMLElement {
          this.#playlist.index = 0;
          this.#media.pause();
          this.#update_play_state();
+         this.#update_content_type_classes();
          this.#stop_button.disabled = true;
          
          this.#cancel_queued_fast_playback();

@@ -10,7 +10,7 @@ Overview:
 
 * Slider thumb should use CSS spritesheets, not SVG views
 * Remove or comment out SVG views in any spritesheets where views are no longer used
-* Make it so that if `data-overlay-controls="video-only"`, then we overlay controls when playing a video but never any other time. Similarly, allow `data-overlay-controls="visuals"` for videos and for audio-only tracks with a defined `poster`.
+* Create a demo page that uses `data-overlay-controls="video-only"` with multiple files to test with.
 * Button glyphs
   * Now Playing (enter/exit) (with disabled states too)
 * `WMPlayerElement`
@@ -30,6 +30,7 @@ Overview:
       * Allow zooming to a percentage size. If the percentage is too large, crop.
       * Allow fitting the video to the player or vice versa.
   * Investigate features for streaming video, e.g. highlighting the currently buffered time range on the seek slider.
+  * Make it so that if `data-overlay-controls="any-visual"`, then we overlay controls when playing a video *or* when playing an audio-only item that has a `poster`.
   * Make it possible to scale the player UI based on a scaling factor relative to the vanilla size *or* maximum main- and cross-axis sizes.
   
 ## Specific features

@@ -196,11 +196,6 @@ video::cue {
    );
    width: 10ch;
 }
-:host([data-overlay-controls]) .current-time {
-   color: #FFF;
-   -webkit-text-stroke: 4px #000A;
-   padding-right: calc(10px * var(--scale,1));
-}
 
 .controls {
    grid-area: controls;
@@ -506,7 +501,8 @@ video::cue {
    THEMES
 */
 
-:host(:not([data-overlay-controls])) .controls {
+:host(:not([data-overlay-controls])) .controls,
+:host([data-overlay-controls="video-only" i]) .main:not(.video) .controls {
    --height:  calc(31px * var(--scale,1));
    --padding: 4px;
    
@@ -550,33 +546,47 @@ video::cue {
       --tray-bulge-sprite-h: 51px;
    }
 }
-:host([data-overlay-controls]) {
-   .main {
-      --requested-scale: var(--scale);
-      .controls {
-         /*
-            In WMP's Now Playing view, player controls are overlaid 
-            on the playing media. The controls are rendered at 92% 
-            scale, but the icon glyphs that serve as button labels 
-            remain at 100% scale.
-            
-            Notably, elements like the seek slider and the current 
-            timestamp are also not downscaled.
-         */
-         --scale: calc(var(--requested-scale,1) * 0.92);
-         --button-glyph-scale: var(--requested-scale,1);
-      }
-      
-      --gap-between-seek-and-controls: calc(12px * var(--scale,1));
-      --gap-below-controls: calc( 3px * var(--scale,1));
+:host([data-overlay-controls]:not([data-overlay-controls="video-only" i])) .main,
+:host([data-overlay-controls="video-only" i]) .main.video {
+   --requested-scale: var(--scale);
+   .controls {
+      /*
+         In WMP's Now Playing view, player controls are overlaid 
+         on the playing media. The controls are rendered at 92% 
+         scale, but the icon glyphs that serve as button labels 
+         remain at 100% scale.
+         
+         Notably, elements like the seek slider and the current 
+         timestamp are also not downscaled.
+      */
+      --scale: calc(var(--requested-scale,1) * 0.92);
+      --button-glyph-scale: var(--requested-scale,1);
    }
+   
+   --gap-between-seek-and-controls: calc(12px * var(--scale,1));
+   --gap-below-controls: calc( 3px * var(--scale,1));
    
    .content {
       grid-row: 1 / span 100;
+      
+      video::cue {
+         /*
+            TODO: We need to move cues out from below the video 
+            controls. The problem is that CSS... just doesn't 
+            give us a way to do that. So whenever CSS control 
+            over subtitles is, uh, no longer terrible, we'll 
+            need to go and update this.
+         */
+      }
    }
    .seek:not(.controls *) {
       margin-left: calc(12px * var(--scale,1));
       margin-right: calc(12px * var(--scale,1));
+   }
+   .current-time {
+      color: #FFF;
+      -webkit-text-stroke: 4px #000A;
+      padding-right: calc(10px * var(--scale,1));
    }
    .controls {
       hr {
@@ -588,44 +598,43 @@ video::cue {
       }
    }
 }
-:host([data-theme="dark" i]:not([data-overlay-controls])) {
+:host([data-theme="dark" i]:not([data-overlay-controls])) .main,
+:host([data-theme="dark" i][data-overlay-controls="video-only"]) .main:not(.video) {
    /*
       Styles for the dark theme used by WMP 11 on Windows XP.
    */
    
    /* background */
-   .main {
-      --tray-background-height: calc(69px*var(--scale,1));
-      &::before {
-         content: " ";
-         grid-row:    lower-start / lower-background-end;
-         grid-column: 1 / span 3;
-         order: -2;
-         z-index: -2;
-         
-         background:
-            url(spritesheet-tray-background-dark.svg#middle) left top/1px var(--tray-background-height) repeat-x
-         ;
-      }
-      &::after {
-         --endcap-outset: calc(-78px * var(--scale,1));
-         --endcap-border-width: calc(110px * var(--scale,1));
-         
-         content: " ";
-         
-         grid-row:    lower-start / lower-background-end;
-         grid-column: controls-start / controls-end;
-         z-index:    -1;
-         
-         margin:     0 var(--endcap-outset);
-         min-height: var(--tray-background-height);
-         border-image:
-            url(spritesheet-tray-background-dark.svg)
-            69 110 0 110 / var(--tray-background-height) var(--endcap-border-width) 0 var(--endcap-border-width)
-            stretch space
-         ;
-         min-width: calc(var(--endcap-border-width) * 2);
-      }
+   --tray-background-height: calc(69px*var(--scale,1));
+   &::before {
+      content: " ";
+      grid-row:    lower-start / lower-background-end;
+      grid-column: 1 / span 3;
+      order: -2;
+      z-index: -2;
+      
+      background:
+         url(spritesheet-tray-background-dark.svg#middle) left top/1px var(--tray-background-height) repeat-x
+      ;
+   }
+   &::after {
+      --endcap-outset: calc(-78px * var(--scale,1));
+      --endcap-border-width: calc(110px * var(--scale,1));
+      
+      content: " ";
+      
+      grid-row:    lower-start / lower-background-end;
+      grid-column: controls-start / controls-end;
+      z-index:    -1;
+      
+      margin:     0 var(--endcap-outset);
+      min-height: var(--tray-background-height);
+      border-image:
+         url(spritesheet-tray-background-dark.svg)
+         69 110 0 110 / var(--tray-background-height) var(--endcap-border-width) 0 var(--endcap-border-width)
+         stretch space
+      ;
+      min-width: calc(var(--endcap-border-width) * 2);
    }
    
    .seek:not(.controls *) {
