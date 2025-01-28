@@ -1,5 +1,7 @@
 
 :host {
+   display: block;
+   
    /*INPUTS*/
    
    /* Guide the aspect ratio of the video player. */
@@ -55,6 +57,9 @@
 }
 
 .main {
+   width:  100%;
+   height: 100%;
+   
    /* Internal variables */
    --button-glyph-scale: var(--scale, 1);
 }

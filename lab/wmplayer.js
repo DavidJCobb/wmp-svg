@@ -88,7 +88,7 @@ class WMPlayerElement extends HTMLElement {
    #setting_attribute = false;
    
    static #HTML = `
-<link rel="stylesheet" href="wmplayer.button-styles.css" />
+<link rel="stylesheet" href="wmplayer.buttons.css" />
 <link rel="stylesheet" href="wmplayer.css" />
 <div class="main">
    <div class="content">
@@ -918,7 +918,9 @@ class WMPlayerElement extends HTMLElement {
       let item  = e.detail.item;
       
       this.#media.pause();
-      item.populateMediaElement(this.#media);
+      if (item) {
+         item.populateMediaElement(this.#media);
+      }
       this.#update_media_session_metadata();
       this.#update_current_time_readout(0);
       this.#update_prev_next_state(0);

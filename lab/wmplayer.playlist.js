@@ -210,6 +210,12 @@ class WMPlaylist extends EventTarget {
       this.#items.push(item);
       this.#indices_for_shuffle.push(this.#items.length - 1);
       this.dispatchEvent(new Event("modified"));
+      if (this.#items.length == 1) {
+         //
+         // Went from empty to non-empty.
+         //
+         this.index = 0;
+      }
    }
    clear() {
       this.#items = [];
