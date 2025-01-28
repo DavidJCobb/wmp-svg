@@ -3,8 +3,10 @@
 
 Overview:
 
-* Graphics work
-  * Slider thumb refinements
+* Finish purging SVG views in favor of CSS spritesheets
+* Create a new `lab` branch based on the current branch. Then, in `main`, delete the lab.
+* In the `main` branch, create a `src` folder for just the WMPlayer assets, minus all the stuff from the lab
+* Create a `gh-pages` branch that has a page for the demo (we want that in its own branch in part so that people wishing to play with just the library don't need to clone hundreds of megabytes of video to their hard drives).
 
 ## Specifics
 
