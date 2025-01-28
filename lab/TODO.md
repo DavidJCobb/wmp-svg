@@ -8,11 +8,12 @@ Overview:
 
 ## Specifics
 
+* Slider thumb should use CSS spritesheets, not SVG views
+* Remove or comment out SVG views in any spritesheets where views are no longer used
+* Make it so that if `data-overlay-controls="video-only"`, then we overlay controls when playing a video but never any other time. Similarly, allow `data-overlay-controls="visuals"` for videos and for audio-only tracks with a defined `poster`.
 * Button glyphs
-  * Full-screen (enter/exit) (with disabled states too)
   * Now Playing (enter/exit) (with disabled states too)
 * `WMPlayerElement`
-  * Full-screen toggle button in lower-right corner (name for layout customization: `fullscreen`)
   * Now Playing toggle (lower-right in Library view; upper-right in Now Playing view) (name for layout customization: `toggle-overlaid`)
   * Investigate allowing control repositioning to move the current timestamp into the tray, e.g. between Play/Pause and Seek.
   * Investigate improvements to the playlist API
@@ -23,7 +24,6 @@ Overview:
       * `.moveItemTo`
       * `.remove`
   * Optional: currently-playing media title offset to the left edge (WMP: seen in music UI, not in video UI).
-  * Investigate automatically switching in and out of "theater" mode depending on whether we hit an audio file or a video file
   * Add APIs/accessors for the following features.
     * Zoom video
       * Present in WMP's context menu
