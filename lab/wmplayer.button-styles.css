@@ -1,7 +1,8 @@
 /*
    DECLARATIVE SPRITESHEETS
 */
-:where(.controls :is(button, .basic-button)) {
+:where(.controls button),
+:where(.basic-button) {
    /**************************************************************\
       BASELINE STYLES
    \**************************************************************/
@@ -290,6 +291,20 @@
       }
       &:checked {
          --glyph-current-col: 4;
+      }
+   }
+   
+   &.fullscreen {
+      --glyph-current-row: var(--glyph-row-fullscreen);
+      --glyph-current-col: var(--glyph-col-fullscreen-enter-enabled);
+      &:disabled {
+         --glyph-current-col: var(--glyph-col-fullscreen-enter-disabled);
+      }
+      &.exit {
+         --glyph-current-col: var(--glyph-col-fullscreen-exit-enabled);
+         &:disabled {
+            --glyph-current-col: var(--glyph-col-fullscreen-exit-disabled);
+         }
       }
    }
 }

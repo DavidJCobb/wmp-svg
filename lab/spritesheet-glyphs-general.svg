@@ -14,7 +14,8 @@
    --icon-line-color: #000;
    --icon-fill-color: #FFF;
    
-   #stop-fill-enabled {
+   #stop-fill-enabled,
+   #fullscreen-fill-enabled {
       stop:first-child { stop-color: #FFF; }
       stop:last-child  { stop-color: #EEE; }
    }

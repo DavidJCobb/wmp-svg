@@ -48,6 +48,11 @@
    --subtitle-text-decoration: unset;
    --subtitle-text-shadow:     unset;
 }
+:host(:fullscreen) {
+   .main {
+      height: 100%;
+   }
+}
 
 .main {
    /* Internal variables */
@@ -92,6 +97,19 @@
    display:       grid;
    grid-template: ". time" / 1fr auto;
    align-items:   center;
+}
+.gutter-right {
+   grid-area: right-gutter;
+   
+   display: grid;
+   grid-template: ". fullscreen" / 1fr auto;
+   align-items:   center;
+   
+   padding-right: calc(20px * var(--scale,1));
+   
+   .fullscreen {
+      grid-area: fullscreen;
+   }
 }
 
 .content {

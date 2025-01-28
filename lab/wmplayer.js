@@ -8,8 +8,9 @@ class WMPlayerElement extends HTMLElement {
    #control_names_to_nodes;
    #controls_layout = (function() {
       let out = {
-         tray_left:  [],
-         tray_right: [],
+         tray_left:    [],
+         tray_right:   [],
+         gutter_right: [],
       };
       let str = {};
       for(let key in out) {
@@ -73,6 +74,7 @@ class WMPlayerElement extends HTMLElement {
    #media;
    
    #current_time_readout;
+   #fullscreen_button;
    #loop_button;
    #mute_button;
    #next_button;
@@ -110,6 +112,9 @@ class WMPlayerElement extends HTMLElement {
          <input type="checkbox" aria-label="Mute" aria-role="switch" class="basic-button mute" />
          <wm-slider aria-label="Volume" class="volume constant-thumb circular-thumb" min="0" max="100" value="100" step="1" title="Volume"></wm-slider>
       </div>
+   </div>
+   <div class="gutter-right">
+      <button class="basic-button fullscreen" title="View full screen"></button>
    </div>
 </div>
    `.trim();
@@ -355,6 +360,10 @@ class WMPlayerElement extends HTMLElement {
       // the window.
       this.#bound_fast_playback_stop_on_release_handler = this.#fast_playback_stop_on_release_handler.bind(this);
       
+      this.#fullscreen_button = this.#shadow.querySelector(".fullscreen");
+      this.#fullscreen_button.addEventListener("click", this.#on_fullscreen_click.bind(this));
+      document.addEventListener("fullscreenchange", this.#on_fullscreen_change.bind(this));
+      
       {
          let bound = this.#disqualify_autoplay_on_playback_control_by_user.bind(this);
          for(let node of [
@@ -389,14 +398,15 @@ class WMPlayerElement extends HTMLElement {
       }
       
       this.#control_names_to_nodes = {
-         loop:    this.#loop_button,
-         mute:    this.#mute_button,
-         next:    this.#next_button,
-         prev:    this.#prev_button,
-         seek:    this.#seek_slider,
-         shuffle: this.#shuffle_button,
-         stop:    this.#stop_button,
-         volume:  this.#volume_slider,
+         fullscreen: this.#fullscreen_button,
+         loop:       this.#loop_button,
+         mute:       this.#mute_button,
+         next:       this.#next_button,
+         prev:       this.#prev_button,
+         seek:       this.#seek_slider,
+         shuffle:    this.#shuffle_button,
+         stop:       this.#stop_button,
+         volume:     this.#volume_slider,
       };
       
       //
@@ -1075,6 +1085,26 @@ class WMPlayerElement extends HTMLElement {
    }
    
    //
+   // Page events
+   //
+   
+   #on_fullscreen_change(e) {
+      let entering = !!document.fullscreenElement;
+      if (this.contains(e.target)) {
+         this.#fullscreen_button.removeAttribute("disabled");
+      } else {
+         this.#fullscreen_button.setAttribute("disabled", "disabled");
+      }
+      if (entering) {
+         this.#fullscreen_button.setAttribute("title", "Exit full-screen mode");
+         this.#fullscreen_button.classList.add("exit");
+      } else {
+         this.#fullscreen_button.setAttribute("title", "View full screen");
+         this.#fullscreen_button.classList.remove("exit");
+      }
+   }
+   
+   //
    // Media events
    //
    
@@ -1142,6 +1172,23 @@ class WMPlayerElement extends HTMLElement {
          this.#media.poster = ""; // clear any leftover poster from the last playlist item
       }
       this.#update_play_state();
+   }
+   
+   //
+   // Button: Fullscreen
+   //
+   
+   #on_fullscreen_click(e) {
+      let subject = document.fullscreenElement;
+      if (subject) {
+         if (!this.contains(subject)) {
+            e.preventDefault();
+            return;
+         }
+         document.exitFullscreen();
+      } else {
+         this.requestFullscreen();
+      }
    }
    
    //
@@ -1589,6 +1636,9 @@ class WMPlayerElement extends HTMLElement {
             this.#mute_button,
             this.#volume_slider
          ];
+         layout.gutter_right = [
+            this.#fullscreen_button,
+         ];
       }
       
       function apply_member(name, container) {
@@ -1603,6 +1653,7 @@ class WMPlayerElement extends HTMLElement {
       }
       apply_member("tray_left",  this.#shadow.querySelector(".controls .left"));
       apply_member("tray_right", this.#shadow.querySelector(".controls .right"));
+      apply_member("gutter_right", this.#shadow.querySelector(".gutter-right"));
    }
    
 };
