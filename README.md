@@ -6,3 +6,5 @@ This is an attempt at recreating the glassy buttons and theming of Windows Media
 The ultimate goal is to be able to build an HTML5 video player UI that recreates the WMP 11/12 look, while being of acceptable quality on high-DPI displays. Additionally, it could be possible to use these graphics elsewhere (e.g. handwriting `QPainter` calls using the SVGs as a guide, to use this theme in Qt; or rendering these SVGs out to new rasters and using them in skinnable programs like WinAmp or VLC).
 
 A 100% perfect reproduction of the original graphics is likely impossible and not a goal of this project; however, I do intend to get as close to the originals as I possibly can.
+
+Additionally, the primary focus here is the graphics, not so much the player itself and its underlying JavaScript. I'm not deliberately cutting corners, but I'm also not stressing too much about organizing the script code perfectly.
