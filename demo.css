@@ -44,3 +44,20 @@ form {
       align-self: end;
    }
 }
+
+/* mobile */
+@media only screen and (min-resolution: 2dppx) and (pointer: coarse),
+       only screen and (min-resolution: 2dppx) and (pointer: none) {
+   /* portrait */
+   @media (max-aspect-ratio: 3/5) {
+      body {
+         grid-template:
+            "player"
+            "info"
+         ;
+      }
+      section {
+         max-width: none;
+      }
+   }
+}

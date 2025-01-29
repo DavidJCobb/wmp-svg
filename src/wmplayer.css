@@ -180,9 +180,11 @@ video::cue {
 }
 
 .current-time {
+   --side-distance: calc(6px * var(--scale, 1));
+   
    grid-area:  time;
    align-self: center;
-   padding-right: calc(6px * var(--scale,1));
+   padding: 0 var(--side-distance);
    
    text-align: right;
    
@@ -200,7 +202,12 @@ video::cue {
          var(--timestamp-max-font-size, 999999px)
       )
    );
-   width: 10ch;
+   
+   /* Force a width, so that the controls layout doesn't shift when the timestamp is updated. */
+   width: 5ch;
+   &[datetime]:not([datetime^="P0H"]) { /* if a non-zero amount of hours */
+      width: 8ch;
+   }
 }
 
 .controls {
@@ -483,8 +490,19 @@ video::cue {
    .next-ff + .basic-button {
       margin-left: calc(6px*var(--button-glyph-scale,1));
    }
+   .basic-button + .basic-button {
+      margin-left: calc(2px*var(--button-glyph-scale,1));
+   }
    .basic-button + .volume {
       margin-left: calc(4px*var(--button-glyph-scale,1));
+   }
+   
+   /* widget distances from the tray endcaps */
+   .left .basic-button:first-child {
+      margin-left: calc(4px*var(--scale,1));
+   }
+   .right .basic-button:last-child {
+      margin-right: calc(4px*var(--scale,1));
    }
    
    /* account for widgets being placed directly next to the play/pause button */
@@ -592,7 +610,7 @@ video::cue {
    .current-time {
       color: #FFF;
       -webkit-text-stroke: 4px #000A;
-      padding-right: calc(10px * var(--scale,1));
+      --side-distance: calc(10px * var(--scale,1));
    }
    .controls {
       hr {
