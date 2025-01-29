@@ -4,27 +4,23 @@
 Overview:
 
 * Finish purging SVG views in favor of CSS spritesheets
-* Create a new `lab` branch based on the current branch. Then, in `main`, delete the lab.
+* Create a new `lab` branch and a new `gh-pages` branch, both based on `main`. Then, in `main`, delete the lab and demo.
 * In the `main` branch, create a `src` folder for just the WMPlayer assets, minus all the stuff from the lab
-* Create a `gh-pages` branch that has a page for the demo (we want that in its own branch in part so that people wishing to play with just the library don't need to clone hundreds of megabytes of video to their hard drives).
+* Update the `gh-pages` branch so that what is currently `index.html` becomes `demo.html`, and our actual `index.html` is a landing page explaining the project.
+* Test accessors on WMPlaylist
+  * `.toArray`
+  * `.insertAt`
+  * `.indexOf`
+  * `.moveItemTo`
+  * `.remove`
 
-## Specifics
+## Post-launch
 
-* Slider thumb should use CSS spritesheets, not SVG views
-* Remove or comment out SVG views in any spritesheets where views are no longer used
-* Create a demo page that uses `data-overlay-controls="video-only"` with multiple files to test with.
 * Button glyphs
   * Now Playing (enter/exit) (with disabled states too)
 * `WMPlayerElement`
   * Now Playing toggle (lower-right in Library view; upper-right in Now Playing view) (name for layout customization: `toggle-overlaid`)
   * Investigate allowing control repositioning to move the current timestamp into the tray, e.g. between Play/Pause and Seek.
-  * Investigate improvements to the playlist API
-    * Test accessors on WMPlaylist
-      * `.toArray`
-      * `.insertAt`
-      * `.indexOf`
-      * `.moveItemTo`
-      * `.remove`
   * Optional: currently-playing media title offset to the left edge (WMP: seen in music UI, not in video UI).
   * Add APIs/accessors for the following features.
     * Zoom video

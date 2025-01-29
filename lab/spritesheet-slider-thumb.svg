@@ -4,6 +4,13 @@
       <view id="hover" viewBox="107 8 86 86" />
       <view id="active" viewBox="207 8 86 86" />
    </defs>
+   <!--
+      All sprites are built with a viewBox size of 86x86px. 
+      Unfortunately, slider thumbs can vary in width and so 
+      use border-image to show the sprites; ergo we need to 
+      rely on SVG views (which fire multiple requests) to 
+      show different states.
+   -->
    
    <defs name="common-defs">
       <g id="alpha-mask-outer-area" fill="none">
