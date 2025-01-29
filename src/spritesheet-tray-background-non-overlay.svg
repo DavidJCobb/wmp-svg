@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="52" height="219">
+   <!--
+      Derived from `now-playing-tray.svg`.
+   
+      Row 1 (y-offset   0): Endcaps. Each is 15.5x31px.
+   
+      Row 2 (y-offset  32): middle section. 31px high. Occupies the 
+      entire row, so you can use repeat-x.
+      
+      Row 3 (y-offset  63): play/pause bulge. 40.497x51px.
+      
+      Row 4 (y-offset 115): play/pause bulge, one-sided. 45.747x51px.
+      
+      Row 5 (y-offset 167): play/pause bulge, zero-sided. 51x51px.
+   -->
+   <view id="dark" />
+   <view id="lite" />
+   <defs>
+      <linearGradient id="dark-stroke" x1="0" x2="0" y1="0" y2="1">
+         <stop offset=".45" stop-color="#202329" />
+         <stop offset=".55" stop-color="#363c49" />
+      </linearGradient>
+      <linearGradient id="lite-stroke" x1="0" x2="0" y1="0" y2="1">
+         <stop offset=".45" stop-color="#403e447C" />
+         <stop offset=".55" stop-color="#655c677C" />
+      </linearGradient>
+      
+      <style><![CDATA[
+.edge {
+   fill:         none;
+   stroke:       url(#dark-stroke);
+   stroke-width: 2px;
+}
+
+:root:has(#lite:target) {
+   .edge {
+      stroke: url(#lite-stroke);
+   }
+}
+      ]]></style>
+      
+      <!--
+         The general pattern here is:
+         
+            #foo-shape
+               The shape we're working with.
+            
+            #foo-clip
+               A clipPath element containing the shape, used so we can 
+               have inner strokes only.
+      -->
+      
+      <path id="endcaps-shape" d="M 15.5 0 l 21 0 a 15.5 15.5 0 0 1 0 31 l -21 0 a 15.5 15.5 0 0 1 0 -31 z" />
+      <!--
+         The endcap path has two line segments. These need to be of the 
+         same length, such that the right endcap is the same distance 
+         from the right edge of the spritesheet as the left endcap is 
+         from the left edge of the spritesheet. Accordingly, the length 
+         should be (spritesheet width - 31), given that the endcap shape 
+         has a radius of 15.5 and is flush with the spritesheet edges.
+      -->
+      <clipPath id="endcaps-clip">
+         <use href="#endcaps-shape" />
+      </clipPath>
+      
+      <rect id="middle-shape" x="-10%" y="0" width="120%" height="31" />
+      <clipPath id="middle-clip">
+         <use href="#middle-shape" />
+      </clipPath>
+      
+      <path id="bulge-shape-2s" d="M -5.2515 10 L 0 10 a 25.5 25.5 0 0 1 40.497 0 l 4.2515 0 l 0 31 l -4.2515 0 a 25.5 25.5 0 0 1 -40.497 0 l -5.2515 0 z" />
+      <clipPath id="bulge-clip-2s">
+         <use href="#bulge-shape-2s" />
+      </clipPath>
+      
+      <path id="bulge-shape-1s" d="M 45.747 10 l 4.2515 0 l 0 31 l -4.2515 0 a 25.5 25.5 0 1 1 0 -31 z" />
+      <clipPath id="bulge-clip-1s">
+         <use href="#bulge-shape-1s" />
+      </clipPath>
+      
+      <circle id="bulge-shape-0s" r="25.5" cx="25.5" cy="25.5" />
+      <clipPath id="bulge-clip-0s">
+         <use href="#bulge-shape-0s" />
+      </clipPath>
+   </defs>
+   
+   <g>
+      <use href="#endcaps-shape" class="edge" clip-path="url(#endcaps-clip)" />
+   </g>
+   <g transform="translate(0 32)">
+      <use href="#middle-shape" class="edge" clip-path="url(#middle-clip)" />
+   </g>
+   <g transform="translate(0 63)">
+      <use href="#bulge-shape-2s" class="edge" clip-path="url(#bulge-clip-2s)" />
+   </g>
+   <g transform="translate(0 115)">
+      <use href="#bulge-shape-1s" class="edge" clip-path="url(#bulge-clip-1s)" />
+   </g>
+   <g transform="translate(0 167)">
+      <use href="#bulge-shape-0s" class="edge" clip-path="url(#bulge-clip-0s)" />
+   </g>
+</svg>
