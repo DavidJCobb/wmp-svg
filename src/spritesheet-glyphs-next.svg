@@ -33,8 +33,8 @@
 :root:has(#overlay:target) {
    --line-color: #000000;
    #icon-fill-normal {
-      stop:first-child { stop-color: #FFF; }
-      stop:last-child  { stop-color: #EEE; }
+      :is(stop:first-child) { stop-color: #FFF; }
+      :is(stop:last-child)  { stop-color: #EEE; }
    }
    .disabled {
       stroke: #FFF;
