@@ -425,7 +425,8 @@
    :host(:is([data-theme="dark" i])) & {
       --glyph-spritesheet: url(spritesheet-glyphs-next.svg#white);
    }
-   :host(:is([data-overlay-controls])) & {
+   :host(:is([data-overlay-controls]:not([data-overlay-controls="video-only"]))) &,
+   :host(:is([data-overlay-controls="video-only"])) .main.video & {
       --glyph-spritesheet: url(spritesheet-glyphs-next.svg#overlay);
       &:not(:hover, :active),
       &:disabled {

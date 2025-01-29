@@ -167,6 +167,10 @@ video::cue {
    .controls & {
       flex: 1 0 auto;
    }
+   .rearrangeables & {
+      min-width: 100px;
+      flex: 1 0 100px;
+   }
 }
 :host(:state(buffering)) .seek {
    --fill-gradient: linear-gradient(to bottom, #a7c2d3, #3c587f, #90a7c5);

@@ -120,6 +120,20 @@ class WMPlayerElement extends HTMLElement {
    </div>
 </div>
    `.trim();
+   static {
+      if (document.currentScript) {
+         let src = (function() {
+            try {
+               return new URL(".", document.currentScript.src);
+            } catch (e) {
+               return null;
+            }
+         })();
+         if (src) {
+            this.#HTML = this.#HTML.replaceAll(`<link rel="stylesheet" href="`, `<link rel="stylesheet" href="${src}`);
+         }
+      }
+   }
    
    // ------------------------------------------------------------------------
    
