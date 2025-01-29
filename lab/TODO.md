@@ -1,25 +1,13 @@
 
 # To-do
 
-Overview:
-
-* Finish purging SVG views in favor of CSS spritesheets
-* Create a new `lab` branch and a new `gh-pages` branch, both based on `main`. Then, in `main`, delete the lab and demo.
-* In the `main` branch, create a `src` folder for just the WMPlayer assets, minus all the stuff from the lab
-* Update the `gh-pages` branch so that what is currently `index.html` becomes `demo.html`, and our actual `index.html` is a landing page explaining the project.
-* Test accessors on WMPlaylist
-  * `.toArray`
-  * `.insertAt`
-  * `.indexOf`
-  * `.moveItemTo`
-  * `.remove`
-
-## Post-launch
-
+* Create a `dist` folder in the `main` branch with minified files.
+  * Update the `gh-pages` branch to have and use this folder instead of `src`.
 * Button glyphs
   * Now Playing (enter/exit) (with disabled states too)
 * `WMPlayerElement`
   * Now Playing toggle (lower-right in Library view; upper-right in Now Playing view) (name for layout customization: `toggle-overlaid`)
+    * Should supersede the effect of `data-overlay-controls`, but maybe only while the button is actually present in the layout
   * Investigate allowing control repositioning to move the current timestamp into the tray, e.g. between Play/Pause and Seek.
   * Optional: currently-playing media title offset to the left edge (WMP: seen in music UI, not in video UI).
   * Add APIs/accessors for the following features.
@@ -30,6 +18,14 @@ Overview:
   * Investigate features for streaming video, e.g. highlighting the currently buffered time range on the seek slider.
   * Make it so that if `data-overlay-controls="any-visual"`, then we overlay controls when playing a video *or* when playing an audio-only item that has a `poster`.
   * Make it possible to scale the player UI based on a scaling factor relative to the vanilla size *or* maximum main- and cross-axis sizes.
+* Playlist API improvements
+  * Allow [gs]etting the current playlist, i.e. creating an entire `WMPlaylist`, preconfiguring it, and assigning it. Similarly, that would also allow `myPlayer.playlist.index = 3` or whatever.
+  * Test accessors on WMPlaylist
+    * `.toArray`
+    * `.insertAt`
+    * `.indexOf`
+    * `.moveItemTo`
+    * `.remove`
   
 ## Specific features
 
