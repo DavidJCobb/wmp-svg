@@ -1,0 +1,333 @@
+WEBVTT
+
+STYLE
+::cue {
+   background-color: #00000080;
+}
+::cue(v[voice="Carter"]) {
+   color: #0066cc;
+}
+::cue(v[voice="Emile"]) {
+   color: #ac4351;
+}
+::cue(v[voice="Jorge"]) {
+   color: #aeaa59;
+}
+::cue(v[voice="Jun"]) {
+   color: #5fca35;
+}
+::cue(v[voice="Kat"]) {
+   color: #00c7dd;
+}
+::cue(v[voice="Farmer"]) {
+   color: #bf7231;
+}
+
+00:00:03.800 -->00:00:08.000
+<v Carter>Listen up, Noble Team. We're looking at a downed relay outpost fifty klicks from Visegrad.</v>
+
+00:00:08.900 -->00:00:12.900
+<v Carter>We're gonna introduce ourselves to whoever took it out and then Kat's gonna get it back online.</v>
+
+00:00:13.151 -->00:00:14.785
+<v Kat>Just get me under the hood, Commander.</v>
+
+00:00:14.785 -->00:00:17.784
+<v Jorge>Sir, why would rebels want to cut off Reach from the rest of the colonies?</v>
+
+00:00:17.784 -->00:00:19.785
+<v Carter>You get a chance, maybe you can ask 'em, Jorge.</v>
+
+00:00:24.200 -->00:00:26.451
+<v Kat>Commander, we just lost our signal with HQ.</v>
+
+00:00:26.600 -->00:00:27.451
+<v Carter>Backup channels?</v>
+
+00:00:27.500 -->00:00:28.367
+<v Kat>Searching...</v>
+
+00:00:29.500 -->00:00:31.618
+<v Kat>Nada. Can't say what's jamming us.</v>
+
+00>32.000 -->00:00:36.618
+<v Carter>You heard her: deadzone confirmed. Command will <i>not</i>be keeping us company this trip.</v>
+
+00:00:37.250 -->00:00:38.368
+<v Emile>I'm lonely already.</v>
+
+00:01:01.000 -->00:01:03.201
+<v Carter>Shootdown attempts are likely, so keep your distance.</v>
+
+01:03:800 -->00:01:04.600
+<v Falcon pilot>Yes, sir.</v>
+
+00:01:06.000 -->00:01:08.450
+<v Carter>Let's stay focused. Watch your sectors.</v>
+
+00:01:09.200 -->00:01:10.950
+<v Jorge>There's the communications outpost.</v>
+
+00:01:09.950 -->00:01:12.700
+<v Kat>Picking up a distress beacon.</v>
+
+00:01:23.800 -->00:01:25.950
+<v Carter>Could be the missing troopers. Let's check it out.</v>
+
+00:01:28.000 -->00:01:30.200
+<v Carter>Put us down on the bluff.</v>
+
+00:01:39.200 -->00:01:40.700
+<v Carter>Jun, I want your eyes in the sky.</v>
+
+00:01:40.800 -->00:01:41.200
+<v Jun>Sir.</v>
+
+00:01:45.500 -->00:01:46.600
+<v Carter>Let's go, Six.</v>
+
+00:01:47.000 -->00:01:50.950
+<v Carter>All right, Noble Team. Spread out. Watch the approach.</v>
+
+00:02:07.000 -->00:02:09.952
+<v Emile>Structure point three-four, looks clear from this angle.</v>
+
+02:13:200 -->02:14:201
+[Emile's energy shield breaks]
+
+00:02:19.500 -->00:02:22.950
+<v Kat>Distress beacon's coming from due south of you, Commander. We're close.</v>
+
+00:02:23.700 -->00:02:25.900
+<v Carter>Roger that. Eyes peeled.</v>
+
+00:02:39.500 -->00:02:40.900
+<v Emile>Found the beacon.</v>
+
+00:02:42.000 -->00:02:44.700
+<v Carter>Make out any ID?</v>
+
+00:02:45.000 -->00:02:47.200
+<v Kat>Negative, but it's military.</v>
+
+00:02:48.000 -->00:02:49.780
+<v Jorge>So where are the troopers?</v>
+
+00:02:56.800 -->00:02:58.535
+<v Emile>There's a lot of blood on the ground.</v>
+
+00:03:00.500 -->00:03:03.285
+<v Kat>Why are we not seeing explosives residue?</v>
+
+00:03:03.400 -->00:03:06.535
+<v Carter>Noble 3, can you confirm any EX residue in the area?</v>
+
+00:03:06.535 -->00:03:08.280
+<v Jun>Hmm... Negative, sir.</v>
+
+00:03:09.100 -->00:03:10.280
+<v Emile>Plasma, maybe?</v>
+
+00:03:10.535 -->00:03:13.034
+<v Jorge>Can't be. Not on Reach.</v>
+
+00:03:14.700 -->00:03:17.540
+<v Carter>All right, Noble, looks like there's nothin' here. Let's move on.</v>
+
+00:03:19.600 -->00:03:21.785
+<v Kat>Smoke at the next structure, boss.</v>
+
+00:03:22.000 -->00:03:28.784
+<v Carter>Circle west and check it out. Noble Team, you have permission to engage, but be selective. We don't need to telegraph our presence.</v>
+
+00:03:52.900 -->00:03:57.700
+<v Carter>Noble Six, move into the house. Go in quiet. I'm right behind you.</v>
+
+00:04:01.400 -->00:04:04.451
+<v Jun>Noble Leader, I'm seeing heat sigs in the structure ahead.</v>
+
+00:04:09.600 -->00:04:10.000
+<v Farmer><lang hu-HU>Én nem csináltam semmit!</lang></v>
+<v Farmer><lang en-US>[Hungarian] I didn't do anything!</lang></v>
+
+00:04:10.000 -->00:04:12.200
+<v Emile><i>Move!</i>On your knees, <i>now!</i></v>
+
+00:04:12.200 -->00:04:13.950
+<v Farmer><lang hu-HU>Ne lőjön! Ne lőjön!</lang></v>
+<v Farmer><lang en-US>[Hungarian] Don't shoot! Don't shoot!</lang></v>
+
+00:04:12.400 -->00:04:14.200
+<v Jorge>They're not rebels. They're farmers. Look at them.</v>
+
+00:04:15.400 -->00:04:16.900
+<v Carter>Ask them what they're doing here.</v>
+
+00:04:17.200 -->00:04:18.450
+<v Jorge><lang hu-HU>Mit kerestek itt?</lang></v>
+<v Jorge><lang en-US>[Hungarian] What are you doing here?</lang></v>
+
+00:04:18.800 -->00:04:20.700
+<v Farmer><lang hu-HU>Csak nem akartunk meghalni.</lang></v>
+<v Farmer><lang en-US>[Hungarian] We just didn't want to die.</lang></v>
+
+00:04:20.700 -->00:04:21.280
+<v Jorge>Hiding, sir.</v>
+
+00:04:21.534 -->00:04:25.600
+<v Farmer>[Hungarian]</v>
+
+00:04:25.600 -->00:04:32.035
+<v Jorge>Neighbors were attacked last night. He heard screams, gunfire. It stopped around sunrise.</v>
+
+00:04:27.200 -->00:04:29.500
+<v Farmer>[Hungarian]</v>
+
+00:04:29.500 -->00:04:31.500
+<v Farmer><lang hu-HU>Valami megölte a fiamat.</lang></v>
+<v Farmer><lang en-US>[Hungarian] Something killed my son.</lang></v>
+
+00:04:32.500 -->00:04:35.860
+<v Jorge>Says something in the fields... killed his son.</v>
+
+00:04:35.860 -->00:04:36.617
+<v Carter>"Some<i>thing?</i>"</v>
+
+00:04:37.000 -->00:04:41.370
+<v Jun>Commander, be advised: I'm reading heat signatures in that structure directly east of your position, over.</v>
+
+00:04:41.700 -->00:04:43.870
+<v Carter>Copy that. [to Jorge:] Get them back inside.</v>
+
+00:04:45.000 -->00:04:47.117
+<v Jorge><lang hu-HU>Azt mondtam, befelé!</lang></v>
+<v Jorge><lang en-US>[Hungarian] I said get in! Get in!</lang></v>
+
+00:04:55.600 -->00:04:56.870
+<v Carter>Noble Team, double-time it!</v>
+
+00:05:15.600 -->00:05:16.500
+<v Carter>Damn...</v>
+
+00:05:17.900 -->00:05:19.900
+<v Jun>Fill me in, Commander. What are you seeing? Over.</v>
+
+00:05:20.100 -->00:05:28.450
+<v Carter>We have military casualties &mdash; two of the missing troopers. Looks like they were interrogated. It's messy...</v>
+
+00:05:34.000 -->00:05:36.700
+[heavy footsteps on metal, and animalistic growling, from above]
+
+00:05:36.200 -->00:05:38.100
+<v Carter>Movement. Watch your motion trackers.</v>
+
+00:05:40.450 -->00:05:41.200
+<v Emile>What the hell was that?</v>
+
+00:05:41.950 -->00:05:43.450
+<v Carter>Jun, you see anything?</v>
+
+00:05:44.400 -->00:05:46.500
+<v Jun>Negative. Thermal's clean.</v>
+
+00:05:55.700 -->00:05:57.950
+<v Jun>Boss! I see movement, outside your structure!</v>
+
+00:05:58.000 -->00:06:00.700
+<v Carter>Noble 2, move up to the west! We're about to be flanked.</v>
+
+00:05:59.610 -->00:06:00.700
+<v Jorge>Huh?</v>
+
+00:05:59.810 -->00:06:00.300
+<v Emile>Damn it!</v>
+
+00:06:60.300 -->00:06:00.650
+<v Jorge>Covenant!</v>
+
+00:05:59.900 -->00:06:01.900
+<v Covenant Skirmisher>[howling]</v>
+
+00:06:01.300 -->00:06:02.450
+<v Carter>Contact! Contact! Spartans, assist!</v>
+
+00:06:04.100 -->00:06:05.200
+<v Jorge>Here we go.</v>
+
+00:06:07.950 -->00:06:10.950
+<v Carter>They're headed into the basement. Move down to the lower levels.</v>
+
+00:06:16.200 -->00:06:16.950
+<v Kat>Contact.</v>
+
+00:06:21.000 -->00:06:22.120
+<v Carter>Outstanding.</v>
+
+00:06:24.900 -->00:06:26.370
+<v Falcon pilot>Banshees. Heads up, Charlie 1!</v>
+
+00:06:33.150 -->00:06:34.370
+<v Kat>[to Covenant] You like that? </v>
+
+00:06:35.600 -->00:06:36.000
+<v Kat>Banshee!</v>
+
+00:06:38.900 -->00:06:39.200
+<v Carter>Good shot.</v>
+
+00:06:42.200 -->00:06:42.870
+<v Jorge>We're clear.</v>
+
+00:06:54.100 -->00:06:56.370
+<v Jun>Noble Leader, enemy dropships inbound!</v>
+
+00:06:59.700 -->00:07:01.370
+<v Falcon pilot>Falcon moving to assist.</v>
+
+00:07:03.600 -->00:07:05.600
+[Banshee exploding, off-screen to the right]
+
+00:07:15.800 -->00:07:16.000
+<v Kat>There it is!</v>
+
+00:07:16.600 -->00:07:17.290
+<v Emile>So kill it!</v>
+
+00:07:17.500 -->00:07:19.040
+<v Carter>Enemy transport inbound!</v>
+
+00:07:21.100 -->00:07:21.300
+<v Emile>[pained groan]</v>
+
+00:07:29.200 -->00:07:30.400
+<v Kat>Hostiles still in hiding.</v>
+
+00:07:33.900 -->00:07:34.900
+<v Jorge>Outstanding!</v>
+
+00:07:37.500 -->00:07:38.700
+<v Jorge>I'm under fire!</v>
+
+00:07:56.400 -->00:07:58.200
+<v Jun>Heads up: you've got trouble!</v>
+
+00:08:03.900 -->00:08:04.100
+<v Kat>We're clear.</v>
+
+00:08:04.200 -->00:08:07.500
+<v Carter>Stand down, Noble, stand down. Contacts neutralized.</v>
+
+00:08:08.000 -->00:08:10.870
+<v Jorge>"Contacts?" It's the damn Covenant!</v>
+
+00:08:11.400 -->00:08:16.120
+<v Emile>Cheer up, big man. This whole valley just turned into a free fire zone.</v>
+
+00:08:16.900 -->00:08:20.600
+<v Carter>Kat, we've gotta warn Holland. I need you at that relay outpost <i>now.</i></v>
+
+00:08:21.400 -->00:08:23.500
+<v Jun>Boss, I'm showing more activity to the east.</v>
+
+00:08:24.100 -->00:08:27.120
+<v Carter>Copy that, Jun. We're on it. Six, you've got point.

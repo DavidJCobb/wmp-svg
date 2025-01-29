@@ -1,0 +1,46 @@
+
+html, body {
+   padding: 0;
+   margin:  0;
+}
+html {
+   background: #000;
+   color:      #E8E0D8;
+   font-family: "Segoe UI", Calibri, Arial, sans-serif;
+}
+
+body {
+   display: grid;
+   grid-template:
+      "player info"
+      /
+      1fr auto
+   ;
+   width:  100vw;
+   height: 100vh;
+}
+
+wm-player {
+   grid-area: player;
+}
+section {
+   grid-area: info;
+   max-width:   25ch;
+   padding: 1em;
+}
+
+*:first-child { margin-top: 0; }
+*:last-child { margin-bottom: 0; }
+
+li { margin: 1em 0; }
+
+form {
+   display: flex;
+   flex-flow: row nowrap;
+   gap: 1em;
+   
+   select {
+      flex: 1 1 auto;
+      align-self: end;
+   }
+}

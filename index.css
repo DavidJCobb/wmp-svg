@@ -1,0 +1,22 @@
+
+html {
+   font-family: Calibri, Arial, sans-serif;
+   background: #808080;
+   padding: 0;
+   margin:  0;
+}
+
+body {
+   background: #FFF;
+   max-width: 960px;
+   padding:   2em;
+   margin:    0 auto;
+}
+
+*:first-child { margin-top: 0; }
+*:last-child { margin-bottom: 0; }
+
+img {
+   display: block;
+   margin: 1em auto;
+}

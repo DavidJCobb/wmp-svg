@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+   <head>
+      <title>WMP-SVG Demo</title>
+      <link rel="stylesheet" href="demo.css" />
+   </head>
+   <body>
+      <script src="src/wmplayer.playlist.js"></script>
+      <script src="src/wmplayer.slider.js"></script>
+      <script src="src/wmplayer.js"></script>
+      <wm-player src="demo-media/winter-contingency.webm" data-theme="dark" data-overlay-controls="video-only"></wm-player>
+      <section>
+         <h1>WMP-SVG</h1>
+         <p>
+            This demo shows off the WMP-SVG player, set to overlay controls when playing video only. It uses a playlist with three items:
+         </p>
+         <ul>
+            <li>
+               <p>Gameplay footage from <i>Deus Ex: Mankind Divided</i> (720p, 2:42, 51.5MB).</p>
+            </li>
+            <li>
+               <p>Gamplay audio from <i>Halo 3: ODST</i> (1:05, 1.51MB), to show off the player UI when controls aren't overlaid on video.</p>
+            </li>
+            <li>
+               <p>Gameplay footage from <i>Halo: Reach</i> (720p, 8:29, 321MB). This video has a (clumsily) handmade VTT file to show off subtitles. There isn't much we can do to visually configure subtitles (i.e. CSS can't move them out of the way of the overlaid video controls), but it's worth demonstrating that they at least <em>exist</em>.</p>
+            </li>
+         </ul>
+         <form>
+            <label for="controls-setter">Layout:</label>
+            <select id="controls-setter">
+               <option value="normal">Normal</option>
+               <option value="no-playlist">For no playlist</option>
+               <option value="silly">Silly</option>
+            </select>
+         </form>
+      </section>
+      <script>
+{
+   let player = document.getElementsByTagName("wm-player")[0];
+   player.clearPlaylist();
+   player.addToPlaylist({
+      src: "demo-media/deus-ex-mankind-divided.webm",
+   });
+   player.addToPlaylist({
+      src: "demo-media/tayari-plaza.aac",
+   });
+   player.addToPlaylist({
+      src:    "demo-media/winter-contingency.webm",
+      tracks: [
+         {
+            kind:    "subtitles",
+            label:   "subtitles",
+            srclang: "en",
+            src:     "demo-media/winter-contingency.vtt",
+            default: true,
+         }
+      ],
+   });
+   
+   let picker = document.getElementById("controls-setter");
+   picker.selectedIndex = 0;
+   picker.addEventListener("change", function(e) {
+      switch (e.target.value) {
+         case "normal":
+            player.controlsInTrayLeft = null;
+            player.controlsInTrayRight = null;
+            player.controlsInGutterRight = null;
+            break;
+         case "no-playlist":
+            player.controlsInTrayLeft = null;
+            player.controlsInTrayRight = "seek separator mute volume";
+            player.controlsInGutterRight = "fullscreen";
+            break;
+         case "silly":
+            player.controlsInTrayLeft = "mute separator next prev separator separator separator";
+            player.controlsInTrayRight = "loop fullscreen shuffle volume";
+            player.controlsInGutterRight = "seek";
+            break;
+      }
+   });
+}
+      </script>
+   </body>
+</html>

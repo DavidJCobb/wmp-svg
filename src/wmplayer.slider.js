@@ -25,6 +25,22 @@ class WMPlayerSliderElement extends HTMLElement {
    #has_ever_been_connected = false;
    #is_dragging = false;
    
+   static #base_path = "";
+   static {
+      if (document.currentScript) {
+         let src = (function() {
+            try {
+               return new URL(".", document.currentScript.src);
+            } catch (e) {
+               return null;
+            }
+         })();
+         if (src) {
+            this.#base_path = src + "/";
+         }
+      }
+   }
+   
    constructor() {
       super();
       this.#internals = this.attachInternals();
@@ -32,7 +48,7 @@ class WMPlayerSliderElement extends HTMLElement {
       {
          let link = document.createElement("link");
          link.setAttribute("rel", "stylesheet");
-         link.setAttribute("href", "wmplayer.slider.css");
+         link.setAttribute("href", WMPlayerSliderElement.#base_path + "wmplayer.slider.css");
          this.#shadow.append(link);
       }
       
