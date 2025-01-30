@@ -361,13 +361,13 @@ class WMPlayerElement extends HTMLElement {
       this.#volume_slider.addEventListener("change", this.#on_volume_slider_change.bind(this));
       
       this.#next_button = this.#shadow.querySelector(".next-ff");
-      this.#next_button.addEventListener("mousedown", this.#on_next_mousedown.bind(this));
-      this.#next_button.addEventListener("mouseup", this.#on_next_mouseup.bind(this));
+      this.#next_button.addEventListener("pointerdown", this.#on_next_mousedown.bind(this));
+      this.#next_button.addEventListener("pointerup", this.#on_next_mouseup.bind(this));
       this.#next_button.addEventListener("keypress", this.#on_next_keypress.bind(this));
       
       this.#prev_button = this.#shadow.querySelector(".prev-rw");
-      this.#prev_button.addEventListener("mousedown", this.#on_prev_mousedown.bind(this));
-      this.#prev_button.addEventListener("mouseup", this.#on_prev_mouseup.bind(this));
+      this.#prev_button.addEventListener("pointerdown", this.#on_prev_mousedown.bind(this));
+      this.#prev_button.addEventListener("pointerup", this.#on_prev_mouseup.bind(this));
       this.#prev_button.addEventListener("keypress", this.#on_prev_keypress.bind(this));
       
       // If we only listen for `mouseup` on the Previous and Next buttons, then in the 
@@ -1380,6 +1380,15 @@ class WMPlayerElement extends HTMLElement {
    // Helpers for Previous/Rewind and Next/Fast Foward buttons
    //
    
+   #fast_playback_check_press_event(e) {
+      if (!e.isPrimary)
+         return false; // reject multi-touch
+      if (e.pointerType == "mouse") {
+         if (e.button != 0) // reject non-primary mouse buttons
+            return false;
+      }
+      return true;
+   }
    #fast_playback_press_handler() {
       let handler = this.#bound_fast_playback_stop_on_release_handler;
       window.addEventListener("blur",    handler);
@@ -1405,7 +1414,7 @@ class WMPlayerElement extends HTMLElement {
    }
    
    #on_prev_mousedown(e) {
-      if (e.button != 0)
+      if (!this.#fast_playback_check_press_event(e))
          return;
       if (this.#can_rewind()) {
          this.#queue_fast_playback(-1, this.#fast_forward_delay);
@@ -1413,7 +1422,7 @@ class WMPlayerElement extends HTMLElement {
       }
    }
    #on_prev_mouseup(e) {
-      if (e.button != 0)
+      if (!this.#fast_playback_check_press_event(e))
          return;
       this.#cancel_queued_fast_playback();
       if (this.#fast_playback_type) {
@@ -1436,13 +1445,13 @@ class WMPlayerElement extends HTMLElement {
    //
    
    #on_next_mousedown(e) {
-      if (e.button != 0)
+      if (!this.#fast_playback_check_press_event(e))
          return;
       this.#queue_fast_playback(1, this.#fast_forward_delay);
       this.#fast_playback_press_handler();
    }
    #on_next_mouseup(e) {
-      if (e.button != 0)
+      if (!this.#fast_playback_check_press_event(e))
          return;
       this.#cancel_queued_fast_playback();
       if (this.#fast_playback_type) {
