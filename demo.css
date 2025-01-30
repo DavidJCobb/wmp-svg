@@ -12,9 +12,9 @@ html {
 body {
    display: grid;
    grid-template:
-      "player info"
+      "player info" minmax(0,1fr)
       /
-      1fr auto
+      minmax(0,1fr) auto
    ;
    width:  100svw;
    height: 100vh; /* fallback */
@@ -35,7 +35,7 @@ section {
 
 li { margin: 1em 0; }
 
-form {
+form>div {
    display: flex;
    flex-flow: row nowrap;
    gap: 1em;

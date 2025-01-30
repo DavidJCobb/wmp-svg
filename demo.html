@@ -27,12 +27,18 @@
             </li>
          </ul>
          <form>
-            <label for="controls-setter">Layout:</label>
-            <select id="controls-setter">
-               <option value="normal">Normal</option>
-               <option value="no-playlist">For no playlist</option>
-               <option value="silly">Silly</option>
-            </select>
+            <div>
+               <label for="controls-setter">Layout:</label>
+               <select id="controls-setter">
+                  <option value="normal">Normal</option>
+                  <option value="no-playlist">For no playlist</option>
+                  <option value="silly">Silly</option>
+               </select>
+            </div>
+            <div>
+               <label for="scale-setter">Scale:</label>
+               <input id="scale-setter" type="number" min="0.5" max="5" value="1" step="0.25" />
+            </div>
          </form>
       </section>
       <script>
@@ -78,6 +84,12 @@
             player.controlsInGutterRight = "seek";
             break;
       }
+   });
+   
+   let scaler = document.getElementById("scale-setter");
+   scaler.value = 1;
+   scaler.addEventListener("change", function(e) {
+      player.style.setProperty("--scale", e.target.value);
    });
 }
       </script>
