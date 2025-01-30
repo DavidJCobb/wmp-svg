@@ -16,8 +16,8 @@
    
    #stop-fill-enabled,
    #fullscreen-fill-enabled {
-      stop:first-child { stop-color: #FFF; }
-      stop:last-child  { stop-color: #EEE; }
+      :is(stop:first-child) { stop-color: #FFF; }
+      :is(stop:last-child)  { stop-color: #EEE; }
    }
 }
       ]]></style>
