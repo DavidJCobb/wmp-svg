@@ -107,7 +107,7 @@
    grid-template: ". rearrangeables" / 1fr auto;
    align-items:   center;
    
-   padding-right: calc(20px * var(--scale,1));
+   padding: 0 calc(20px * var(--scale,1));
    
    .rearrangeables {
       grid-area: rearrangeables;
