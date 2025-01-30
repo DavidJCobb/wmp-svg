@@ -3,24 +3,27 @@
    <head>
       <title>WMP-SVG</title>
       <link rel="stylesheet" href="index.css" />
+      <link rel="icon" href="./favicon-64.ico" type="image/x-icon" sizes="64" />
+      <link rel="icon" href="./favicon-64.svg" type="image/png" sizes="64" />
+      <link rel="icon" href="./favicon-128.svg" type="image/png" sizes="128" />
+      <link rel="icon" href="./favicon.svg" type="image/svg+xml" sizes="any" />
    </head>
    <body>
       <h1>WMP-SVG</h1>
       <p>
-         WMP-SVG is an attempt at recreating the graphics from Windows Media Player 11 and 12 using SVGs. WMP's original graphics were rasters, with SD and HD versions. The SVGs in this project were handwritten, using an image comparison slider (also handmade) to compare them with the rasters during editing and get them as close as I could.
+         WMP-SVG is an attempt at recreating the graphics from Windows Media Player 11 and 12 using SVGs. WMP's original graphics were rasters, with SD and HD versions. The SVGs in this project were handwritten, using an image comparison slider (also handmade) to compare them with ripped rasters and online screenshots during editing, to get them as close to the originals as I could.
       </p>
       <p>
          A JavaScript-based custom element also exists for using the SVGs on a web page. <a href="demo.html">Try it out here.</a> You can <a href="https://github.com/DavidJCobb/wmp-svg/tree/main">view the repo on GitHub</a>.
       </p>
-      <p>Caveats:</p>
+      <h2>Caveats</h2>
       <ul>
          <li>The primary goal of this project was just the graphics, so the script only exists as a means to show them off; I didn't stress over trying to perfect it.</li>
-         <li>Browsers may render certain parts of the UI incorrectly (i.e. you may see visible seams) due to sub-pixel rounding issues that are impossible to reliably mitigate using CSS. A pure-SVG implementation (rather than using SVG-format assets within an HTML/CSS/JS implementation) would likely avoid these problems, but wouldn't be as flexible or feature-capable.</li>
+         <li>Browsers may render certain parts of the UI incorrectly (i.e. you may see visible seams or occasional single-pixel misalignments) due to sub-pixel rounding issues that are impossible to reliably mitigate using CSS. A pure-SVG implementation (rather than using SVG-format assets within an HTML/CSS/JS implementation) would avoid these problems, but wouldn't be as flexible or feature-capable.</li>
          <li>When used with the default button layout and at 1x scale, the player must be at least 551px wide in order to avoid being cropped in its dark theme. When controls are overlaid or the non-dark theme is used, the player should be at least 500px wide.</li>
       </ul>
-      <p>
-         Screenshots:
-      </p>
+      
+      <h2>Screenshots</h2>
       <img src="sample-overlaid.png" />
       <img src="sample-dark.png" />
       <p>
@@ -29,5 +32,12 @@
       <div class="pannable">
          <img src="sample-2.5x.png" />
       </div>
+      
+      <h2>Remaining work</h2>
+      <ul>
+         <li>The button to switch into and out of Now Playing view (i.e. the view wherein controls are overlaid on the playing media)</li>
+         <li>In Library view (i.e. not Now Playing view), we're missing the glow effect that appears around the Play/Pause button on mouseover</li>
+         <li>See also: `TODO.md`</li>
+      </ul>
    </body>
 </html>

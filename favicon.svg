@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="86" height="86" viewBox="7 8 86 86" shape-rendering="crisp-edges">
+   <defs name="common-defs">
+      <g id="alpha-mask-outer-area" fill="none">
+         <circle cx="50" cy="51" r="43" stroke="#FFF" stroke-width="6" />
+         <circle cx="50" cy="51" r="57" stroke="#000" stroke-width="14" />
+      </g>
+      <g id="inner-highlight-mask-content">
+         <ellipse ry="44" rx="40" cx="50" cy="54" />
+         <g id="inner-highlight-mask-outer-area" fill="none" stroke="#000">
+            <ellipse rx="40" ry="40.5" cx="50" cy="50.75" stroke-width="4" />
+            <ellipse rx="48" ry="46.5" cx="50" cy="50.75" stroke-width="10" />
+         </g>
+      </g>
+      
+      <radialGradient id="body-fill-common">
+         <stop offset="0.000" stop-color="#0d4091FF" />
+         <stop offset="0.900" stop-color="#0c3f90FF" />
+         <stop offset="1.000" stop-color="#0c3f9000" />
+      </radialGradient>
+      <mask id="glass-highlight-shape-mask">
+         <path fill="#FFF" d="M 0.5 -40.5 l -0.5 0 c -18 0 -37 10 -40 32 c 0 3 0 6 2 7 c 2 1 4 1 12 -2 c 6 -2 13 -3 26 -3 Z" transform="translate(50 50)" />
+         <path fill="#FFF" d="M 0 -40.5 c -18 0 -37 10 -40 32 c 0 3 0 6 2 7 c 2 1 4 1 12 -2 c 6 -2 13 -3 26.5 -3 Z" transform="translate(50 50) scale(-1 1)" />
+      </mask>
+      
+      <mask id="common-alpha-mask">
+         <ellipse cx="50" cy="49" rx="60" ry="42" fill="#FFF" />
+         <use href="#alpha-mask-outer-area" />
+      </mask>
+      
+      <mask id="inner-highlight-mask-common">
+         <defs>
+            <radialGradient id="inner-highlight-mask-common-grad">
+               <stop offset="0.00" stop-color="#FFF" />
+               <stop offset="0.75" stop-color="#FFF" />
+               <stop offset="0.95" stop-color="#000" />
+            </radialGradient>
+         </defs>
+         <use href="#inner-highlight-mask-content" fill="url(#inner-highlight-mask-common-grad)" />
+      </mask>
+      
+      <mask id="inner-mask-common">
+         <defs>
+            <radialGradient id="inner-mask-common-grad">
+               <stop offset="0" stop-color="#FFF" />
+               <stop offset="0.96" stop-color="#FFF" />
+               <stop offset="1" stop-color="#000" />
+            </radialGradient>
+         </defs>
+         <ellipse fill="url(#inner-mask-common-grad)" rx="42" ry="40" cx="50" cy="49.5" />
+      </mask>
+      
+      <linearGradient id="edge-fill-normal" x1="0" x2="0" y1="1" y2="0">
+         <stop offset="0.000" stop-color="#cfffff" />
+         <stop offset="0.125" stop-color="#81d7fa" />
+         <stop offset="0.250" stop-color="#5290e4" />
+         <stop offset="0.500" stop-color="#3f3d92" />
+         <stop offset="0.750" stop-color="#607890" />
+         <stop offset="1.000" stop-color="#A0A0B0" />
+      </linearGradient>
+      <radialGradient id="glass-highlight-fill-normal">
+         <stop stop-color="#A0A0B0" offset="20%" stop-opacity="0.72" />
+         <stop stop-color="#C0C0D0" offset="60%" stop-opacity="0.72" />
+         <stop stop-color="#D0D0D8" offset="75%" stop-opacity="0.72" />
+         <stop stop-color="#E0E0FF" offset="90%" stop-opacity="0.72" />
+      </radialGradient>
+      <linearGradient id="inner-highlight-fill-normal" x1="0" x2="0" y1="1" y2="0.5">
+         <stop stop-color="#40c3f8" offset=".2" />
+         <stop stop-color="#0c83d6" offset=".445" />
+         <stop stop-color="#0c5eae" offset=".675" />
+         <stop stop-color="#0c4c99" offset=".82" />
+         <stop stop-color="#043988" offset="1" />
+      </linearGradient>
+   </defs>
+   <g mask="url(#common-alpha-mask)">
+      <ellipse id="outline" fill="#043287" rx="43" ry="43" cx="50" cy="51" /> 
+      <ellipse id="edge" rx="38" ry="36.5" cx="50" cy="50.75" fill="url(#edge-fill-normal)" />
+      <g mask="url(#inner-mask-common)">
+         <ellipse id="inner-fill-base" rx="36" ry="34.5" cx="50" cy="50.5" fill="#04258B" />
+         <ellipse fill="url(#body-fill-common)" rx="36" ry="38" cx="50" cy="50.5" />
+         <ellipse id="inner-fill-highlight" rx="39" ry="39" cx="50" cy="51" mask="url(#inner-highlight-mask-common)" fill="url(#inner-highlight-fill-normal)" />
+      </g>
+      <circle id="glass-highlight" mask="url(#glass-highlight-shape-mask)" r="37.5" cx="50" cy="51" style="mix-blend-mode: screen" fill="url(#glass-highlight-fill-normal)" />
+   </g>
+   <g transform="translate(0, 2)" style="transform-origin:center center">
+      <defs>
+         <linearGradient id="fill-enabled" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0.00" stop-color="#FEFEFE" />
+            <stop offset="0.45" stop-color="#F5F5F5" />
+            <stop offset="0.55" stop-color="#EAEAEA" />
+            <stop offset="1.00" stop-color="#D3D3D3" />
+         </linearGradient>
+         
+         <rect id="pause-bar"
+            x="30"
+            y="32"
+            width="7"
+            height="38"
+            rx="3"
+            ry="3"
+         />
+      </defs>
+      <path
+         transform="translate(39, 50)"
+         d="M 29.909 -1.732 a 2 2 90 0 1 0 3.4641 l -26.909 15.5359 a 2 2 90 0 1 -3 -1.7321 l 0 -31.0718 a 2 2 90 0 1 3 -1.7321 Z"
+         fill="url(#fill-enabled)"
+         stroke="#FEFEFE"
+         stroke-width="1.5"
+         style="filter: drop-shadow(-1px 1px 2px #00000080)"
+      />
+   </g>
+</svg>
