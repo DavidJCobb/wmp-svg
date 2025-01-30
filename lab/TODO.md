@@ -1,8 +1,6 @@
 
 # To-do
 
-* Create a `dist` folder in the `main` branch with minified files.
-  * Update the `gh-pages` branch to have and use this folder instead of `src`.
 * Button glyphs
   * Now Playing (enter/exit) (with disabled states too)
 * `WMPlayerElement`
@@ -18,6 +16,7 @@
   * Investigate features for streaming video, e.g. highlighting the currently buffered time range on the seek slider.
   * Make it so that if `data-overlay-controls="any-visual"`, then we overlay controls when playing a video *or* when playing an audio-only item that has a `poster`.
   * Make it possible to scale the player UI based on a scaling factor relative to the vanilla size *or* maximum main- and cross-axis sizes.
+    * Would require being able to compute the size of the controls *a priori* within CSS, which in turn would require knowing the controls layout. In other words, this is something that's only possible with a fixed controls layout, and at that point, we may as well go all the way and do the entire set of player controls as a single merged SVG.
 * Playlist API improvements
   * Allow [gs]etting the current playlist, i.e. creating an entire `WMPlaylist`, preconfiguring it, and assigning it. Similarly, that would also allow `myPlayer.playlist.index = 3` or whatever.
   * Test accessors on WMPlaylist
