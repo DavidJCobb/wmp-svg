@@ -270,6 +270,8 @@ class WMPlayerSliderElement extends HTMLElement {
    #on_drag_start(e) {
       if (e.button)
          return;
+      if (!e.cancelable) // abort if this is a swipe to scroll
+         return;
       
       this.#is_dragging = true;
       if (this.#internals.states)
@@ -286,16 +288,20 @@ class WMPlayerSliderElement extends HTMLElement {
       }
       if (e.target != this.#thumb) {
          let pos = this.#pointer_pos_to_slider_pos(e);
-         this.#set_relative_position(pos);
-         this.dispatchEvent(new Event("change"));
+         if (!isNaN(pos)) {
+            this.#set_relative_position(pos);
+            this.dispatchEvent(new Event("change"));
+         }
       }
       this.dispatchEvent(new Event("edit-start"));
    }
    #on_drag_tick(e) {
       e.preventDefault();
       let pos = this.#pointer_pos_to_slider_pos(e);
-      this.#set_relative_position(pos);
-      this.dispatchEvent(new Event("change"));
+      if (!isNaN(pos)) {
+         this.#set_relative_position(pos);
+         this.dispatchEvent(new Event("change"));
+      }
    }
    #on_drag_end() {
       if (!this.#is_dragging)
