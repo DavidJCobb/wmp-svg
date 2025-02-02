@@ -197,7 +197,7 @@ video::cue {
    
    font-size: var(--timestamp-force-font-size, 
       clamp(
-         var(--timestamp-min-font-size, 0px),
+         var(--timestamp-min-font-size, 0.001px), /* minifiers may strip 0px to 0, breaking this */
          calc(var(--timestamp-base-font-size,12px) * var(--timestamp-scale-font-size,1)),
          var(--timestamp-max-font-size, 999999px)
       )
