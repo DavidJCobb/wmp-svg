@@ -537,7 +537,7 @@ class WMPlayerElement extends HTMLElement {
       }
       
       let is_video = false;
-      if (item) {
+      if (item && !item.audio_only) {
          let tracks = this.#media.videoTracks;
          if (tracks && tracks.length > 0) {
             is_video = true;
