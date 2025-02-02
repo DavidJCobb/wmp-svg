@@ -10,6 +10,8 @@ The minifier doesn't handle the following cases; they must be dealt with manuall
 * Extra whitespace in CSS grid template area strings
 * Extra whitespace in some custom property values
 
+Note also that the minifier is likely to strip units off of zero values like `0px`, even in cases where doing so would break your styles (e.g. `clamp()`).
+
 ## JavaScript
 
 JavaScript files were minified using [this site](https://minify-js.com/), which is based on Terser v5.20.0. The `keep_classnames` and `keep_fnames` settings were enabled, and the ECMA version specified was `5`.

@@ -1,6 +1,8 @@
 
 # To-do
 
+* Slider: we can probably just listen for `pointerdown` and `pointerup`; listening for mouse and touch events is redundant.
+* Investigate an implementation based on inlined SVGs; see what kind of filesize reduction and sub-pixel improvements we'd get.
 * Button glyphs
   * Now Playing (enter/exit) (with disabled states too)
 * `WMPlayerElement`
